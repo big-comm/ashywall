@@ -73,6 +73,7 @@ class DownloadRecord:
     license: str | None
     author: str | None = None
     license_url: str | None = None
+    title: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -112,14 +113,21 @@ _ORIENTATION_SQL: dict[Orientation, str] = {
     ),
 }
 
+# Downloads show the title their source gave them rather than the file name.
+_TITLE_SQL = (
+    "COALESCE((SELECT d.title FROM downloads d WHERE d.path = w.path "
+    "AND d.title IS NOT NULL ORDER BY d.downloaded_at DESC LIMIT 1), w.title)"
+)
+
 _ORDER_SQL: dict[SortOrder, str] = {
-    SortOrder.TITLE: "w.title COLLATE NOCASE, w.path",
+    SortOrder.TITLE: f"{_TITLE_SQL} COLLATE NOCASE, w.path",
     SortOrder.NEWEST: "w.mtime_ns DESC, w.path",
     SortOrder.LARGEST: "w.width * w.height DESC, w.path",
 }
 
-_WALLPAPER_COLUMNS = """
-    w.id, w.source_id, s.kind AS source_kind, s.label AS source_label, w.path, w.title,
+_WALLPAPER_COLUMNS = f"""
+    w.id, w.source_id, s.kind AS source_kind, s.label AS source_label, w.path,
+    {_TITLE_SQL} AS title,
     w.width, w.height, w.file_size, w.mtime_ns, w.image_format, w.dark_path,
     w.picture_options, (f.item_key IS NOT NULL) AS is_favorite
 """
@@ -156,7 +164,9 @@ def _where_clause(query: LibraryQuery) -> tuple[str, list[object]]:
         )
         params.append(query.collection_id if query.collection_id is not None else -1)
     if text := query.text.strip():
-        clauses.append("(w.title LIKE ? ESCAPE '\\' OR w.path LIKE ? ESCAPE '\\')")
+        clauses.append(
+            f"({_TITLE_SQL} LIKE ? ESCAPE '\\' OR w.path LIKE ? ESCAPE '\\')"
+        )
         pattern = f"%{_escape_like(text)}%"
         params += [pattern, pattern]
     if query.orientation is not None:
@@ -485,8 +495,8 @@ class LibraryRepository:
         with transaction(self._conn):
             self._conn.execute(
                 "INSERT OR REPLACE INTO downloads (origin, remote_id, path, page_url, "
-                "source_url, uploader, license, author, license_url, downloaded_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "source_url, uploader, license, author, license_url, title, downloaded_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     item.origin,
                     item.remote_id,
@@ -497,6 +507,7 @@ class LibraryRepository:
                     item.license,
                     item.author,
                     item.license_url,
+                    item.title,
                     int(time.time()),
                 ),
             )
@@ -526,7 +537,31 @@ class LibraryRepository:
             license=row["license"],
             author=row["author"],
             license_url=row["license_url"],
+            title=row["title"],
         )
+
+    def title_for_path(self, path: Path) -> str | None:
+        """The title to show for a file: its online listing if downloaded, else the library's."""
+        record = self.download_record_for(path)
+        if record is not None and record.title:
+            return record.title
+        if record is not None:
+            # Downloads recorded before titles were kept: use a stored listing.
+            for table in ("favorites", "collection_items"):
+                row = self._conn.execute(
+                    f"SELECT metadata FROM {table} WHERE origin = ? AND item_key = ? "
+                    "AND metadata IS NOT NULL LIMIT 1",
+                    (record.origin, record.remote_id),
+                ).fetchone()
+                if row is not None:
+                    try:
+                        return RemoteWallpaper.from_json(row["metadata"]).title
+                    except (ProviderError, ValueError, TypeError):
+                        pass
+        row = self._conn.execute(
+            "SELECT title FROM wallpapers WHERE path = ? LIMIT 1", (str(path),)
+        ).fetchone()
+        return row["title"] if row else None
 
     # Settings ------------------------------------------------------------
 

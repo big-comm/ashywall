@@ -1,5 +1,6 @@
 """Sidebar entries and the texts of empty, error and unavailable states."""
 
+import locale
 from dataclasses import dataclass
 
 from ..i18n import _, ngettext
@@ -191,11 +192,19 @@ def remote_error_state(provider: str, error: Exception) -> EmptyState:
     )
 
 
+def format_count(count: int) -> str:
+    """A number with the user's digit grouping (21.769 in Portuguese)."""
+    try:
+        return locale.format_string("%d", count, grouping=True)
+    except (ValueError, TypeError):
+        return str(count)
+
+
 def remote_subtitle(provider: str, page: RemotePage | None, shown: int) -> str:
     if page is not None and page.total is not None:
         return ngettext(
             "{count} result on {provider}", "{count} results on {provider}", page.total
-        ).format(count=page.total, provider=provider)
+        ).format(count=format_count(page.total), provider=provider)
     if page is not None and page.last_page:
         return _("{count} shown · page {page} of {last}").format(
             count=shown, page=page.page, last=page.last_page

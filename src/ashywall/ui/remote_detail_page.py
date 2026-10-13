@@ -9,6 +9,7 @@ from pathlib import Path
 from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 from ..i18n import _
+from ..paths import display_path
 from ..providers.base import RemoteWallpaper
 from ..providers.registry import provider_name
 from ..services.http import TransferCancelled
@@ -319,7 +320,7 @@ class RemoteDetailPage(Adw.NavigationPage):
         if downloaded:
             self._status_row.set_title(_("Downloaded"))
             self._status_row.set_subtitle(
-                GLib.markup_escape_text(str(self.item.local_path))
+                GLib.markup_escape_text(display_path(self.item.local_path))
             )
         elif active:
             self._status_row.set_title(_("Downloading…"))

@@ -120,6 +120,10 @@ MIGRATIONS: tuple[tuple[str, ...], ...] = (
         "ALTER TABLE downloads ADD COLUMN author TEXT",
         "ALTER TABLE downloads ADD COLUMN license_url TEXT",
     ),
+    (
+        # The online title, shown in the library instead of the file name.
+        "ALTER TABLE downloads ADD COLUMN title TEXT",
+    ),
 )
 
 LATEST_VERSION = len(MIGRATIONS)

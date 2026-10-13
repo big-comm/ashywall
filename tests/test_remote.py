@@ -4,12 +4,14 @@ import io
 import json
 import threading
 import urllib.error
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 from conftest import make_image
 
 from ashywall.models.resolution import UHD_4K, Orientation
+from ashywall.paths import display_path
 from ashywall.providers.base import (
     ProviderError,
     RemoteQuery,
@@ -485,3 +487,23 @@ def test_missing_cached_original_falls_back_to_network(tmp_path: Path) -> None:
     )
     assert saved.read_bytes() == body
     assert len(opener.requests) == 1
+
+
+def test_downloaded_files_keep_their_online_title(conn, tmp_path: Path) -> None:
+    repository = LibraryRepository(conn)
+    item = replace(parse_wallpaper(listing()), title="Misty peak")
+    path = tmp_path / "wallhaven-abc123.jpg"
+    repository.record_download(item, path)
+    assert repository.title_for_path(path) == "Misty peak"
+    # Downloads recorded before titles were kept fall back to a stored listing.
+    conn.execute("UPDATE downloads SET title = NULL")
+    assert repository.title_for_path(path) is None
+    repository.set_remote_favorite(item, True)
+    assert repository.title_for_path(path) == "Misty peak"
+
+
+def test_paths_under_home_are_abbreviated(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    assert display_path(tmp_path / ".local" / "x.jpg") == "~/.local/x.jpg"
+    assert display_path(tmp_path) == "~"
+    assert display_path(Path("/usr/share/backgrounds")) == "/usr/share/backgrounds"

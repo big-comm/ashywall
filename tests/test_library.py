@@ -245,3 +245,34 @@ def test_unavailable_folder_is_reported(
     layout["pictures"].rmdir()
     summary = indexer_for(conn, layout).run()
     assert summary.unavailable_folders == (layout["pictures"],)
+
+
+def test_downloads_show_the_title_from_their_source(
+    conn: sqlite3.Connection, layout: dict[str, Path]
+) -> None:
+    from dataclasses import replace
+
+    from ashywall.providers.wallhaven import parse_wallpaper
+
+    path = make_image(
+        layout["downloads"] / "wallhaven-abc123.jpg", (64, 36), format="JPEG"
+    )
+    repository = LibraryRepository(conn)
+    repository.ensure_builtin_sources(layout["downloads"])
+    indexer_for(conn, layout).run()
+    assert titles(repository, section=Section.DOWNLOADS) == ["Wallhaven abc123"]
+    item = parse_wallpaper(
+        {
+            "id": "abc123",
+            "url": "https://wallhaven.cc/w/abc123",
+            "path": "https://w.wallhaven.cc/full/ab/wallhaven-abc123.jpg",
+            "thumbs": {"large": "https://th.wallhaven.cc/lg/ab/abc123.jpg"},
+            "dimension_x": 64,
+            "dimension_y": 36,
+            "file_size": 1000,
+            "file_type": "image/jpeg",
+        }
+    )
+    repository.record_download(replace(item, title="Misty peak"), path)
+    assert titles(repository, section=Section.DOWNLOADS) == ["Misty peak"]
+    assert titles(repository, text="misty") == ["Misty peak"]

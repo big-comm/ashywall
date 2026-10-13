@@ -75,7 +75,7 @@ class PreferencesDialog(Adw.PreferencesDialog):
         for folder in folders:
             row = Adw.ActionRow(
                 title=GLib.markup_escape_text(folder.label),
-                subtitle=GLib.markup_escape_text(str(folder.path)),
+                subtitle=GLib.markup_escape_text(paths.display_path(folder.path)),
                 subtitle_selectable=True,
             )
             remove = Gtk.Button(
@@ -114,7 +114,7 @@ class PreferencesDialog(Adw.PreferencesDialog):
         group = Adw.PreferencesGroup(title=_("Storage"))
         downloads = Adw.ActionRow(
             title=_("Downloaded Wallpapers"),
-            subtitle=GLib.markup_escape_text(str(paths.downloads_dir())),
+            subtitle=GLib.markup_escape_text(paths.display_path(paths.downloads_dir())),
             subtitle_selectable=True,
         )
         downloads.add_css_class("property")

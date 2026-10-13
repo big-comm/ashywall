@@ -729,7 +729,9 @@ class MainWindow(Adw.ApplicationWindow):
                 ).format(count=invalid)
             )
         for folder in self._unavailable_folders:
-            messages.append(_("Folder not found: {path}").format(path=folder))
+            messages.append(
+                _("Folder not found: {path}").format(path=paths.display_path(folder))
+            )
         self._status_label.set_label("\n".join(messages))
         self._status_box.set_visible(bool(messages))
 
@@ -818,7 +820,10 @@ class MainWindow(Adw.ApplicationWindow):
 
     def _rotation_title(self) -> str | None:
         state = self._rotation.active_state()
-        return self._rotation.current_path(state).name if state else None
+        if state is None:
+            return None
+        path = self._rotation.current_path(state)
+        return self._repository.title_for_path(path) or path.name
 
     def _start_rotation(self, config: RotationConfig) -> RotationState | str:
         try:
@@ -854,9 +859,7 @@ class MainWindow(Adw.ApplicationWindow):
             message = _("Could not change the wallpaper: {error}").format(error=error)
             self._toast(message)
             return message
-        self._toast(
-            _("Now showing {name}").format(name=self._rotation.current_path(state).name)
-        )
+        self._toast(_("Now showing {name}").format(name=self._rotation_title() or ""))
         return state
 
     def _current_provider(self) -> RemoteProvider | None:

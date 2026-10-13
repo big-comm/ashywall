@@ -57,3 +57,12 @@ def originals_dir() -> Path:
 def downloads_dir() -> Path:
     """Originals downloaded from online sources (kept until the user removes them)."""
     return data_dir() / "downloads"
+
+
+def display_path(path: Path) -> str:
+    """A path as shown to the user, with the home folder abbreviated to ~."""
+    try:
+        relative = Path(path).relative_to(Path.home())
+    except ValueError:
+        return str(path)
+    return "~" if str(relative) == "." else f"~/{relative}"

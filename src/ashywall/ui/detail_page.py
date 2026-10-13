@@ -8,6 +8,7 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 from ..i18n import _, ngettext
 from ..models.wallpaper import SourceKind, Wallpaper
+from ..paths import display_path
 from ..providers.base import RemoteWallpaper
 from ..providers.registry import provider_name
 from ..services.library_repository import DownloadRecord
@@ -151,7 +152,7 @@ class DetailPage(Adw.NavigationPage):
         if wallpaper.source_kind is SourceKind.SYSTEM:
             self._lookup_package()
 
-        location = property_row(_("Location"), str(wallpaper.path))
+        location = property_row(_("Location"), display_path(wallpaper.path))
         open_button = Gtk.Button(
             icon_name="folder-open-symbolic",
             valign=Gtk.Align.CENTER,
@@ -163,7 +164,9 @@ class DetailPage(Adw.NavigationPage):
         group.add(location)
 
         if wallpaper.dark_path is not None:
-            group.add(property_row(_("Dark Style Variant"), str(wallpaper.dark_path)))
+            group.add(
+                property_row(_("Dark Style Variant"), display_path(wallpaper.dark_path))
+            )
 
         if provenance is not None:
             for row in attribution_rows(Attribution.of(provenance)):
@@ -190,7 +193,7 @@ class DetailPage(Adw.NavigationPage):
             expander.add_row(
                 Adw.ActionRow(
                     title=GLib.markup_escape_text(path.name),
-                    subtitle=GLib.markup_escape_text(str(path.parent)),
+                    subtitle=GLib.markup_escape_text(display_path(path.parent)),
                 )
             )
         return expander

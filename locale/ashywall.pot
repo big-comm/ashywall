@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ashywall\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 09:11-0300\n"
+"POT-Creation-Date: 2026-10-13 10:11-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,7 +75,7 @@ msgstr ""
 msgid "Create and Add"
 msgstr ""
 
-#: src/ashywall/ui/collections_ui.py:63 src/ashywall/ui/window_states.py:31
+#: src/ashywall/ui/collections_ui.py:63 src/ashywall/ui/window_states.py:32
 msgid "Collections"
 msgstr ""
 
@@ -84,128 +84,128 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:31 src/ashywall/ui/rotation_dialog.py:29
-#: src/ashywall/ui/window_states.py:37
+#: src/ashywall/ui/detail_page.py:32 src/ashywall/ui/rotation_dialog.py:29
+#: src/ashywall/ui/window_states.py:38
 msgid "System"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:34
+#: src/ashywall/ui/detail_page.py:35
 #, python-brace-format
 msgid "Downloaded from {provider}"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:37 src/ashywall/ui/rotation_dialog.py:31
-#: src/ashywall/ui/window_states.py:48
+#: src/ashywall/ui/detail_page.py:38 src/ashywall/ui/rotation_dialog.py:31
+#: src/ashywall/ui/window_states.py:49
 msgid "Downloads"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:38
+#: src/ashywall/ui/detail_page.py:39
 #, python-brace-format
 msgid "My folder “{name}”"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:75 src/ashywall/ui/remote_detail_page.py:88
+#: src/ashywall/ui/detail_page.py:76 src/ashywall/ui/remote_detail_page.py:89
 msgid "Apply"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:137 src/ashywall/ui/remote_detail_page.py:401
+#: src/ashywall/ui/detail_page.py:138 src/ashywall/ui/remote_detail_page.py:402
 msgid "Details"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:140 src/ashywall/ui/remote_detail_page.py:409
+#: src/ashywall/ui/detail_page.py:141 src/ashywall/ui/remote_detail_page.py:410
 msgid "Dimensions"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:140 src/ashywall/ui/remote_detail_page.py:409
+#: src/ashywall/ui/detail_page.py:141 src/ashywall/ui/remote_detail_page.py:410
 #, python-brace-format
 msgid "{size} px"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:143 src/ashywall/ui/remote_detail_page.py:412
+#: src/ashywall/ui/detail_page.py:144 src/ashywall/ui/remote_detail_page.py:413
 msgid "Aspect Ratio"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:144 src/ashywall/ui/remote_detail_page.py:415
+#: src/ashywall/ui/detail_page.py:145 src/ashywall/ui/remote_detail_page.py:416
 msgid "File Size"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:145 src/ashywall/ui/remote_detail_page.py:419
+#: src/ashywall/ui/detail_page.py:146 src/ashywall/ui/remote_detail_page.py:420
 msgid "Format"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:145 src/ashywall/ui/preferences_dialog.py:144
-#: src/ashywall/ui/remote_detail_page.py:416
-#: src/ashywall/ui/remote_detail_page.py:464
+#: src/ashywall/ui/detail_page.py:146 src/ashywall/ui/preferences_dialog.py:144
+#: src/ashywall/ui/remote_detail_page.py:417
+#: src/ashywall/ui/remote_detail_page.py:465
 #: src/ashywall/ui/rotation_dialog.py:184
 msgid "Unknown"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:148 src/ashywall/ui/remote_detail_page.py:420
+#: src/ashywall/ui/detail_page.py:149 src/ashywall/ui/remote_detail_page.py:421
 msgid "Source"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:154
+#: src/ashywall/ui/detail_page.py:155
 msgid "Location"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:158 src/ashywall/ui/remote_detail_page.py:294
+#: src/ashywall/ui/detail_page.py:159 src/ashywall/ui/remote_detail_page.py:295
 msgid "Show in Folder"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:166
+#: src/ashywall/ui/detail_page.py:168
 msgid "Dark Style Variant"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:172 src/ashywall/ui/detail_page.py:260
-#: src/ashywall/ui/detail_page.py:269
+#: src/ashywall/ui/detail_page.py:175 src/ashywall/ui/detail_page.py:263
+#: src/ashywall/ui/detail_page.py:272
 msgid "Author"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:172 src/ashywall/ui/detail_page.py:173
-#: src/ashywall/ui/detail_page.py:265 src/ashywall/ui/detail_page.py:269
-#: src/ashywall/ui/detail_page.py:274
+#: src/ashywall/ui/detail_page.py:175 src/ashywall/ui/detail_page.py:176
+#: src/ashywall/ui/detail_page.py:268 src/ashywall/ui/detail_page.py:272
+#: src/ashywall/ui/detail_page.py:277
 msgid "Not provided by this source"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:173 src/ashywall/ui/detail_page.py:284
-#: src/ashywall/ui/detail_page.py:287 src/ashywall/ui/detail_page.py:291
+#: src/ashywall/ui/detail_page.py:176 src/ashywall/ui/detail_page.py:287
+#: src/ashywall/ui/detail_page.py:290 src/ashywall/ui/detail_page.py:294
 msgid "License"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:180 src/ashywall/ui/detail_page.py:182
+#: src/ashywall/ui/detail_page.py:183 src/ashywall/ui/detail_page.py:185
 msgid "Identical Copies"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:180
+#: src/ashywall/ui/detail_page.py:183
 msgid "None in the library"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:184
+#: src/ashywall/ui/detail_page.py:187
 #, python-brace-format
 msgid "{count} other file with the same content"
 msgid_plural "{count} other files with the same content"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ashywall/ui/detail_page.py:205
+#: src/ashywall/ui/detail_page.py:208
 #, python-brace-format
 msgid "System — package {name}"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:264
+#: src/ashywall/ui/detail_page.py:267
 msgid "Uploaded By"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:271 src/ashywall/ui/detail_page.py:274
+#: src/ashywall/ui/detail_page.py:274 src/ashywall/ui/detail_page.py:277
 msgid "Original Source"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:279
+#: src/ashywall/ui/detail_page.py:282
 #, python-brace-format
 msgid "Page on {provider}"
 msgstr ""
 
-#: src/ashywall/ui/detail_page.py:293
+#: src/ashywall/ui/detail_page.py:296
 #, python-brace-format
 msgid "Not provided by {provider}. Images remain the property of their owners."
 msgstr ""
@@ -347,7 +347,7 @@ msgid "Filters and sorting"
 msgstr ""
 
 #: src/ashywall/ui/gallery_page.py:111 src/ashywall/ui/preferences_dialog.py:53
-#: src/ashywall/ui/window_states.py:103
+#: src/ashywall/ui/window_states.py:104
 msgid "Add Folder"
 msgstr ""
 
@@ -422,8 +422,8 @@ msgid ""
 "was upscaled."
 msgstr ""
 
-#: src/ashywall/ui/gallery_page.py:280 src/ashywall/ui/window_states.py:97
-#: src/ashywall/ui/window_states.py:168
+#: src/ashywall/ui/gallery_page.py:280 src/ashywall/ui/window_states.py:98
+#: src/ashywall/ui/window_states.py:169
 msgid "Clear Filters"
 msgstr ""
 
@@ -504,12 +504,12 @@ msgstr ""
 msgid "Online wallpapers are fetched again when opened"
 msgstr ""
 
-#: src/ashywall/ui/preferences_dialog.py:43 src/ashywall/ui/window_states.py:31
+#: src/ashywall/ui/preferences_dialog.py:43 src/ashywall/ui/window_states.py:32
 msgid "Library"
 msgstr ""
 
 #: src/ashywall/ui/preferences_dialog.py:46
-#: src/ashywall/ui/rotation_dialog.py:30 src/ashywall/ui/window_states.py:41
+#: src/ashywall/ui/rotation_dialog.py:30 src/ashywall/ui/window_states.py:42
 msgid "My Folders"
 msgstr ""
 
@@ -563,103 +563,103 @@ msgstr ""
 msgid "{used} of {limit}"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:155
+#: src/ashywall/ui/remote_detail_page.py:156
 #, python-brace-format
 msgid ""
 "Reduced preview: {provider} asks apps to load originals ({size}) only when "
 "you want them."
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:162
+#: src/ashywall/ui/remote_detail_page.py:163
 #, python-brace-format
 msgid ""
 "Reduced preview: your connection is metered, so the original ({size}) is not "
 "loaded automatically."
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:167
+#: src/ashywall/ui/remote_detail_page.py:168
 #, python-brace-format
 msgid ""
 "Reduced preview: the original is large ({size}), so it is loaded only when "
 "you ask."
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:170
+#: src/ashywall/ui/remote_detail_page.py:171
 msgid "Load Full Resolution"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:178
-#: src/ashywall/ui/remote_detail_page.py:335
+#: src/ashywall/ui/remote_detail_page.py:179
+#: src/ashywall/ui/remote_detail_page.py:336
 msgid "unknown size"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:219
+#: src/ashywall/ui/remote_detail_page.py:220
 #, python-brace-format
 msgid "Loading the full-resolution image ({size})…"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:239
+#: src/ashywall/ui/remote_detail_page.py:240
 #, python-brace-format
 msgid "Loading the full-resolution image: {received} of {total}…"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:260
+#: src/ashywall/ui/remote_detail_page.py:261
 #, python-brace-format
 msgid ""
 "Showing a reduced preview: the full-resolution image could not be loaded. "
 "{reason}"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:263
-#: src/ashywall/ui/window_states.py:189
+#: src/ashywall/ui/remote_detail_page.py:264
+#: src/ashywall/ui/window_states.py:190
 msgid "Try Again"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:277
-#: src/ashywall/ui/remote_detail_page.py:330
+#: src/ashywall/ui/remote_detail_page.py:278
+#: src/ashywall/ui/remote_detail_page.py:331
 msgid "Not Downloaded"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:278
+#: src/ashywall/ui/remote_detail_page.py:279
 msgid "Download"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:285
+#: src/ashywall/ui/remote_detail_page.py:286
 msgid "Cancel Download"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:320
+#: src/ashywall/ui/remote_detail_page.py:321
 #: src/ashywall/ui/wallpaper_card.py:39
 msgid "Downloaded"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:325
+#: src/ashywall/ui/remote_detail_page.py:326
 msgid "Downloading…"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:330
+#: src/ashywall/ui/remote_detail_page.py:331
 msgid "Download Failed"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:341
+#: src/ashywall/ui/remote_detail_page.py:342
 #, python-brace-format
 msgid "Original file: {size}. It is saved to your Downloads section."
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:349
+#: src/ashywall/ui/remote_detail_page.py:350
 #, python-brace-format
 msgid "{received} of {total}"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:371
+#: src/ashywall/ui/remote_detail_page.py:372
 msgid "Download cancelled"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:404
+#: src/ashywall/ui/remote_detail_page.py:405
 msgid "Description"
 msgstr ""
 
-#: src/ashywall/ui/remote_detail_page.py:406
+#: src/ashywall/ui/remote_detail_page.py:407
 msgid "Featured On"
 msgstr ""
 
@@ -681,11 +681,11 @@ msgstr[1] ""
 msgid "Every day"
 msgstr ""
 
-#: src/ashywall/ui/rotation_dialog.py:28 src/ashywall/ui/window_states.py:34
+#: src/ashywall/ui/rotation_dialog.py:28 src/ashywall/ui/window_states.py:35
 msgid "All Wallpapers"
 msgstr ""
 
-#: src/ashywall/ui/rotation_dialog.py:32 src/ashywall/ui/window_states.py:61
+#: src/ashywall/ui/rotation_dialog.py:32 src/ashywall/ui/window_states.py:62
 msgid "Favorites"
 msgstr ""
 
@@ -743,8 +743,8 @@ msgstr ""
 msgid "Otherwise wallpapers follow the library order"
 msgstr ""
 
-#: src/ashywall/ui/rotation_dialog.py:173 src/ashywall/ui/window_states.py:203
-#: src/ashywall/ui/window_states.py:209
+#: src/ashywall/ui/rotation_dialog.py:173 src/ashywall/ui/window_states.py:212
+#: src/ashywall/ui/window_states.py:218
 #, python-brace-format
 msgid "{count} wallpaper"
 msgid_plural "{count} wallpapers"
@@ -909,192 +909,192 @@ msgid_plural "{count} files could not be read"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ashywall/ui/window.py:732
+#: src/ashywall/ui/window.py:733
 #, python-brace-format
 msgid "Folder not found: {path}"
 msgstr ""
 
-#: src/ashywall/ui/window.py:760
+#: src/ashywall/ui/window.py:762
 #, python-brace-format
 msgid "The library could not be updated: {error}"
 msgstr ""
 
-#: src/ashywall/ui/window.py:792
+#: src/ashywall/ui/window.py:794
 msgid "Automatic change stopped: no wallpapers match its settings"
 msgstr ""
 
-#: src/ashywall/ui/window.py:798
+#: src/ashywall/ui/window.py:800
 #, python-brace-format
 msgid "Automatic change could not be updated: {error}"
 msgstr ""
 
-#: src/ashywall/ui/window.py:828
+#: src/ashywall/ui/window.py:833
 #, python-brace-format
 msgid "Automatic change could not start: {error}"
 msgstr ""
 
-#: src/ashywall/ui/window.py:840
+#: src/ashywall/ui/window.py:845
 #, python-brace-format
 msgid "Could not keep the current wallpaper: {error}"
 msgstr ""
 
-#: src/ashywall/ui/window.py:845
+#: src/ashywall/ui/window.py:850
 msgid "Automatic change turned off"
 msgstr ""
 
-#: src/ashywall/ui/window.py:846
+#: src/ashywall/ui/window.py:851
 #, python-brace-format
 msgid "Automatic change turned off; “{name}” stays as the wallpaper"
 msgstr ""
 
-#: src/ashywall/ui/window.py:854
+#: src/ashywall/ui/window.py:859
 #, python-brace-format
 msgid "Could not change the wallpaper: {error}"
 msgstr ""
 
-#: src/ashywall/ui/window.py:858
+#: src/ashywall/ui/window.py:862
 #, python-brace-format
 msgid "Now showing {name}"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:31
+#: src/ashywall/ui/window_states.py:32
 msgid "Explore"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:54
+#: src/ashywall/ui/window_states.py:55
 msgid "Big Collections"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:75
+#: src/ashywall/ui/window_states.py:76
 msgid "New Collection…"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:82
+#: src/ashywall/ui/window_states.py:83
 #, python-brace-format
 msgid "This folder is already in the library through “{path}”"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:87
+#: src/ashywall/ui/window_states.py:88
 #, python-brace-format
 msgid ""
 "This folder contains “{path}”, which is already in the library. Remove it "
 "first."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:89
+#: src/ashywall/ui/window_states.py:90
 #, python-brace-format
 msgid "“{path}” is not a folder"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:95
+#: src/ashywall/ui/window_states.py:96
 msgid "No Matching Wallpapers"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:96 src/ashywall/ui/window_states.py:167
+#: src/ashywall/ui/window_states.py:97 src/ashywall/ui/window_states.py:168
 msgid "Try other search terms or filters."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:107
+#: src/ashywall/ui/window_states.py:108
 msgid "No System Wallpapers Found"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:109
+#: src/ashywall/ui/window_states.py:110
 msgid ""
 "AshyWall looked in the GNOME background catalogs and in the shared "
 "backgrounds and wallpapers folders."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:115
+#: src/ashywall/ui/window_states.py:116
 msgid "No Images in Your Folders"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:115
+#: src/ashywall/ui/window_states.py:116
 msgid "No Folders Added"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:117
+#: src/ashywall/ui/window_states.py:118
 msgid ""
 "Add folders with images. AshyWall only reads them; nothing is moved or "
 "deleted."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:124
+#: src/ashywall/ui/window_states.py:125
 msgid "No Downloads Yet"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:125
+#: src/ashywall/ui/window_states.py:126
 msgid "Wallpapers you download from online sources appear here."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:130
+#: src/ashywall/ui/window_states.py:131
 msgid "This Collection Is Empty"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:131
+#: src/ashywall/ui/window_states.py:132
 msgid "Use the bookmark button on a wallpaper's page to add it here."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:136
+#: src/ashywall/ui/window_states.py:137
 msgid "No Favorites Yet"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:137
+#: src/ashywall/ui/window_states.py:138
 msgid "Use the star on a wallpaper's page to keep it here."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:141
+#: src/ashywall/ui/window_states.py:142
 msgid "No Wallpapers Yet"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:142
+#: src/ashywall/ui/window_states.py:143
 msgid "Add a folder with images to start your library."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:150
+#: src/ashywall/ui/window_states.py:151
 msgid "Not Available Yet"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:151
+#: src/ashywall/ui/window_states.py:152
 msgid "Browsing the Big community collections is planned for a future version."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:161 src/ashywall/ui/window_states.py:173
+#: src/ashywall/ui/window_states.py:162 src/ashywall/ui/window_states.py:174
 #, python-brace-format
 msgid "No Results on {provider}"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:163
+#: src/ashywall/ui/window_states.py:164
 msgid ""
 "“Top this month” only includes wallpapers ranked in the last month. Sort by "
 "relevance or most favorited to search all of Wallhaven."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:174
+#: src/ashywall/ui/window_states.py:175
 msgid "Try again later."
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:180
+#: src/ashywall/ui/window_states.py:181
 #, python-brace-format
 msgid "{provider} Is Unreachable"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:182
+#: src/ashywall/ui/window_states.py:183
 msgid "Too Many Requests"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:184
+#: src/ashywall/ui/window_states.py:185
 #, python-brace-format
 msgid "{provider} Could Not Be Loaded"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:197
+#: src/ashywall/ui/window_states.py:206
 #, python-brace-format
 msgid "{count} result on {provider}"
 msgid_plural "{count} results on {provider}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ashywall/ui/window_states.py:200
+#: src/ashywall/ui/window_states.py:209
 #, python-brace-format
 msgid "{count} shown · page {page} of {last}"
 msgstr ""
