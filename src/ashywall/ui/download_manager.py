@@ -47,12 +47,14 @@ class DownloadManager:
         allowed_hosts: Callable[[str], frozenset[str]],
         on_finished: Callable[[RemoteWallpaper, Path], None],
         on_failed: Callable[[RemoteWallpaper, Exception], None],
+        cached_original: Callable[[RemoteWallpaper], Path | None] = lambda _item: None,
     ) -> None:
         self._http = http
         self._target_dir = target_dir
         self._allowed_hosts = allowed_hosts
         self._on_finished = on_finished
         self._on_failed = on_failed
+        self._cached_original = cached_original
         self._runner = BackgroundRunner(2, "ashywall-downloads")
         self._active: dict[DownloadKey, _ActiveDownload] = {}
         self._listeners: dict[DownloadKey, list[DownloadListener]] = {}
@@ -96,6 +98,8 @@ class DownloadManager:
                 hosts,
                 on_progress=report,
                 cancel=active.cancel,
+                # A full-resolution preview already fetched is reused.
+                source=self._cached_original(item),
             )
 
         self._runner.submit(

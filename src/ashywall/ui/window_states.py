@@ -148,12 +148,17 @@ def big_unavailable_state() -> EmptyState:
     )
 
 
-def remote_empty_state(filtered: bool) -> EmptyState:
+def remote_empty_state(filtered: bool, monthly_top: bool = False) -> EmptyState:
     if filtered:
         return EmptyState(
             "system-search-symbolic",
             _("No Results on Wallhaven"),
-            _("Try other search terms or filters."),
+            _(
+                "“Top this month” only includes wallpapers ranked in the last month. "
+                "Sort by relevance or most favorited to search all of Wallhaven."
+            )
+            if monthly_top
+            else _("Try other search terms or filters."),
             _("Clear Filters"),
             "win.clear-filters",
         )

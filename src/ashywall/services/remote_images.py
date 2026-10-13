@@ -2,13 +2,16 @@
 
 Remote thumbnails are fetched with a size limit, decoded by Pillow through
 the same allow-list as local files and re-encoded before the interface ever
-loads them. Originals are downloaded only when the user asks, written to a
-hidden temporary file, checked (format, pixel limits, dimensions announced by
-the provider) and then linked into place without overwriting anything.
+loads them. Originals (for downloads and for full-resolution previews) are
+written to a hidden temporary file, checked (format, pixel limits, dimensions
+announced by the provider) and then linked into place without overwriting
+anything. Previews live in a pruned cache; saving one to the library copies
+the cached file through the same checks instead of fetching it again.
 """
 
 import hashlib
 import os
+import shutil
 import tempfile
 import threading
 from collections.abc import Callable
@@ -22,12 +25,13 @@ from ..providers.base import (
 )
 from .http import HttpClient
 from .image_probe import ImageProbeError, probe_image
-from .thumbnails import THUMBNAIL_SIZE, render_scaled_jpeg
+from .thumbnails import THUMBNAIL_SIZE, CacheDirectory, render_scaled_jpeg
 
 MAX_THUMBNAIL_BYTES = 4 * 1024 * 1024
 MAX_DOWNLOAD_BYTES = 256 * 1024 * 1024
 # Slack over the size announced by the provider before a transfer is refused.
 DOWNLOAD_SIZE_SLACK = 1024 * 1024
+ORIGINALS_CACHE_LIMIT = 600 * 1000 * 1000
 
 EXTENSIONS: dict[str, str] = {
     "JPEG": ".jpg",
@@ -120,10 +124,13 @@ def download_original(
     on_progress: Callable[[int, int | None], None] | None = None,
     cancel: threading.Event | None = None,
     max_bytes: int = MAX_DOWNLOAD_BYTES,
+    source: Path | None = None,
 ) -> Path:
     """Download ``item`` into ``target_dir`` and return the final path.
 
-    An existing download of the same item is returned as is.
+    An existing download of the same item is returned as is. ``source`` is an
+    already fetched copy (the preview cache); it is copied and checked instead
+    of downloading again.
     """
     try:
         url = validated_url(item.original_url, allowed_hosts)
@@ -143,13 +150,19 @@ def download_original(
     temporary = Path(temporary_name)
     try:
         with os.fdopen(descriptor, "wb") as handle:
-            http.stream(
-                url,
-                handle.write,
-                max_bytes=limit,
-                on_progress=on_progress,
-                cancel=cancel,
-            )
+            if source is not None and _copy_cached(source, handle, limit):
+                if on_progress is not None:
+                    on_progress(handle.tell(), handle.tell())
+            else:
+                handle.seek(0)
+                handle.truncate()
+                http.stream(
+                    url,
+                    handle.write,
+                    max_bytes=limit,
+                    on_progress=on_progress,
+                    cancel=cancel,
+                )
             handle.flush()
             os.fsync(handle.fileno())
         try:
@@ -175,3 +188,62 @@ def download_original(
         return final
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def _copy_cached(source: Path, handle, limit: int) -> bool:
+    """Copy a cached original into ``handle``; False when it cannot be used."""
+    try:
+        with source.open("rb") as cached:
+            if os.fstat(cached.fileno()).st_size > limit:
+                return False
+            shutil.copyfileobj(cached, handle)
+    except OSError:
+        return False
+    return True
+
+
+class OriginalCache(CacheDirectory):
+    """Full-resolution originals fetched for previews, pruned like thumbnails."""
+
+    def __init__(
+        self,
+        root: Path,
+        http: HttpClient,
+        allowed_hosts: Callable[[str], frozenset[str]],
+        max_bytes: int = ORIGINALS_CACHE_LIMIT,
+    ) -> None:
+        super().__init__(root, max_bytes)
+        self._http = http
+        self._allowed_hosts = allowed_hosts
+
+    def cached(self, item: RemoteWallpaper) -> Path | None:
+        try:
+            path = existing_download(self.root, item)
+        except DownloadError:
+            return None
+        if path is not None:
+            try:
+                os.utime(path)  # Marks it as recently used for pruning.
+            except OSError:
+                pass
+        return path
+
+    def ensure(
+        self,
+        item: RemoteWallpaper,
+        *,
+        on_progress: Callable[[int, int | None], None] | None = None,
+        cancel: threading.Event | None = None,
+    ) -> Path:
+        if (path := self.cached(item)) is not None:
+            return path
+        path = download_original(
+            item,
+            self._http,
+            self.root,
+            self._allowed_hosts(item.origin),
+            on_progress=on_progress,
+            cancel=cancel,
+        )
+        self.prune()
+        return path

@@ -95,6 +95,9 @@ class GalleryPage(Adw.NavigationPage):
         self._remote = False
         self._quiet = False
         self._searched_text = ""
+        # Online sorting follows the search text (relevance while searching)
+        # until the user picks a sort order.
+        self._sort_chosen = False
         self._store = Gio.ListStore(item_type=WallpaperItem)
         self._window_title = Adw.WindowTitle(title=_("Wallpapers"))
 
@@ -258,6 +261,8 @@ class GalleryPage(Adw.NavigationPage):
             label = Gtk.Label(label=title, xalign=0)
             label.add_css_class("heading")
             drop.connect("notify::selected", self._on_filter_changed)
+            if drop is self._sort_drop:
+                drop.connect("notify::selected", self._on_sort_chosen)
             drop.update_property([Gtk.AccessibleProperty.LABEL], [title])
             box.append(label)
             box.append(drop)
@@ -286,8 +291,20 @@ class GalleryPage(Adw.NavigationPage):
         # and, for online sources, spend a request.
         text = self._search_entry.get_text()
         if text != self._searched_text:
+            searching = bool(text.strip())
+            if searching != bool(self._searched_text.strip()):
+                self._follow_search_sort(searching)
             self._searched_text = text
             self._emit_query_changed()
+
+    def _follow_search_sort(self, searching: bool) -> None:
+        """Wallhaven's "top this month" list barely matches any search terms."""
+        if not self._remote or self._sort_chosen:
+            return
+        sort = RemoteSort.RELEVANCE if searching else REMOTE_SORTS[0]
+        quiet, self._quiet = self._quiet, True
+        self._sort_drop.set_selected(REMOTE_SORTS.index(sort))
+        self._quiet = quiet
 
     def _emit_query_changed(self) -> None:
         if not self._quiet:
@@ -300,6 +317,10 @@ class GalleryPage(Adw.NavigationPage):
         else:
             self._filter_button.remove_css_class("accent")
         self._emit_query_changed()
+
+    def _on_sort_chosen(self, *_args: object) -> None:
+        if not self._quiet:
+            self._sort_chosen = True
 
     def filters(self) -> GalleryFilters:
         resolution = self._resolution_drop.get_selected()
@@ -328,6 +349,7 @@ class GalleryPage(Adw.NavigationPage):
         self._quiet = True
         self._search_entry.set_text("")
         self._searched_text = ""
+        self._follow_search_sort(False)
         self._orientation_drop.set_selected(0)
         self._resolution_drop.set_selected(0)
         self._quiet = False
@@ -357,8 +379,10 @@ class GalleryPage(Adw.NavigationPage):
         if remote != self._remote:
             self._remote = remote
             self._quiet = True
+            self._sort_chosen = False
             self._sort_drop.set_model(Gtk.StringList.new(_sort_labels(remote)))
             self._sort_drop.set_selected(0)
+            self._follow_search_sort(bool(self._searched_text.strip()))
             self._search_entry.set_search_delay(
                 REMOTE_SEARCH_DELAY_MS if remote else LOCAL_SEARCH_DELAY_MS
             )

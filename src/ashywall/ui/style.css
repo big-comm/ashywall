@@ -35,3 +35,17 @@
   border-radius: 12px;
   background-color: alpha(currentColor, 0.06);
 }
+
+.image-viewer {
+  background-color: black;
+}
+
+.viewer-controls {
+  padding: 6px 6px 6px 16px;
+  border-radius: 999px;
+}
+
+.viewer-info {
+  padding: 6px 14px;
+  border-radius: 999px;
+}

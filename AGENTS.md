@@ -19,13 +19,15 @@ src/ashywall/
                       indexer), library_repository (queries), image_probe
                       (safe opening), thumbnails, hashing, package_owner,
                       http (size limits, rate limiter, https-only redirects),
-                      remote_images (remote thumbnails, verified downloads).
+                      remote_images (remote thumbnails, full-resolution
+                      preview cache, verified downloads).
   providers/          base (RemoteWallpaper, RemoteQuery, URL validation),
                       local (system catalogs/folders), wallhaven (API v1).
   desktop/gnome.py    Apply/restore through org.gnome.desktop.background.
   ui/                 Window, gallery, local and remote detail pages, shared
-                      detail widgets, preferences, thumbnail loader, index,
-                      explore and download controllers, style.css.
+                      detail widgets, full-screen image viewer, preferences,
+                      thumbnail loader, index, explore and download
+                      controllers, style.css.
 tests/                pytest suite (services, discovery, GNOME settings).
 usr/                  Files installed to /usr (desktop entry, icon, .mo).
 locale/               POT template and .po catalogs.

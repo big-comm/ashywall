@@ -1,5 +1,7 @@
 """Detail page for a wallpaper listed by an online provider."""
 
+import threading
+import time
 from concurrent.futures import Future
 from dataclasses import replace
 from pathlib import Path
@@ -8,8 +10,9 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 from ..i18n import _
 from ..providers.base import RemoteWallpaper
-from ..services.remote_images import RemoteThumbnailCache
-from .background_tasks import BackgroundRunner
+from ..services.http import TransferCancelled
+from ..services.remote_images import OriginalCache, RemoteThumbnailCache
+from .background_tasks import BackgroundRunner, run_on_main
 from .detail_page import attribution_rows, provider_name, render_texture
 from .detail_widgets import (
     FavoriteButton,
@@ -18,11 +21,17 @@ from .detail_widgets import (
     detail_layout,
     property_row,
 )
-from .download_manager import DownloadManager
+from .download_manager import PROGRESS_INTERVAL, DownloadManager
+from .errors import error_text
+from .image_viewer import open_viewer
 from .wallpaper_card import dimensions_text
 
 # Wallhaven's largest thumbnail is a few hundred pixels wide; keep it as is.
 REMOTE_PREVIEW_SIZE = 1024
+
+
+def network_is_metered() -> bool:
+    return Gio.NetworkMonitor.get_default().get_network_metered()
 
 
 def describe_error(error: Exception) -> str:
@@ -42,6 +51,8 @@ class RemoteDetailPage(Adw.NavigationPage):
         item: RemoteWallpaper,
         runner: BackgroundRunner,
         remote_thumbnails: RemoteThumbnailCache,
+        originals: OriginalCache,
+        originals_runner: BackgroundRunner,
         downloads: DownloadManager,
         details_loader,
         apply_unavailable_reason: str | None,
@@ -52,6 +63,11 @@ class RemoteDetailPage(Adw.NavigationPage):
         self._runner = runner
         self._remote_thumbnails = remote_thumbnails
         self._downloads = downloads
+        self._originals = originals
+        self._originals_runner = originals_runner
+        # Full-resolution file shown in the preview and the full-screen view.
+        self._full_path: Path | None = None
+        self._original_cancel: threading.Event | None = None
         self._pending: list[Future[None]] = []
         self._install_actions(apply_unavailable_reason is None)
 
@@ -105,16 +121,10 @@ class RemoteDetailPage(Adw.NavigationPage):
     # Preview ---------------------------------------------------------------
 
     def _load_preview(self) -> None:
-        local = self.item.local_path
-        if local is not None:
-            self._preview.set_caption(None)
-            self._preview.load(lambda: render_texture(local))
+        path = self.item.local_path or self._originals.cached(self.item)
+        if path is not None:
+            self._show_full_resolution(path)
             return
-        self._preview.set_caption(
-            _(
-                "Low-resolution preview from {provider}. Download to see the full image."
-            ).format(provider=provider_name(self.item.origin))
-        )
         url = self.item.preview_url
         cache = self._remote_thumbnails
 
@@ -124,6 +134,116 @@ class RemoteDetailPage(Adw.NavigationPage):
             )
 
         self._preview.load(work)
+        if network_is_metered():
+            self._preview.set_caption(
+                _(
+                    "Reduced preview: your connection is metered, so the original "
+                    "({size}) is not loaded automatically."
+                ).format(size=self._size_text()),
+                _("Load Full Resolution"),
+                self._fetch_original,
+            )
+        else:
+            self._fetch_original()
+
+    def _size_text(self) -> str:
+        return (
+            GLib.format_size(self.item.file_size)
+            if self.item.file_size
+            else _("unknown size")
+        )
+
+    def _show_full_resolution(self, path: Path) -> None:
+        self._full_path = path
+        self._preview.set_caption(None)
+        self._preview.set_progress(None)
+        self._preview.load(lambda: render_texture(path))
+        self._preview.set_fullscreen_handler(self._open_fullscreen)
+
+    def _open_fullscreen(self) -> None:
+        if self._full_path is None:
+            return
+        open_viewer(
+            self,
+            self.item.title,
+            self._full_path,
+            self.item.width,
+            self.item.height,
+            self._preview.crops,
+            self._runner,
+        )
+
+    def _fetch_original(self) -> None:
+        """Fetch the original into the preview cache, never into the library."""
+        if self._original_cancel is not None or self._full_path is not None:
+            return
+        cancel = threading.Event()
+        self._original_cancel = cancel
+        item = self.item
+        originals = self._originals
+        last_report = 0.0
+
+        def report(received: int, total: int | None) -> None:
+            nonlocal last_report
+            now = time.monotonic()
+            if now - last_report >= PROGRESS_INTERVAL:
+                last_report = now
+                run_on_main(self._on_original_progress, cancel, received, total)
+
+        self._preview.set_caption(
+            _("Loading the full-resolution image ({size})…").format(
+                size=self._size_text()
+            )
+        )
+        self._preview.set_progress(0.0)
+        self._originals_runner.submit(
+            lambda: originals.ensure(item, on_progress=report, cancel=cancel),
+            lambda path: self._on_original_ready(cancel, path),
+            lambda error: self._on_original_failed(cancel, error),
+        )
+
+    def _on_original_progress(
+        self, cancel: threading.Event, received: int, total: int | None
+    ) -> None:
+        if cancel is not self._original_cancel:
+            return
+        total = total or self.item.file_size
+        self._preview.set_progress(min(1.0, received / total) if total else None)
+        if total:
+            self._preview.set_caption(
+                _("Loading the full-resolution image: {received} of {total}…").format(
+                    received=GLib.format_size(received), total=GLib.format_size(total)
+                )
+            )
+
+    def _on_original_ready(self, cancel: threading.Event, path: Path) -> None:
+        if cancel is not self._original_cancel:
+            return
+        self._original_cancel = None
+        if self._full_path is None:
+            self._show_full_resolution(path)
+
+    def _on_original_failed(self, cancel: threading.Event, error: Exception) -> None:
+        if cancel is not self._original_cancel:
+            return
+        self._original_cancel = None
+        self._preview.set_progress(None)
+        if isinstance(error, TransferCancelled):
+            return
+        self._preview.set_caption(
+            _(
+                "Showing a reduced preview: the full-resolution image could not be "
+                "loaded. {reason}"
+            ).format(reason=error_text(error)),
+            _("Try Again"),
+            self._fetch_original,
+        )
+
+    def _stop_original(self) -> None:
+        if self._original_cancel is not None:
+            self._original_cancel.set()
+            self._original_cancel = None
+            self._preview.set_progress(None)
 
     # Download ----------------------------------------------------------------
 
@@ -214,7 +334,9 @@ class RemoteDetailPage(Adw.NavigationPage):
             is_favorite=self.item.is_favorite, local_path=path
         )
         self._show_state()
-        self._load_preview()
+        if self._full_path is None:
+            self._stop_original()
+            self._show_full_resolution(path)
 
     def on_download_failed(self, error: Exception) -> None:
         self._show_state(describe_error(error))
@@ -226,9 +348,12 @@ class RemoteDetailPage(Adw.NavigationPage):
     def _on_showing(self, _page: Adw.NavigationPage) -> None:
         self._downloads.add_listener(self.item.favorite_key, self)
         self._show_state()
+        if self._full_path is None and not network_is_metered():
+            self._fetch_original()
 
     def _on_hidden(self, _page: Adw.NavigationPage) -> None:
         self._downloads.remove_listener(self.item.favorite_key, self)
+        self._stop_original()
         self._preview.cancel()
         for future in self._pending:
             future.cancel()

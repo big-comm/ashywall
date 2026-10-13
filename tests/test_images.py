@@ -8,7 +8,12 @@ from PIL import Image
 
 from ashywall.services import image_probe
 from ashywall.services.image_probe import ImageProbeError, probe_image
-from ashywall.services.thumbnails import THUMBNAIL_SIZE, ThumbnailCache, render_preview
+from ashywall.services.thumbnails import (
+    THUMBNAIL_SIZE,
+    ThumbnailCache,
+    decode_for_display,
+    render_preview,
+)
 
 
 @pytest.mark.parametrize("extension", ["png", "jpg", "webp", "avif"])
@@ -97,3 +102,32 @@ def test_prune_removes_least_recently_used(tmp_path: Path) -> None:
     removed = cache.prune()
     assert removed == 3
     assert [path.exists() for path in paths] == [False, False, False, True, True]
+
+
+def test_prune_keeps_transfers_in_progress(tmp_path: Path) -> None:
+    cache = ThumbnailCache(tmp_path / "thumbs", max_bytes=1000)
+    partial = cache.root / ".abc.part"
+    partial.parent.mkdir(parents=True)
+    partial.write_bytes(b"x" * 5000)
+    assert cache.total_size() == 0
+    assert cache.prune() == 0
+    assert partial.exists()
+    # A leftover from a crash is old and gets removed.
+    os.utime(partial, ns=(0, 0))
+    assert cache.prune() == 1
+
+
+def test_display_decoding_keeps_full_size(tmp_path: Path) -> None:
+    path = make_image(tmp_path / "big.png", (3000, 1000))
+    image = decode_for_display(path)
+    assert (image.width, image.height, image.mode) == (3000, 1000, "RGB")
+
+
+def test_display_decoding_applies_orientation_and_limit(tmp_path: Path) -> None:
+    exif = Image.Exif()
+    exif[image_probe.EXIF_ORIENTATION_TAG] = 6
+    path = make_image(tmp_path / "rotated.jpg", (400, 100), exif=exif)
+    image = decode_for_display(path)
+    assert image.size == (100, 400)
+    reduced = decode_for_display(path, max_pixels=10_000)
+    assert reduced.size == (50, 200)

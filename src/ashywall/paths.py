@@ -44,6 +44,11 @@ def thumbnails_dir() -> Path:
     return cache_dir() / "thumbnails"
 
 
+def originals_dir() -> Path:
+    """Full-resolution previews of online wallpapers; safe to delete at any time."""
+    return cache_dir() / "originals"
+
+
 def downloads_dir() -> Path:
     """Originals downloaded from online sources (kept until the user removes them)."""
     return data_dir() / "downloads"

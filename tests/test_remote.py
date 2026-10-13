@@ -37,6 +37,7 @@ from ashywall.services.http import (
 from ashywall.services.library_repository import LibraryRepository, Section
 from ashywall.services.remote_images import (
     DownloadError,
+    OriginalCache,
     RemoteThumbnailCache,
     download_original,
 )
@@ -431,3 +432,56 @@ def test_download_records_only_report_existing_files(conn, tmp_path: Path) -> No
     assert record is not None and record.page_url == item.page_url
     path.unlink()
     assert repository.downloaded_paths("wallhaven") == {}
+
+
+def test_full_resolution_preview_is_cached_and_reused(tmp_path: Path) -> None:
+    body = png_bytes(tmp_path, (64, 36))
+    item = remote_item(file_size=len(body))
+    opener = FakeOpener({item.original_url: body})
+    http = HttpClient(opener=opener)
+    originals = OriginalCache(tmp_path / "originals", http, lambda _o: IMAGE_HOSTS)
+
+    assert originals.cached(item) is None
+    cached = originals.ensure(item)
+    assert cached.read_bytes() == body
+    assert originals.ensure(item) == cached == originals.cached(item)
+    assert len(opener.requests) == 1
+
+    # Saving it to the library copies the checked cache instead of fetching again.
+    saved = download_original(
+        item, http, tmp_path / "downloads", IMAGE_HOSTS, source=cached
+    )
+    assert saved.read_bytes() == body
+    assert saved.parent == tmp_path / "downloads"
+    assert len(opener.requests) == 1
+
+
+def test_cached_original_is_checked_again(tmp_path: Path) -> None:
+    body = png_bytes(tmp_path, (64, 36))
+    item = remote_item(file_size=len(body))
+    tampered = tmp_path / "tampered.png"
+    tampered.write_bytes(png_bytes(tmp_path, (30, 30)))
+    with pytest.raises(DownloadError, match="announced"):
+        download_original(
+            item,
+            HttpClient(opener=FakeOpener({item.original_url: body})),
+            tmp_path / "downloads",
+            IMAGE_HOSTS,
+            source=tampered,
+        )
+    assert list((tmp_path / "downloads").iterdir()) == []
+
+
+def test_missing_cached_original_falls_back_to_network(tmp_path: Path) -> None:
+    body = png_bytes(tmp_path, (64, 36))
+    item = remote_item(file_size=len(body))
+    opener = FakeOpener({item.original_url: body})
+    saved = download_original(
+        item,
+        HttpClient(opener=opener),
+        tmp_path / "downloads",
+        IMAGE_HOSTS,
+        source=tmp_path / "gone.png",
+    )
+    assert saved.read_bytes() == body
+    assert len(opener.requests) == 1

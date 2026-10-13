@@ -19,6 +19,7 @@ from .detail_widgets import (
     link_row,
     property_row,
 )
+from .image_viewer import open_viewer
 from .wallpaper_card import dimensions_text
 
 
@@ -93,6 +94,17 @@ class DetailPage(Adw.NavigationPage):
         self.connect("hidden", lambda _page: self._cancel_pending())
         path = wallpaper.path
         self._preview.load(lambda: render_texture(path))
+        self._preview.set_fullscreen_handler(
+            lambda: open_viewer(
+                self,
+                self.wallpaper.title,
+                self.wallpaper.path,
+                self.wallpaper.width,
+                self.wallpaper.height,
+                self._preview.crops,
+                self._runner,
+            )
+        )
 
     def _install_actions(self, apply_enabled: bool) -> None:
         group = Gio.SimpleActionGroup()

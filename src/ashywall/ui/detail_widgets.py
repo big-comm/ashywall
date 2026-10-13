@@ -132,10 +132,30 @@ class PreviewPanel(Gtk.Box):
             label=_("Could not load the preview"), visible=False, wrap=True
         )
         self._error.add_css_class("dim-label")
+        self._fullscreen_button = Gtk.Button(
+            icon_name="view-fullscreen-symbolic",
+            tooltip_text=_("View Full Screen"),
+            halign=Gtk.Align.END,
+            valign=Gtk.Align.START,
+            margin_top=8,
+            margin_end=8,
+            visible=False,
+        )
+        self._fullscreen_button.add_css_class("osd")
+        self._fullscreen_button.add_css_class("circular")
+        self._fullscreen_button.connect("clicked", lambda _b: self._open_fullscreen())
+        self._progress = Gtk.ProgressBar(valign=Gtk.Align.END, visible=False)
+        self._progress.add_css_class("osd")
         overlay = Gtk.Overlay(child=self._picture, overflow=Gtk.Overflow.HIDDEN)
         overlay.add_css_class("preview-frame")
         overlay.add_overlay(self._spinner)
         overlay.add_overlay(self._error)
+        overlay.add_overlay(self._progress)
+        overlay.add_overlay(self._fullscreen_button)
+        self._on_fullscreen: Callable[[], None] | None = None
+        clicks = Gtk.GestureClick()
+        clicks.connect("released", lambda *_a: self._open_fullscreen())
+        self._picture.add_controller(clicks)
         self._aspect = Gtk.AspectFrame(
             child=overlay,
             obey_child=False,
@@ -149,7 +169,12 @@ class PreviewPanel(Gtk.Box):
         self._caption.add_css_class("dim-label")
         if caption:
             self._caption.set_label(caption)
+        self._caption_action = Gtk.Button(halign=Gtk.Align.CENTER, visible=False)
+        self._caption_action.add_css_class("pill")
+        self._caption_action.connect("clicked", lambda _b: self._run_caption_action())
+        self._caption_callback: Callable[[], None] | None = None
         self.append(self._caption)
+        self.append(self._caption_action)
 
         group = Adw.PreferencesGroup(margin_top=12)
         self._simulate_row = Adw.SwitchRow(
@@ -170,9 +195,41 @@ class PreviewPanel(Gtk.Box):
         self._error.set_visible(False)
         self._pending = self._runner.submit(work, self._on_ready, self._on_failed)
 
-    def set_caption(self, text: str | None) -> None:
+    def set_caption(
+        self,
+        text: str | None,
+        action_label: str | None = None,
+        on_action: Callable[[], None] | None = None,
+    ) -> None:
         self._caption.set_visible(bool(text))
         self._caption.set_label(text or "")
+        self._caption_callback = on_action
+        self._caption_action.set_visible(on_action is not None)
+        self._caption_action.set_label(action_label or "")
+
+    def _run_caption_action(self) -> None:
+        if self._caption_callback is not None:
+            self._caption_callback()
+
+    def set_progress(self, fraction: float | None) -> None:
+        """Show transfer progress over the preview; None hides it."""
+        self._progress.set_visible(fraction is not None)
+        if fraction is not None:
+            self._progress.set_fraction(fraction)
+
+    def set_fullscreen_handler(self, handler: Callable[[], None] | None) -> None:
+        """Offer the full-screen view; only when a full-resolution file is at hand."""
+        self._on_fullscreen = handler
+        self._fullscreen_button.set_visible(handler is not None)
+        self._picture.set_cursor_from_name("zoom-in" if handler else None)
+
+    def _open_fullscreen(self) -> None:
+        if self._on_fullscreen is not None:
+            self._on_fullscreen()
+
+    @property
+    def crops(self) -> bool:
+        return self._crops
 
     def cancel(self) -> None:
         if self._pending is not None:

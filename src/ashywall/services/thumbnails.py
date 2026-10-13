@@ -9,6 +9,7 @@ import hashlib
 import io
 import os
 import tempfile
+import time
 from pathlib import Path
 
 from PIL import Image
@@ -22,9 +23,13 @@ from .image_probe import (
 
 THUMBNAIL_SIZE = 480
 PREVIEW_SIZE = 2048
+# 8K is about 33 megapixels; anything above this is shown reduced.
+MAX_DISPLAY_PIXELS = 80_000_000
 DEFAULT_CACHE_LIMIT = 250 * 1000 * 1000
 # Transparent areas are drawn over a neutral grey, close to what GNOME shows.
 BACKDROP_COLOR = (128, 128, 128)
+# Hidden files younger than this are transfers in progress and never pruned.
+PARTIAL_FILE_AGE = 3600
 
 
 def render_scaled_jpeg(path: Path, max_side: int, quality: int) -> bytes:
@@ -62,10 +67,85 @@ def render_preview(path: Path, max_side: int = PREVIEW_SIZE) -> bytes:
     return render_scaled_jpeg(path, max_side, quality=90)
 
 
-class ThumbnailCache:
-    def __init__(self, root: Path, max_bytes: int = DEFAULT_CACHE_LIMIT) -> None:
+def decode_for_display(path: Path, max_pixels: int = MAX_DISPLAY_PIXELS) -> Image.Image:
+    """Decode ``path`` at full size for the viewer, as RGB.
+
+    Images above ``max_pixels`` (far beyond 8K) are reduced to keep memory in
+    check; callers compare the result with the file's size to say so.
+    """
+    try:
+        with open_image(path) as image:
+            orientation = exif_orientation(image)
+            pixels = image.width * image.height
+            if pixels > max_pixels:
+                factor = (max_pixels / pixels) ** 0.5
+                size = (
+                    max(1, int(image.width * factor)),
+                    max(1, int(image.height * factor)),
+                )
+                image.draft("RGB", size)
+                image.thumbnail(size, Image.Resampling.LANCZOS, reducing_gap=2.0)
+            else:
+                image.load()
+            image = apply_orientation(image, orientation)
+            return _flatten_to_rgb(image)
+    except ImageProbeError:
+        raise
+    except (OSError, ValueError, SyntaxError, Image.DecompressionBombError) as error:
+        raise ImageProbeError(f"Could not decode image: {error}") from error
+
+
+class CacheDirectory:
+    """A directory of disposable files pruned by least-recent use."""
+
+    def __init__(self, root: Path, max_bytes: int) -> None:
         self.root = root
         self.max_bytes = max_bytes
+
+    def _entries(self) -> list[tuple[float, int, Path]]:
+        entries = []
+        if not self.root.is_dir():
+            return entries
+        stale = time.time() - PARTIAL_FILE_AGE
+        for directory, _subdirs, files in os.walk(self.root):
+            for name in files:
+                path = Path(directory, name)
+                try:
+                    info = path.stat()
+                except OSError:
+                    continue
+                if name.startswith(".") and info.st_mtime > stale:
+                    continue  # A transfer still being written.
+                entries.append((info.st_mtime, info.st_size, path))
+        return entries
+
+    def total_size(self) -> int:
+        return sum(size for _mtime, size, _path in self._entries())
+
+    def prune(self) -> int:
+        """Delete least recently used files until the cache is under 80% of its limit."""
+        entries = sorted(self._entries())
+        total = sum(size for _mtime, size, _path in entries)
+        removed = 0
+        target = int(self.max_bytes * 0.8)
+        if total <= self.max_bytes:
+            return 0
+        for _mtime, size, path in entries:
+            if total <= target:
+                break
+            path.unlink(missing_ok=True)
+            total -= size
+            removed += 1
+        return removed
+
+    def clear(self) -> None:
+        for _mtime, _size, path in self._entries():
+            path.unlink(missing_ok=True)
+
+
+class ThumbnailCache(CacheDirectory):
+    def __init__(self, root: Path, max_bytes: int = DEFAULT_CACHE_LIMIT) -> None:
+        super().__init__(root, max_bytes)
 
     def path_for(self, image_path: Path, file_size: int, mtime_ns: int) -> Path:
         key = hashlib.sha256(
@@ -93,40 +173,3 @@ class ThumbnailCache:
             Path(temporary).unlink(missing_ok=True)
             raise
         return target
-
-    def _entries(self) -> list[tuple[float, int, Path]]:
-        entries = []
-        if not self.root.is_dir():
-            return entries
-        for directory, _subdirs, files in os.walk(self.root):
-            for name in files:
-                path = Path(directory, name)
-                try:
-                    info = path.stat()
-                except OSError:
-                    continue
-                entries.append((info.st_mtime, info.st_size, path))
-        return entries
-
-    def total_size(self) -> int:
-        return sum(size for _mtime, size, _path in self._entries())
-
-    def prune(self) -> int:
-        """Delete least recently used thumbnails until the cache is under 80% of its limit."""
-        entries = sorted(self._entries())
-        total = sum(size for _mtime, size, _path in entries)
-        removed = 0
-        target = int(self.max_bytes * 0.8)
-        if total <= self.max_bytes:
-            return 0
-        for _mtime, size, path in entries:
-            if total <= target:
-                break
-            path.unlink(missing_ok=True)
-            total -= size
-            removed += 1
-        return removed
-
-    def clear(self) -> None:
-        for _mtime, _size, path in self._entries():
-            path.unlink(missing_ok=True)

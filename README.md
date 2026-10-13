@@ -4,7 +4,7 @@ A wallpaper library for GNOME, built first for BigCommunity. AshyWall gathers
 the wallpapers installed on the system and the images in folders you choose,
 lets you preview them and applies them to the desktop.
 
-Status: early development (0.3.0). Local library, preview, favorites,
+Status: early development (0.4.0). Local library, preview, favorites,
 collections, applying on GNOME and browsing Wallhaven work. The Big community collections
 are planned and shown as "not available yet" in the interface.
 
@@ -21,6 +21,9 @@ are planned and shown as "not available yet" in the interface.
 - **Detail page** with a large preview, real pixel dimensions, aspect ratio,
   file size, format, source (including the owning package for system files),
   location and byte-identical copies found in the library.
+- **Full-screen view** of the file at full resolution: as the desktop would
+  show it, the whole image, or at actual size (one image pixel per screen
+  pixel, with panning). Double-click toggles actual size at the clicked point.
 - **Screen crop simulation** for the current monitor, clearly labelled as an
   approximation.
 - **Apply** to the light style, the dark style or both, with undo and
@@ -30,8 +33,14 @@ are planned and shown as "not available yet" in the interface.
 - **Collections** created by the user, mixing local and online wallpapers.
   Deleting a collection never touches the wallpapers in it.
 - **Wallhaven** browsing (search, sorting, orientation and resolution
-  filters, endless scrolling). Safe-for-work content only, no account or API
-  key. Nothing is contacted until you open the Wallhaven section.
+  filters, endless scrolling). Searches are sorted by relevance unless you
+  pick another order; "top this month" only covers the last month's ranking.
+  Safe-for-work content only, no account or API key. Nothing is contacted
+  until you open the Wallhaven section.
+- **Full-resolution previews** of online wallpapers: opening one fetches the
+  original into a pruned cache (600 MB) after showing the provider's
+  thumbnail. On metered connections this waits for a click. Downloading a
+  previewed wallpaper reuses the cached file, checked again.
 - **Downloads** on demand with progress and cancellation. Files are verified
   (format, pixel limits, dimensions announced by the provider) before they
   are moved into place, never overwrite an existing file and appear in the
@@ -104,7 +113,8 @@ User-facing strings are in English in the code and translated with gettext
 - Author and license are shown only when the source provides them; local
   sources currently do not. Wallhaven names the uploader (not necessarily the
   author) and publishes no license; AshyWall says so on each page.
-- Wallhaven previews before downloading are its own small thumbnails.
+- Images above 80 megapixels (far beyond 8K) are shown reduced in the
+  full-screen view, and the view says so.
 - Wallhaven's API may change without notice; AshyWall validates every
   response and shows an error instead of partial data.
 

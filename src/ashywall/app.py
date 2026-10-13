@@ -23,7 +23,7 @@ from .providers.wallhaven import WallhavenProvider
 from .services.database import DatabaseError, connect
 from .services.http import HttpClient
 from .services.library_repository import LibraryRepository
-from .services.remote_images import RemoteThumbnailCache
+from .services.remote_images import OriginalCache, RemoteThumbnailCache
 from .services.thumbnails import ThumbnailCache
 from .ui.background_tasks import BackgroundRunner
 from .ui.thumbnail_loader import ThumbnailLoader
@@ -97,6 +97,7 @@ class AshyWallApplication(Adw.Application):
         if self._services is not None:
             self._services.loader.shutdown()
             self._services.runner.shutdown()
+            self._services.originals_runner.shutdown()
         Adw.Application.do_shutdown(self)
 
     def _create_services(self) -> WindowServices:
@@ -106,14 +107,20 @@ class AshyWallApplication(Adw.Application):
         remote_thumbnails = RemoteThumbnailCache(
             paths.thumbnails_dir() / "remote", cdn, WallhavenProvider.thumbnail_hosts
         )
+        originals = OriginalCache(
+            paths.originals_dir(), cdn, lambda _origin: WallhavenProvider.download_hosts
+        )
         runner = BackgroundRunner(2, "ashywall-tasks")
         runner.submit(thumbnails.prune, lambda _removed: None)
+        runner.submit(originals.prune, lambda _removed: None)
         desktop, reason = desktop_backend()
         self._services = WindowServices(
             database_path=database_path,
             repository=LibraryRepository(connect(database_path)),
             thumbnails=thumbnails,
             remote_thumbnails=remote_thumbnails,
+            originals=originals,
+            originals_runner=BackgroundRunner(2, "ashywall-originals"),
             loader=ThumbnailLoader(thumbnails, remote_thumbnails),
             runner=runner,
             cdn=cdn,

@@ -9,7 +9,7 @@ from .. import paths
 from ..desktop.gnome import ApplyMode, BackgroundState, DesktopError, GnomeBackground
 from ..i18n import _, ngettext
 from ..models.wallpaper import Source, SourceKind, Wallpaper
-from ..providers.base import RemotePage, RemoteWallpaper
+from ..providers.base import RemotePage, RemoteSort, RemoteWallpaper
 from ..providers.wallhaven import WallhavenProvider
 from ..services.http import HttpClient
 from ..services.library_index import IndexProgress, IndexSummary
@@ -19,7 +19,7 @@ from ..services.library_repository import (
     LibraryRepository,
     Section,
 )
-from ..services.remote_images import RemoteThumbnailCache
+from ..services.remote_images import OriginalCache, RemoteThumbnailCache
 from ..services.thumbnails import ThumbnailCache
 from .background_tasks import BackgroundRunner
 from .collections_ui import CollectionPicker, ask_collection_name, collection_error_text
@@ -54,6 +54,8 @@ class WindowServices:
     repository: LibraryRepository
     thumbnails: ThumbnailCache
     remote_thumbnails: RemoteThumbnailCache
+    originals: OriginalCache
+    originals_runner: BackgroundRunner
     loader: ThumbnailLoader
     runner: BackgroundRunner
     cdn: HttpClient
@@ -113,6 +115,7 @@ class MainWindow(Adw.ApplicationWindow):
             lambda _origin: services.wallhaven.download_hosts,
             self._on_download_finished,
             self._on_download_failed,
+            services.originals.cached,
         )
 
         self._gallery = GalleryPage(services.loader, self._on_unreadable)
@@ -336,6 +339,8 @@ class MainWindow(Adw.ApplicationWindow):
                 entry,
                 self._services.runner,
                 self._services.remote_thumbnails,
+                self._services.originals,
+                self._services.originals_runner,
                 self._downloads,
                 self._services.wallhaven.details
                 if entry.origin == "wallhaven"
@@ -485,7 +490,12 @@ class MainWindow(Adw.ApplicationWindow):
         else:
             self._auto_loads = 0
             self._gallery.show_entries(
-                items, remote_empty_state(self._gallery.filters().active), ""
+                items,
+                remote_empty_state(
+                    self._gallery.filters().active,
+                    self._gallery.remote_sort() is RemoteSort.TOP,
+                ),
+                "",
             )
         self._gallery.show_subtitle(remote_subtitle(page, self._gallery.entry_count()))
         # Locally filtered pages can be short; load a few more until the view can scroll.
@@ -643,6 +653,7 @@ class MainWindow(Adw.ApplicationWindow):
         self._preferences = PreferencesDialog(
             self._repository.list_sources(SourceKind.FOLDER),
             self._services.thumbnails,
+            self._services.originals,
             self._services.runner,
             self.add_folder,
             self._remove_folder,
