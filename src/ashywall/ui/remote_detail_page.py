@@ -10,10 +10,11 @@ from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 from ..i18n import _
 from ..providers.base import RemoteWallpaper
+from ..providers.registry import provider_name
 from ..services.http import TransferCancelled
 from ..services.remote_images import OriginalCache, RemoteThumbnailCache
 from .background_tasks import BackgroundRunner, run_on_main
-from .detail_page import attribution_rows, provider_name, render_texture
+from .detail_page import Attribution, attribution_rows, render_texture
 from .detail_widgets import (
     FavoriteButton,
     PreviewPanel,
@@ -26,12 +27,22 @@ from .errors import error_text
 from .image_viewer import open_viewer
 from .wallpaper_card import dimensions_text
 
-# Wallhaven's largest thumbnail is a few hundred pixels wide; keep it as is.
-REMOTE_PREVIEW_SIZE = 1024
+# Shown until the original arrives (or instead of it): sharp enough for the panel.
+REMOTE_PREVIEW_SIZE = 2048
+
+
+# Larger originals (Commons has 20-35 MB photos) load only on request.
+AUTO_ORIGINAL_MAX_BYTES = 15 * 1000 * 1000
 
 
 def network_is_metered() -> bool:
     return Gio.NetworkMonitor.get_default().get_network_metered()
+
+
+def loads_original_automatically(item: RemoteWallpaper, allowed: bool) -> bool:
+    if not allowed or network_is_metered():
+        return False
+    return item.file_size is None or item.file_size <= AUTO_ORIGINAL_MAX_BYTES
 
 
 def describe_error(error: Exception) -> str:
@@ -55,6 +66,7 @@ class RemoteDetailPage(Adw.NavigationPage):
         originals_runner: BackgroundRunner,
         downloads: DownloadManager,
         details_loader,
+        auto_original: bool,
         apply_unavailable_reason: str | None,
         collection_picker: Gtk.Widget,
     ) -> None:
@@ -65,6 +77,7 @@ class RemoteDetailPage(Adw.NavigationPage):
         self._downloads = downloads
         self._originals = originals
         self._originals_runner = originals_runner
+        self._auto_original = auto_original
         # Full-resolution file shown in the preview and the full-screen view.
         self._full_path: Path | None = None
         self._original_cancel: threading.Event | None = None
@@ -134,17 +147,29 @@ class RemoteDetailPage(Adw.NavigationPage):
             )
 
         self._preview.load(work)
-        if network_is_metered():
+        if loads_original_automatically(self.item, self._auto_original):
+            self._fetch_original()
+        else:
             self._preview.set_caption(
                 _(
+                    "Reduced preview: {provider} asks apps to load originals "
+                    "({size}) only when you want them."
+                ).format(
+                    provider=provider_name(self.item.origin), size=self._size_text()
+                )
+                if not self._auto_original
+                else _(
                     "Reduced preview: your connection is metered, so the original "
                     "({size}) is not loaded automatically."
+                ).format(size=self._size_text())
+                if network_is_metered()
+                else _(
+                    "Reduced preview: the original is large ({size}), so it is "
+                    "loaded only when you ask."
                 ).format(size=self._size_text()),
                 _("Load Full Resolution"),
                 self._fetch_original,
             )
-        else:
-            self._fetch_original()
 
     def _size_text(self) -> str:
         return (
@@ -348,7 +373,9 @@ class RemoteDetailPage(Adw.NavigationPage):
     def _on_showing(self, _page: Adw.NavigationPage) -> None:
         self._downloads.add_listener(self.item.favorite_key, self)
         self._show_state()
-        if self._full_path is None and not network_is_metered():
+        if self._full_path is None and loads_original_automatically(
+            self.item, self._auto_original
+        ):
             self._fetch_original()
 
     def _on_hidden(self, _page: Adw.NavigationPage) -> None:
@@ -373,6 +400,10 @@ class RemoteDetailPage(Adw.NavigationPage):
         item = self.item
         self._details_group = Adw.PreferencesGroup(title=_("Details"))
         group = self._details_group
+        if item.description:
+            group.add(property_row(_("Description"), item.description))
+        if (featured := featured_date(item.date)) is not None:
+            group.add(property_row(_("Featured On"), featured))
         group.add(
             property_row(
                 _("Dimensions"), _("{size} px").format(size=dimensions_text(item))
@@ -394,9 +425,7 @@ class RemoteDetailPage(Adw.NavigationPage):
     def _show_attribution(self, item: RemoteWallpaper) -> None:
         for row in self._attribution:
             self._details_group.remove(row)
-        self._attribution = attribution_rows(
-            item.uploader, item.source_url, item.page_url, item.origin
-        )
+        self._attribution = attribution_rows(Attribution.of(item))
         for row in self._attribution:
             self._details_group.add(row)
 
@@ -418,6 +447,16 @@ class RemoteDetailPage(Adw.NavigationPage):
                 lambda: details_loader(remote_id), show, lambda _e: None
             )
         )
+
+
+def featured_date(value: str | None) -> str | None:
+    """An ISO date in the user's format."""
+    try:
+        year, month, day = (int(part) for part in (value or "").split("-"))
+        moment = GLib.DateTime.new_local(year, month, day, 12, 0, 0)
+    except (ValueError, TypeError):
+        return None
+    return moment.format("%x") if moment is not None else None
 
 
 def _format_label(media_type: str | None) -> str:

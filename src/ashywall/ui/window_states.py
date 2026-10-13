@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from ..i18n import _, ngettext
 from ..models.wallpaper import Collection
-from ..providers.base import RemotePage
+from ..providers.base import RemotePage, RemoteProvider
 from ..services.http import NetworkUnavailable, RateLimited
 from ..services.library_repository import FolderError, FolderProblem, Section
 from .errors import error_text
@@ -21,12 +21,13 @@ class SidebarEntry:
     collection_id: int | None = None
 
 
-WALLHAVEN_KEY = "wallhaven"
 BIG_KEY = "big"
 NEW_COLLECTION_KEY = "new-collection"
 
 
-def sidebar_entries(collections: list[Collection]) -> list[SidebarEntry]:
+def sidebar_entries(
+    collections: list[Collection], providers: list[RemoteProvider]
+) -> list[SidebarEntry]:
     library, explore, group = _("Library"), _("Explore"), _("Collections")
     return [
         SidebarEntry(
@@ -52,7 +53,10 @@ def sidebar_entries(collections: list[Collection]) -> list[SidebarEntry]:
         SidebarEntry(
             BIG_KEY, _("Big Collections"), "image-x-generic-symbolic", explore, None
         ),
-        SidebarEntry(WALLHAVEN_KEY, "Wallhaven", "web-browser-symbolic", explore, None),
+        *(
+            SidebarEntry(p.id, p.display_name, p.icon_name, explore, None)
+            for p in providers
+        ),
         SidebarEntry(
             "favorites", _("Favorites"), "starred-symbolic", group, Section.FAVORITES
         ),
@@ -118,7 +122,7 @@ def library_empty_state(section: Section, has_folders: bool) -> EmptyState:
         return EmptyState(
             "folder-download-symbolic",
             _("No Downloads Yet"),
-            _("Wallpapers you download from Wallhaven appear here."),
+            _("Wallpapers you download from online sources appear here."),
         )
     if section is Section.COLLECTION:
         return EmptyState(
@@ -148,11 +152,13 @@ def big_unavailable_state() -> EmptyState:
     )
 
 
-def remote_empty_state(filtered: bool, monthly_top: bool = False) -> EmptyState:
+def remote_empty_state(
+    provider: str, filtered: bool, monthly_top: bool = False
+) -> EmptyState:
     if filtered:
         return EmptyState(
             "system-search-symbolic",
-            _("No Results on Wallhaven"),
+            _("No Results on {provider}").format(provider=provider),
             _(
                 "“Top this month” only includes wallpapers ranked in the last month. "
                 "Sort by relevance or most favorited to search all of Wallhaven."
@@ -163,17 +169,19 @@ def remote_empty_state(filtered: bool, monthly_top: bool = False) -> EmptyState:
             "win.clear-filters",
         )
     return EmptyState(
-        "system-search-symbolic", _("No Results on Wallhaven"), _("Try again later.")
+        "system-search-symbolic",
+        _("No Results on {provider}").format(provider=provider),
+        _("Try again later."),
     )
 
 
-def remote_error_state(error: Exception) -> EmptyState:
+def remote_error_state(provider: str, error: Exception) -> EmptyState:
     if isinstance(error, NetworkUnavailable):
-        title = _("Wallhaven Is Unreachable")
+        title = _("{provider} Is Unreachable").format(provider=provider)
     elif isinstance(error, RateLimited):
         title = _("Too Many Requests")
     else:
-        title = _("Wallhaven Could Not Be Loaded")
+        title = _("{provider} Could Not Be Loaded").format(provider=provider)
     return EmptyState(
         "network-error-symbolic",
         title,
@@ -183,11 +191,11 @@ def remote_error_state(error: Exception) -> EmptyState:
     )
 
 
-def remote_subtitle(page: RemotePage | None, shown: int) -> str:
+def remote_subtitle(provider: str, page: RemotePage | None, shown: int) -> str:
     if page is not None and page.total is not None:
         return ngettext(
-            "{count} result on Wallhaven", "{count} results on Wallhaven", page.total
-        ).format(count=page.total)
+            "{count} result on {provider}", "{count} results on {provider}", page.total
+        ).format(count=page.total, provider=provider)
     if page is not None and page.last_page:
         return _("{count} shown · page {page} of {last}").format(
             count=shown, page=page.page, last=page.last_page

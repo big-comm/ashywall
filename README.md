@@ -4,8 +4,9 @@ A wallpaper library for GNOME, built first for BigCommunity. AshyWall gathers
 the wallpapers installed on the system and the images in folders you choose,
 lets you preview them and applies them to the desktop.
 
-Status: early development (0.4.0). Local library, preview, favorites,
-collections, applying on GNOME and browsing Wallhaven work. The Big community collections
+Status: early development (0.5.0). Local library, preview, favorites,
+collections, applying on GNOME, automatic change and browsing Wallhaven,
+Bing and Wikimedia Commons work. The Big community collections
 are planned and shown as "not available yet" in the interface.
 
 ## Features
@@ -28,6 +29,12 @@ are planned and shown as "not available yet" in the interface.
   approximation.
 - **Apply** to the light style, the dark style or both, with undo and
   "restore previous wallpaper".
+- **Automatic change** through GNOME's own slideshow format: pick a section
+  or collection, an interval (5 minutes to a day), shuffle, a minimum
+  resolution and whether to skip portrait images. GNOME switches the picture
+  with a cross-fade, so AshyWall does not need to keep running, even after a
+  restart. The list is updated when the library changes without changing
+  the picture on screen; turning it off keeps the current picture.
 - **Favorites** stored by origin and identifier, so they survive re-indexing;
   online favorites keep their listing and show up without a connection.
 - **Collections** created by the user, mixing local and online wallpapers.
@@ -37,10 +44,19 @@ are planned and shown as "not available yet" in the interface.
   pick another order; "top this month" only covers the last month's ranking.
   Safe-for-work content only, no account or API key. Nothing is contacted
   until you open the Wallhaven section.
+- **Bing image of the day** for about the last two weeks, with its caption
+  and photographer credit. Bing publishes no license; AshyWall says so. The
+  real size of each UHD original is read from its first bytes before it is
+  listed.
+- **Wikimedia Commons picture of the day**, 30 days per page back to 2004,
+  each with its author and license (Creative Commons or public domain),
+  which are also recorded with downloads. Only this curated selection is
+  browsed: Commons has no safe-search filter, so free-text search over all
+  of it is not offered.
 - **Full-resolution previews** of online wallpapers: opening one fetches the
   original into a pruned cache (600 MB) after showing the provider's
-  thumbnail. On metered connections this waits for a click. Downloading a
-  previewed wallpaper reuses the cached file, checked again.
+  thumbnail. Originals above 15 MB and metered connections wait for a click.
+  Downloading a previewed wallpaper reuses the cached file, checked again.
 - **Downloads** on demand with progress and cancellation. Files are verified
   (format, pixel limits, dimensions announced by the provider) before they
   are moved into place, never overwrite an existing file and appear in the
@@ -107,16 +123,23 @@ User-facing strings are in English in the code and translated with gettext
 
 - GNOME uses a single picture per style for every monitor; per-monitor
   wallpapers are not supported.
+- The automatic change uses local files only. Online favorites and
+  collection items join it once downloaded, and new files join the next time
+  AshyWall opens (or refreshes the library); nothing fetches new online
+  pictures in the background.
 - Applying from a Flatpak sandbox (wallpaper portal) is not implemented.
 - Formats decoded: JPEG, PNG, WebP, AVIF, TIFF and BMP. JPEG XL and HEIF
   wallpapers are not listed yet.
 - Author and license are shown only when the source provides them; local
   sources currently do not. Wallhaven names the uploader (not necessarily the
-  author) and publishes no license; AshyWall says so on each page.
+  author) and Bing the photographer; neither publishes a license, and
+  AshyWall says so on each page. Wikimedia Commons gives author and license.
 - Images above 80 megapixels (far beyond 8K) are shown reduced in the
   full-screen view, and the view says so.
-- Wallhaven's API may change without notice; AshyWall validates every
-  response and shows an error instead of partial data.
+- The online services may change without notice; AshyWall validates every
+  response and shows an error instead of partial data. Wikimedia limits how
+  many originals one address may download in a short time; when that
+  happens AshyWall asks you to wait a minute.
 
 ## License
 

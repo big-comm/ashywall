@@ -171,7 +171,10 @@ def download_original(
             raise DownloadError(
                 f"The downloaded file is not a valid image: {error}"
             ) from error
-        if (info.width, info.height) != (item.width, item.height):
+        # Some providers report the stored size and others the size after EXIF
+        # rotation, so a swapped pair is the same picture.
+        announced = {(item.width, item.height), (item.height, item.width)}
+        if (info.width, info.height) not in announced:
             raise DownloadError(
                 f"The downloaded image is {info.width}x{info.height}, "
                 f"but {item.width}x{item.height} was announced"

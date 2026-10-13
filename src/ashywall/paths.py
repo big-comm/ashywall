@@ -44,6 +44,11 @@ def thumbnails_dir() -> Path:
     return cache_dir() / "thumbnails"
 
 
+def slideshow_dir() -> Path:
+    """Slideshow files GNOME reads for the automatic change; must stay in place."""
+    return data_dir() / "slideshow"
+
+
 def originals_dir() -> Path:
     """Full-resolution previews of online wallpapers; safe to delete at any time."""
     return cache_dir() / "originals"

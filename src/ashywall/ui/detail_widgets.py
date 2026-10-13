@@ -21,9 +21,9 @@ def property_row(title: str, value: str | None = None) -> Adw.ActionRow:
     return row
 
 
-def link_row(title: str, url: str) -> Adw.ActionRow:
-    """A property row whose value is a web address, with a button to open it."""
-    row = property_row(title, url)
+def link_row(title: str, url: str, label: str | None = None) -> Adw.ActionRow:
+    """A property row with a button that opens ``url``; shows the address unless ``label``."""
+    row = property_row(title, label or url)
     button = Gtk.Button(
         icon_name="adw-external-link-symbolic",
         valign=Gtk.Align.CENTER,

@@ -1,1 +1,1 @@
-"""Wallpaper sources: local discovery now, online providers later."""
+"""Wallpaper sources: local discovery and online providers."""

@@ -31,7 +31,7 @@ class ExploreController:
         self._repository = repository
         self._on_page = on_page
         self._on_error = on_error
-        self._runner = BackgroundRunner(1, f"ashywall-{provider.id}")
+        self._runner = BackgroundRunner(1, "ashywall-explore")
         self._generation = 0
         self._cancel = threading.Event()
         self._query: RemoteQuery | None = None
@@ -45,6 +45,13 @@ class ExploreController:
     @property
     def last_page(self) -> RemotePage | None:
         return self._last
+
+    def set_provider(self, provider: RemoteProvider) -> None:
+        if provider is not self.provider:
+            self.stop()
+            self.provider = provider
+            self._query = None
+            self._last = None
 
     def search(self, filters: GalleryFilters, sort: RemoteSort) -> None:
         self._cancel.set()
@@ -95,15 +102,7 @@ class ExploreController:
 
     def enrich(self, items: list[RemoteWallpaper]) -> list[RemoteWallpaper]:
         """Mark favorites and downloads known to the local catalog."""
-        favorites = self._repository.remote_favorite_ids(self.provider.id)
-        downloads = self._repository.downloaded_paths(self.provider.id)
-        return [
-            item.with_state(
-                is_favorite=item.remote_id in favorites,
-                local_path=downloads.get(item.remote_id),
-            )
-            for item in items
-        ]
+        return self._repository.with_local_state(items)
 
     def _fetch(self, query: RemoteQuery, append: bool) -> None:
         generation = self._generation
@@ -123,4 +122,5 @@ class ExploreController:
             self.loading = False
             self._on_error(error, append)
 
-        self._runner.submit(lambda: self.provider.search(query, cancel), done, failed)
+        provider = self.provider
+        self._runner.submit(lambda: provider.search(query, cancel), done, failed)

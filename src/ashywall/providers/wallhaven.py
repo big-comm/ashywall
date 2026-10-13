@@ -23,6 +23,7 @@ from .base import (
     RemoteSort,
     RemoteWallpaper,
     optional_web_url,
+    query_accepts,
     validated_url,
 )
 
@@ -136,13 +137,6 @@ def _uploader_name(uploader: Any) -> str | None:
     return None
 
 
-def _accepts(query: RemoteQuery, item: RemoteWallpaper) -> bool:
-    """Apply AshyWall's own criteria, whatever the provider returned."""
-    if query.orientation is not None and item.orientation is not query.orientation:
-        return False
-    return query.min_tier is None or query.min_tier.accepts(item.width, item.height)
-
-
 def parse_search(payload: Any, query: RemoteQuery) -> RemotePage:
     if not isinstance(payload, dict) or not isinstance(payload.get("data"), list):
         raise ProviderError("Unexpected search response")
@@ -155,7 +149,7 @@ def parse_search(payload: Any, query: RemoteQuery) -> RemotePage:
         except ProviderError:
             skipped += 1
             continue
-        if _accepts(query, item):
+        if query_accepts(query, item):
             items.append(item)
         else:
             skipped += 1
@@ -178,8 +172,20 @@ def parse_search(payload: Any, query: RemoteQuery) -> RemotePage:
 class WallhavenProvider:
     id = "wallhaven"
     display_name = "Wallhaven"
+    icon_name = "web-browser-symbolic"
     download_hosts = IMAGE_HOSTS
     thumbnail_hosts = THUMBNAIL_HOSTS
+    searchable = True
+    sorts = (
+        RemoteSort.TOP,
+        RemoteSort.LATEST,
+        RemoteSort.VIEWS,
+        RemoteSort.FAVORITES,
+        RemoteSort.RANDOM,
+        RemoteSort.RELEVANCE,
+    )
+    has_details = True
+    auto_original = True
 
     def __init__(self, api: HttpClient | None = None) -> None:
         self._api = api or new_api_client()

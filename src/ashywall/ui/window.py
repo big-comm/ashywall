@@ -9,8 +9,7 @@ from .. import paths
 from ..desktop.gnome import ApplyMode, BackgroundState, DesktopError, GnomeBackground
 from ..i18n import _, ngettext
 from ..models.wallpaper import Source, SourceKind, Wallpaper
-from ..providers.base import RemotePage, RemoteSort, RemoteWallpaper
-from ..providers.wallhaven import WallhavenProvider
+from ..providers.base import RemotePage, RemoteProvider, RemoteSort, RemoteWallpaper
 from ..services.http import HttpClient
 from ..services.library_index import IndexProgress, IndexSummary
 from ..services.library_repository import (
@@ -20,6 +19,12 @@ from ..services.library_repository import (
     Section,
 )
 from ..services.remote_images import OriginalCache, RemoteThumbnailCache
+from ..services.rotation import (
+    RotationConfig,
+    RotationError,
+    RotationManager,
+    RotationState,
+)
 from ..services.thumbnails import ThumbnailCache
 from .background_tasks import BackgroundRunner
 from .collections_ui import CollectionPicker, ask_collection_name, collection_error_text
@@ -31,10 +36,10 @@ from .gallery_page import GalleryFilters, GalleryPage
 from .index_controller import IndexController
 from .preferences_dialog import PreferencesDialog
 from .remote_detail_page import RemoteDetailPage
+from .rotation_dialog import RotationDialog
 from .thumbnail_loader import GalleryEntry, ThumbnailLoader
 from .window_states import (
     NEW_COLLECTION_KEY,
-    WALLHAVEN_KEY,
     SidebarEntry,
     big_unavailable_state,
     filtered_empty_state,
@@ -59,7 +64,7 @@ class WindowServices:
     loader: ThumbnailLoader
     runner: BackgroundRunner
     cdn: HttpClient
-    wallhaven: WallhavenProvider
+    providers: dict[str, RemoteProvider]
     desktop: GnomeBackground | None
     desktop_unavailable_reason: str | None
 
@@ -89,7 +94,10 @@ class MainWindow(Adw.ApplicationWindow):
         )
         self._services = services
         self._repository = services.repository
-        self._entries = sidebar_entries(self._repository.list_collections())
+        self._providers = services.providers
+        self._entries = sidebar_entries(
+            self._repository.list_collections(), list(self._providers.values())
+        )
         self._current = self._entries[0]
         self._count_labels: dict[str, Gtk.Label] = {}
         self._preferences: PreferencesDialog | None = None
@@ -97,6 +105,9 @@ class MainWindow(Adw.ApplicationWindow):
         self._unavailable_folders: tuple[Path, ...] = ()
         self._apply_after_download: dict[tuple[str, str], str] = {}
         self._auto_loads = 0
+        self._rotation = RotationManager(
+            self._repository, services.desktop, paths.slideshow_dir
+        )
         self._indexer = IndexController(
             services.database_path,
             self._on_index_progress,
@@ -104,7 +115,7 @@ class MainWindow(Adw.ApplicationWindow):
             self._on_index_failed,
         )
         self._explore = ExploreController(
-            services.wallhaven,
+            next(iter(self._providers.values())),
             self._repository,
             self._on_remote_page,
             self._on_remote_error,
@@ -112,7 +123,7 @@ class MainWindow(Adw.ApplicationWindow):
         self._downloads = DownloadManager(
             services.cdn,
             paths.downloads_dir,
-            lambda _origin: services.wallhaven.download_hosts,
+            lambda origin: self._providers[origin].download_hosts,
             self._on_download_finished,
             self._on_download_failed,
             services.originals.cached,
@@ -141,6 +152,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.set_content(self._toasts)
 
         self._install_actions()
+        self._sync_rotation()
         self.connect("close-request", self._on_close_request)
         self._select_entry(self._entries[0])
         self._indexer.start()
@@ -159,6 +171,10 @@ class MainWindow(Adw.ApplicationWindow):
         library_section.append(_("Refresh Library"), "win.refresh")
         library_section.append(_("Restore Previous Wallpaper"), "win.restore-wallpaper")
         menu.append_section(None, library_section)
+        rotation_section = Gio.Menu()
+        rotation_section.append(_("Automatic Change…"), "win.rotation")
+        rotation_section.append(_("Next Wallpaper"), "win.next-wallpaper")
+        menu.append_section(None, rotation_section)
         app_section = Gio.Menu()
         app_section.append(_("Preferences"), "app.preferences")
         app_section.append(_("About AshyWall"), "app.about")
@@ -205,7 +221,9 @@ class MainWindow(Adw.ApplicationWindow):
 
     def _rebuild_sidebar(self, select_key: str | None = None) -> None:
         """Recreate rows after collections change, keeping or moving the selection."""
-        self._entries = sidebar_entries(self._repository.list_collections())
+        self._entries = sidebar_entries(
+            self._repository.list_collections(), list(self._providers.values())
+        )
         self._populate_sidebar()
         key = select_key or self._current.key
         target = next((e for e in self._entries if e.key == key), self._entries[0])
@@ -270,8 +288,17 @@ class MainWindow(Adw.ApplicationWindow):
         self._navigation.pop_to_tag("gallery")
         self._explore.stop()
         self._gallery.set_loading_more(False)
-        if entry.key == WALLHAVEN_KEY:
-            self._gallery.set_section(None, entry.title, remote=True)
+        provider = self._providers.get(entry.key)
+        if provider is not None:
+            self._explore.set_provider(provider)
+            self._gallery.set_section(
+                None,
+                entry.title,
+                remote=True,
+                provider_name=provider.display_name,
+                sorts=provider.sorts,
+                searchable=provider.searchable,
+            )
         elif entry.section is None:
             self._gallery.show_unavailable(entry.title, big_unavailable_state())
             self._update_counts()
@@ -286,8 +313,10 @@ class MainWindow(Adw.ApplicationWindow):
 
     def refresh_gallery(self) -> None:
         self._update_counts()
-        if self._current.key == WALLHAVEN_KEY:
-            self._gallery.show_loading(_("Searching Wallhaven…"))
+        if (provider := self._current_provider()) is not None:
+            self._gallery.show_loading(
+                _("Loading {provider}…").format(provider=provider.display_name)
+            )
             self._explore.search(self._gallery.filters(), self._gallery.remote_sort())
             return
         if self._current.section is None:
@@ -342,9 +371,10 @@ class MainWindow(Adw.ApplicationWindow):
                 self._services.originals,
                 self._services.originals_runner,
                 self._downloads,
-                self._services.wallhaven.details
-                if entry.origin == "wallhaven"
-                else None,
+                self._details_loader(entry.origin),
+                self._providers[entry.origin].auto_original
+                if entry.origin in self._providers
+                else False,
                 self._services.desktop_unavailable_reason,
                 self._collection_picker(lambda: page.item),
             )
@@ -476,13 +506,14 @@ class MainWindow(Adw.ApplicationWindow):
     # Online browsing -----------------------------------------------------------
 
     def _load_more(self) -> None:
-        if self._current.key == WALLHAVEN_KEY and self._explore.load_more():
+        if self._current_provider() is not None and self._explore.load_more():
             self._gallery.set_loading_more(True)
 
     def _on_remote_page(
         self, page: RemotePage, items: list[RemoteWallpaper], append: bool
     ) -> None:
-        if self._current.key != WALLHAVEN_KEY:
+        provider = self._current_provider()
+        if provider is None or provider is not self._explore.provider:
             return
         self._gallery.set_loading_more(False)
         if append:
@@ -492,39 +523,45 @@ class MainWindow(Adw.ApplicationWindow):
             self._gallery.show_entries(
                 items,
                 remote_empty_state(
+                    provider.display_name,
                     self._gallery.filters().active,
-                    self._gallery.remote_sort() is RemoteSort.TOP,
+                    RemoteSort.TOP in provider.sorts
+                    and self._gallery.remote_sort() is RemoteSort.TOP,
                 ),
                 "",
             )
-        self._gallery.show_subtitle(remote_subtitle(page, self._gallery.entry_count()))
+        self._gallery.show_subtitle(
+            remote_subtitle(provider.display_name, page, self._gallery.entry_count())
+        )
         # Locally filtered pages can be short; load a few more until the view can scroll.
         if page.has_more and self._auto_loads < MAX_AUTO_LOADS:
             GLib.timeout_add(300, self._fill_view)
 
     def _fill_view(self) -> bool:
-        if self._current.key == WALLHAVEN_KEY and not self._gallery.fills_view():
+        if self._current_provider() is not None and not self._gallery.fills_view():
             self._auto_loads += 1
             self._load_more()
         return GLib.SOURCE_REMOVE
 
     def _on_remote_error(self, error: Exception, append: bool) -> None:
-        if self._current.key != WALLHAVEN_KEY:
+        provider = self._current_provider()
+        if provider is None:
             return
         self._gallery.set_loading_more(False)
         if append:
             self._toast(error_text(error))
         else:
-            self._gallery.show_status(remote_error_state(error))
+            self._gallery.show_status(remote_error_state(provider.display_name, error))
 
     # Downloads ---------------------------------------------------------------
 
     def _on_download_finished(self, item: RemoteWallpaper, path: Path) -> None:
         self._repository.record_download(item, path)
-        if item.uploader is None and item.origin == self._services.wallhaven.id:
+        details = self._details_loader(item.origin)
+        if item.uploader is None and details is not None:
             # Listings omit the uploader; complete the attribution record in the background.
             self._services.runner.submit(
-                lambda: self._services.wallhaven.details(item.remote_id),
+                lambda: details(item.remote_id),
                 lambda details: self._repository.record_download(details, path),
                 lambda _error: None,
             )
@@ -578,6 +615,7 @@ class MainWindow(Adw.ApplicationWindow):
             self._toast(_("Could not apply the wallpaper: {error}").format(error=error))
             return
         self._repository.push_desktop_history(path.as_uri(), previous.to_json())
+        self._sync_rotation()
         self._update_counts()
         titles = {
             ApplyMode.BOTH: _("Wallpaper applied"),
@@ -609,6 +647,7 @@ class MainWindow(Adw.ApplicationWindow):
             )
             return
         self._repository.drop_desktop_history(entry_id)
+        self._sync_rotation()
         self._update_counts()
         self._toast(_("Previous wallpaper restored"))
 
@@ -701,15 +740,16 @@ class MainWindow(Adw.ApplicationWindow):
         if (
             section is not None
             and section is not Section.FAVORITES
-            and self._current.key != WALLHAVEN_KEY
+            and self._current_provider() is None
         ):
             if self._repository.count_wallpapers(self._gallery.current_query()) == 0:
                 self._gallery.show_loading(self._progress_text())
 
     def _on_index_finished(self, summary: IndexSummary) -> None:
         self._progress = None
+        self._sync_rotation(update_list=True)
         self._unavailable_folders = summary.unavailable_folders
-        if self._current.key == WALLHAVEN_KEY:
+        if self._current_provider() is not None:
             self._update_counts()
         else:
             self.refresh_gallery()
@@ -732,14 +772,107 @@ class MainWindow(Adw.ApplicationWindow):
             "new-collection": self._new_collection,
             "rename-collection": self._rename_collection,
             "delete-collection": self._delete_collection,
+            "rotation": lambda *_a: self._show_rotation(),
+            "next-wallpaper": lambda *_a: self._next_wallpaper(),
         }
         for name, callback in actions.items():
             action = Gio.SimpleAction(name=name)
             action.connect("activate", callback)
             self.add_action(action)
 
+    # Automatic change ----------------------------------------------------------
+
+    def _sync_rotation(self, update_list: bool = False) -> None:
+        """Forget a slideshow GNOME no longer shows; after indexing, update its list."""
+        try:
+            if update_list:
+                active = self._rotation.active_state() is not None
+                if self._rotation.refresh() is None and active:
+                    self._toast(
+                        _("Automatic change stopped: no wallpapers match its settings")
+                    )
+            elif self._rotation.active_state() is None:
+                self._rotation.refresh()
+        except (RotationError, DesktopError) as error:
+            self._toast(
+                _("Automatic change could not be updated: {error}").format(error=error)
+            )
+        self.lookup_action("next-wallpaper").set_enabled(
+            self._rotation.active_state() is not None
+        )
+
+    def _show_rotation(self) -> None:
+        dialog = RotationDialog(
+            self._rotation.saved_config(),
+            self._rotation.active_state(),
+            self._repository.list_collections(),
+            lambda config: len(self._rotation.candidates(config)),
+            self._rotation_title,
+            self._start_rotation,
+            self._stop_rotation,
+            self._next_wallpaper,
+            self._services.desktop_unavailable_reason,
+        )
+        dialog.connect("closed", lambda _d: self._sync_rotation())
+        dialog.present(self)
+
+    def _rotation_title(self) -> str | None:
+        state = self._rotation.active_state()
+        return self._rotation.current_path(state).name if state else None
+
+    def _start_rotation(self, config: RotationConfig) -> RotationState | str:
+        try:
+            state, replaced = self._rotation.start(config)
+        except (RotationError, DesktopError) as error:
+            self._rotation.save_config(config)
+            return _("Automatic change could not start: {error}").format(error=error)
+        if replaced is not None:
+            # "Restore Previous Wallpaper" brings back what was on screen before.
+            self._repository.push_desktop_history(Path(state.file).as_uri(), replaced)
+        self._sync_rotation()
+        self._update_counts()
+        return state
+
+    def _stop_rotation(self) -> str:
+        try:
+            kept = self._rotation.stop()
+        except DesktopError as error:
+            return _("Could not keep the current wallpaper: {error}").format(
+                error=error
+            )
+        self._sync_rotation()
+        if kept is None:
+            return _("Automatic change turned off")
+        return _("Automatic change turned off; “{name}” stays as the wallpaper").format(
+            name=kept.name
+        )
+
+    def _next_wallpaper(self) -> RotationState | str:
+        try:
+            state = self._rotation.next()
+        except (RotationError, DesktopError) as error:
+            message = _("Could not change the wallpaper: {error}").format(error=error)
+            self._toast(message)
+            return message
+        self._toast(
+            _("Now showing {name}").format(name=self._rotation.current_path(state).name)
+        )
+        return state
+
+    def _current_provider(self) -> RemoteProvider | None:
+        return self._providers.get(self._current.key)
+
+    def _details_loader(self, origin: str):
+        provider = self._providers.get(origin)
+        if provider is None or not provider.has_details:
+            return None
+        return provider.details
+
     def _focus_search(self) -> None:
-        if self._current.section is not None or self._current.key == WALLHAVEN_KEY:
+        provider = self._current_provider()
+        if self._current.section is not None or (
+            provider is not None and provider.searchable
+        ):
             self._gallery.focus_search()
 
     def _toast(self, text: str) -> None:

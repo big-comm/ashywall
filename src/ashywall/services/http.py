@@ -6,6 +6,7 @@ The opener is injectable so tests never touch the network.
 """
 
 import json
+import sys
 import threading
 import time
 import urllib.error
@@ -17,7 +18,12 @@ from typing import Any, Protocol
 
 from .. import __version__
 
-USER_AGENT = f"AshyWall/{__version__}"
+# Wikimedia requires a contact address in the User-Agent and throttles clients
+# without one; the other services accept it too.
+USER_AGENT = (
+    f"AshyWall/{__version__} (https://github.com/big-comm; GNOME wallpaper library) "
+    f"python-urllib/{sys.version_info.major}.{sys.version_info.minor}"
+)
 CHUNK_SIZE = 64 * 1024
 DEFAULT_TIMEOUT = 20.0
 
@@ -116,7 +122,11 @@ class HttpClient:
         self._limiter = limiter
 
     def _open(
-        self, url: str, params: dict[str, str] | None, cancel: threading.Event | None
+        self,
+        url: str,
+        params: dict[str, str] | None,
+        cancel: threading.Event | None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         if params:
             url = f"{url}?{urllib.parse.urlencode(params)}"
@@ -128,7 +138,7 @@ class HttpClient:
             elif delay:
                 time.sleep(delay)
         request = urllib.request.Request(
-            url, headers={"User-Agent": USER_AGENT, "Accept": "*/*"}
+            url, headers={"User-Agent": USER_AGENT, "Accept": "*/*", **(headers or {})}
         )
         try:
             return self._opener(request, self._timeout)
@@ -188,6 +198,37 @@ class HttpClient:
                     f"Transfer interrupted ({received} of {expected} bytes)"
                 )
             return received
+
+    def get_prefix(
+        self, url: str, length: int, *, cancel: threading.Event | None = None
+    ) -> tuple[bytes, int | None]:
+        """The first ``length`` bytes and the full size, when the server tells it."""
+        with self._open(
+            url, None, cancel, headers={"Range": f"bytes=0-{length - 1}"}
+        ) as response:
+            headers = response.headers
+            total = None
+            if response.status == 206 and headers:
+                content_range = headers.get("Content-Range") or ""
+                size = content_range.rpartition("/")[2]
+                total = int(size) if size.isdigit() else None
+            elif headers:
+                size = headers.get("Content-Length") or ""
+                total = int(size) if size.isdigit() else None
+            parts: list[bytes] = []
+            received = 0
+            while received < length:
+                if cancel is not None and cancel.is_set():
+                    raise TransferCancelled()
+                try:
+                    chunk = response.read(min(CHUNK_SIZE, length - received))
+                except (TimeoutError, OSError) as error:
+                    raise NetworkUnavailable(str(error)) from error
+                if not chunk:
+                    break
+                parts.append(chunk)
+                received += len(chunk)
+            return b"".join(parts), total
 
     def get_bytes(
         self,

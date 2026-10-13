@@ -106,6 +106,20 @@ MIGRATIONS: tuple[tuple[str, ...], ...] = (
         )
         """,
     ),
+    (
+        # Small application state (automatic change settings), stored as JSON text.
+        """
+        CREATE TABLE settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+        """,
+    ),
+    (
+        # Sources that name the author and link the license (Wikimedia Commons).
+        "ALTER TABLE downloads ADD COLUMN author TEXT",
+        "ALTER TABLE downloads ADD COLUMN license_url TEXT",
+    ),
 )
 
 LATEST_VERSION = len(MIGRATIONS)

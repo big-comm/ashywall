@@ -1,12 +1,15 @@
 """Detail page for a wallpaper on this computer."""
 
 from concurrent.futures import Future
+from dataclasses import dataclass
 from pathlib import Path
 
 from gi.repository import Adw, Gdk, Gio, GLib, GObject, Gtk
 
 from ..i18n import _, ngettext
 from ..models.wallpaper import SourceKind, Wallpaper
+from ..providers.base import RemoteWallpaper
+from ..providers.registry import provider_name
 from ..services.library_repository import DownloadRecord
 from ..services.package_owner import owning_package
 from ..services.thumbnails import render_preview
@@ -33,10 +36,6 @@ def source_description(wallpaper: Wallpaper, provenance: DownloadRecord | None) 
             )
         return _("Downloads")
     return _("My folder “{name}”").format(name=wallpaper.source_label)
-
-
-def provider_name(origin: str) -> str:
-    return {"wallhaven": "Wallhaven"}.get(origin, origin)
 
 
 def render_texture(path: Path) -> Gdk.Texture:
@@ -167,12 +166,7 @@ class DetailPage(Adw.NavigationPage):
             group.add(property_row(_("Dark Style Variant"), str(wallpaper.dark_path)))
 
         if provenance is not None:
-            for row in attribution_rows(
-                provenance.uploader,
-                provenance.source_url,
-                provenance.page_url,
-                provenance.origin,
-            ):
+            for row in attribution_rows(Attribution.of(provenance)):
                 group.add(row)
         else:
             group.add(property_row(_("Author"), _("Not provided by this source")))
@@ -230,35 +224,74 @@ def _on_launcher_done(launcher: Gtk.FileLauncher, result: Gio.AsyncResult) -> No
         pass  # The user dismissed the chooser or no file manager is available.
 
 
-def attribution_rows(
-    uploader: str | None, source_url: str | None, page_url: str | None, origin: str
-) -> list[Gtk.Widget]:
-    """Uploader, original source, provider page and the licensing note.
+@dataclass(frozen=True, slots=True)
+class Attribution:
+    origin: str
+    author: str | None = None
+    uploader: str | None = None
+    source_url: str | None = None
+    page_url: str | None = None
+    license: str | None = None
+    license_url: str | None = None
 
-    Wallhaven names who uploaded an image, not necessarily who made it, and
-    publishes no license; the rows say exactly that.
+    @classmethod
+    def of(cls, item: RemoteWallpaper | DownloadRecord) -> "Attribution":
+        return cls(
+            origin=item.origin,
+            author=item.author,
+            uploader=item.uploader,
+            source_url=item.source_url,
+            page_url=item.page_url,
+            license=item.license,
+            license_url=item.license_url,
+        )
+
+
+def attribution_rows(attribution: Attribution) -> list[Gtk.Widget]:
+    """Author or uploader, original source, provider page and license.
+
+    Only what the source states is shown. Wallhaven names who uploaded an
+    image, not necessarily who made it, and publishes no license; Bing credits
+    the photographer without a license; Wikimedia Commons gives both.
     """
-    rows: list[Gtk.Widget] = [
-        property_row(_("Uploaded By"), uploader or _("Not provided by this source"))
-    ]
-    if source_url:
-        rows.append(link_row(_("Original Source"), source_url))
-    else:
+    provider = provider_name(attribution.origin)
+    rows: list[Gtk.Widget] = []
+    if attribution.author:
+        rows.append(property_row(_("Author"), attribution.author))
+    if attribution.uploader or attribution.origin == "wallhaven":
+        rows.append(
+            property_row(
+                _("Uploaded By"),
+                attribution.uploader or _("Not provided by this source"),
+            )
+        )
+    if not rows:
+        rows.append(property_row(_("Author"), _("Not provided by this source")))
+    if attribution.source_url:
+        rows.append(link_row(_("Original Source"), attribution.source_url))
+    elif attribution.origin == "wallhaven":
         rows.append(
             property_row(_("Original Source"), _("Not provided by this source"))
         )
-    if page_url:
+    if attribution.page_url:
         rows.append(
             link_row(
-                _("Page on {provider}").format(provider=provider_name(origin)), page_url
+                _("Page on {provider}").format(provider=provider), attribution.page_url
             )
         )
-    rows.append(
-        property_row(
-            _("License"),
-            _(
-                "Not provided by {provider}. Images remain the property of their owners."
-            ).format(provider=provider_name(origin)),
+    if attribution.license and attribution.license_url:
+        rows.append(
+            link_row(_("License"), attribution.license_url, attribution.license)
         )
-    )
+    elif attribution.license:
+        rows.append(property_row(_("License"), attribution.license))
+    else:
+        rows.append(
+            property_row(
+                _("License"),
+                _(
+                    "Not provided by {provider}. Images remain the property of their owners."
+                ).format(provider=provider),
+            )
+        )
     return rows

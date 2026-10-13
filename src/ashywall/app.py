@@ -19,7 +19,7 @@ from .desktop.gnome import (
     is_sandboxed,
 )
 from .i18n import _
-from .providers.wallhaven import WallhavenProvider
+from .providers.registry import create_providers
 from .services.database import DatabaseError, connect
 from .services.http import HttpClient
 from .services.library_repository import LibraryRepository
@@ -104,11 +104,14 @@ class AshyWallApplication(Adw.Application):
         database_path = paths.database_path()
         thumbnails = ThumbnailCache(paths.thumbnails_dir())
         cdn = HttpClient()
+        providers = create_providers()
         remote_thumbnails = RemoteThumbnailCache(
-            paths.thumbnails_dir() / "remote", cdn, WallhavenProvider.thumbnail_hosts
+            paths.thumbnails_dir() / "remote",
+            cdn,
+            frozenset().union(*(p.thumbnail_hosts for p in providers.values())),
         )
         originals = OriginalCache(
-            paths.originals_dir(), cdn, lambda _origin: WallhavenProvider.download_hosts
+            paths.originals_dir(), cdn, lambda origin: providers[origin].download_hosts
         )
         runner = BackgroundRunner(2, "ashywall-tasks")
         runner.submit(thumbnails.prune, lambda _removed: None)
@@ -124,7 +127,7 @@ class AshyWallApplication(Adw.Application):
             loader=ThumbnailLoader(thumbnails, remote_thumbnails),
             runner=runner,
             cdn=cdn,
-            wallhaven=WallhavenProvider(),
+            providers=providers,
             desktop=desktop,
             desktop_unavailable_reason=reason,
         )

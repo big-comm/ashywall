@@ -20,12 +20,16 @@ src/ashywall/
                       (safe opening), thumbnails, hashing, package_owner,
                       http (size limits, rate limiter, https-only redirects),
                       remote_images (remote thumbnails, full-resolution
-                      preview cache, verified downloads).
+                      preview cache, verified downloads), rotation (GNOME
+                      slideshow XML for the automatic change).
   providers/          base (RemoteWallpaper, RemoteQuery, URL validation),
-                      local (system catalogs/folders), wallhaven (API v1).
+                      local (system catalogs/folders), wallhaven (API v1),
+                      bing (image of the day), commons (Wikimedia picture
+                      of the day), registry (the providers, in sidebar order).
   desktop/gnome.py    Apply/restore through org.gnome.desktop.background.
   ui/                 Window, gallery, local and remote detail pages, shared
-                      detail widgets, full-screen image viewer, preferences,
+                      detail widgets, full-screen image viewer, automatic
+                      change dialog, preferences,
                       thumbnail loader, index, explore and download
                       controllers, style.css.
 tests/                pytest suite (services, discovery, GNOME settings).
@@ -46,7 +50,9 @@ pkgbuild/             Arch/BigCommunity PKGBUILD.
 4. Never show invented data: counts come from the catalog, unknown fields say
    so, unimplemented features say "not available yet".
 5. Tests must not touch the user's desktop: use
-   `Gio.memory_settings_backend_new()` for GSettings.
+   `Gio.memory_settings_backend_new()` for GSettings, and run interface
+   sessions with `GSETTINGS_BACKEND=keyfile` and their own `XDG_*`
+   directories (never start a `dconf-service` there).
 6. Language: UI strings in English wrapped in `_()`, translated in
    `locale/pt_BR.po`; code, comments and commits in English.
 7. Online data is untrusted: parse with strict type checks, accept only

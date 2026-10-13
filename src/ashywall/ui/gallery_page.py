@@ -27,14 +27,6 @@ LOCAL_SORTS: tuple[SortOrder, ...] = (
     SortOrder.NEWEST,
     SortOrder.LARGEST,
 )
-REMOTE_SORTS: tuple[RemoteSort, ...] = (
-    RemoteSort.TOP,
-    RemoteSort.LATEST,
-    RemoteSort.VIEWS,
-    RemoteSort.FAVORITES,
-    RemoteSort.RANDOM,
-    RemoteSort.RELEVANCE,
-)
 LOCAL_SEARCH_DELAY_MS = 150
 REMOTE_SEARCH_DELAY_MS = 700
 
@@ -63,16 +55,18 @@ class GalleryFilters:
         )
 
 
-def _sort_labels(remote: bool) -> list[str]:
-    if remote:
-        return [
-            _("Top this month"),
-            _("Latest"),
-            _("Most viewed"),
-            _("Most favorited"),
-            _("Random"),
-            _("Relevance"),
-        ]
+def remote_sort_label(sort: RemoteSort) -> str:
+    return {
+        RemoteSort.TOP: _("Top this month"),
+        RemoteSort.LATEST: _("Latest"),
+        RemoteSort.VIEWS: _("Most viewed"),
+        RemoteSort.FAVORITES: _("Most favorited"),
+        RemoteSort.RANDOM: _("Random"),
+        RemoteSort.RELEVANCE: _("Relevance"),
+    }[sort]
+
+
+def _local_sort_labels() -> list[str]:
     return [_("Name"), _("Recently modified"), _("Largest first")]
 
 
@@ -98,6 +92,8 @@ class GalleryPage(Adw.NavigationPage):
         # Online sorting follows the search text (relevance while searching)
         # until the user picks a sort order.
         self._sort_chosen = False
+        self._remote_sorts: tuple[RemoteSort, ...] = ()
+        self._searchable = True
         self._store = Gio.ListStore(item_type=WallpaperItem)
         self._window_title = Adw.WindowTitle(title=_("Wallpapers"))
 
@@ -244,7 +240,7 @@ class GalleryPage(Adw.NavigationPage):
                 _("8K or larger"),
             ]
         )
-        self._sort_drop = Gtk.DropDown.new_from_strings(_sort_labels(remote=False))
+        self._sort_drop = Gtk.DropDown.new_from_strings(_local_sort_labels())
         box = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
             spacing=12,
@@ -259,6 +255,8 @@ class GalleryPage(Adw.NavigationPage):
             (_("Sort by"), self._sort_drop),
         ):
             label = Gtk.Label(label=title, xalign=0)
+            if drop is self._sort_drop:
+                self._sort_label = label
             label.add_css_class("heading")
             drop.connect("notify::selected", self._on_filter_changed)
             if drop is self._sort_drop:
@@ -299,11 +297,12 @@ class GalleryPage(Adw.NavigationPage):
 
     def _follow_search_sort(self, searching: bool) -> None:
         """Wallhaven's "top this month" list barely matches any search terms."""
-        if not self._remote or self._sort_chosen:
+        sorts = self._remote_sorts
+        if not self._remote or self._sort_chosen or RemoteSort.RELEVANCE not in sorts:
             return
-        sort = RemoteSort.RELEVANCE if searching else REMOTE_SORTS[0]
+        sort = RemoteSort.RELEVANCE if searching else sorts[0]
         quiet, self._quiet = self._quiet, True
-        self._sort_drop.set_selected(REMOTE_SORTS.index(sort))
+        self._sort_drop.set_selected(sorts.index(sort))
         self._quiet = quiet
 
     def _emit_query_changed(self) -> None:
@@ -343,7 +342,11 @@ class GalleryPage(Adw.NavigationPage):
         )
 
     def remote_sort(self) -> RemoteSort:
-        return REMOTE_SORTS[min(self._sort_drop.get_selected(), len(REMOTE_SORTS) - 1)]
+        """The chosen order; providers without choices get their fixed one."""
+        if not self._remote_sorts:
+            return RemoteSort.LATEST
+        index = min(self._sort_drop.get_selected(), len(self._remote_sorts) - 1)
+        return self._remote_sorts[index]
 
     def clear_filters(self) -> None:
         self._quiet = True
@@ -367,6 +370,10 @@ class GalleryPage(Adw.NavigationPage):
         title: str,
         remote: bool = False,
         collection_id: int | None = None,
+        *,
+        provider_name: str | None = None,
+        sorts: tuple[RemoteSort, ...] = (),
+        searchable: bool = True,
     ) -> None:
         self._section = section or Section.ALL
         self._collection_id = collection_id
@@ -374,22 +381,46 @@ class GalleryPage(Adw.NavigationPage):
         self._window_title.set_title(title)
         self._add_folder_button.set_visible(section is Section.FOLDERS)
         self._collection_button.set_visible(section is Section.COLLECTION)
-        self._search_button.set_sensitive(True)
         self._filter_button.set_sensitive(True)
-        if remote != self._remote:
+        sorts = sorts if remote else ()
+        if remote != self._remote or sorts != self._remote_sorts:
             self._remote = remote
+            self._remote_sorts = sorts
             self._quiet = True
             self._sort_chosen = False
-            self._sort_drop.set_model(Gtk.StringList.new(_sort_labels(remote)))
+            labels = (
+                [remote_sort_label(sort) for sort in sorts]
+                if remote
+                else _local_sort_labels()
+            )
+            self._sort_drop.set_model(Gtk.StringList.new(labels))
             self._sort_drop.set_selected(0)
-            self._follow_search_sort(bool(self._searched_text.strip()))
+            self._sort_drop.set_visible(bool(labels))
+            self._sort_label.set_visible(bool(labels))
             self._search_entry.set_search_delay(
                 REMOTE_SEARCH_DELAY_MS if remote else LOCAL_SEARCH_DELAY_MS
             )
-            self._search_entry.set_placeholder_text(
-                _("Search Wallhaven") if remote else _("Search by name or path")
-            )
             self._quiet = False
+        searchable = searchable or not remote
+        if searchable != self._searchable:
+            self._searchable = searchable
+            if not searchable:
+                # Feeds without search ignore text; drop any left from another section.
+                self._quiet = True
+                self._search_button.set_active(False)
+                self._search_entry.set_text("")
+                self._searched_text = ""
+                self._quiet = False
+        self._search_button.set_visible(searchable)
+        self._search_button.set_sensitive(True)
+        self._search_entry.set_placeholder_text(
+            _("Search {provider}").format(provider=provider_name)
+            if remote and provider_name
+            else _("Search by name or path")
+        )
+        quiet, self._quiet = self._quiet, True
+        self._follow_search_sort(bool(self._searched_text.strip()))
+        self._quiet = quiet
 
     def show_entries(
         self, entries: list[GalleryEntry], empty_state: EmptyState, subtitle: str
@@ -444,7 +475,7 @@ class GalleryPage(Adw.NavigationPage):
 
     def show_unavailable(self, title: str, state: EmptyState) -> None:
         """For sections that are planned but not implemented yet."""
-        self.set_section(None, title, remote=self._remote)
+        self.set_section(None, title)
         self._window_title.set_subtitle("")
         self._search_button.set_active(False)
         self._search_button.set_sensitive(False)

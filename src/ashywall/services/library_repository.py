@@ -71,6 +71,8 @@ class DownloadRecord:
     source_url: str | None
     uploader: str | None
     license: str | None
+    author: str | None = None
+    license_url: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -346,6 +348,23 @@ class LibraryRepository:
         )
         return {row["item_key"] for row in rows}
 
+    def with_local_state(self, items: list[RemoteWallpaper]) -> list[RemoteWallpaper]:
+        """Mark favorites and existing downloads, whatever provider listed the items."""
+        favorites: dict[str, set[str]] = {}
+        downloads: dict[str, dict[str, Path]] = {}
+        marked = []
+        for item in items:
+            if item.origin not in favorites:
+                favorites[item.origin] = self.remote_favorite_ids(item.origin)
+                downloads[item.origin] = self.downloaded_paths(item.origin)
+            marked.append(
+                item.with_state(
+                    is_favorite=item.remote_id in favorites[item.origin],
+                    local_path=downloads[item.origin].get(item.remote_id),
+                )
+            )
+        return marked
+
     def remote_favorites(self) -> list[RemoteWallpaper]:
         """Remote favorites, most recent first, from their stored listings."""
         return self._remote_items(
@@ -466,7 +485,8 @@ class LibraryRepository:
         with transaction(self._conn):
             self._conn.execute(
                 "INSERT OR REPLACE INTO downloads (origin, remote_id, path, page_url, "
-                "source_url, uploader, license, downloaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "source_url, uploader, license, author, license_url, downloaded_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (
                     item.origin,
                     item.remote_id,
@@ -475,6 +495,8 @@ class LibraryRepository:
                     item.source_url,
                     item.uploader,
                     item.license,
+                    item.author,
+                    item.license_url,
                     int(time.time()),
                 ),
             )
@@ -502,7 +524,28 @@ class LibraryRepository:
             source_url=row["source_url"],
             uploader=row["uploader"],
             license=row["license"],
+            author=row["author"],
+            license_url=row["license_url"],
         )
+
+    # Settings ------------------------------------------------------------
+
+    def get_setting(self, key: str) -> str | None:
+        row = self._conn.execute(
+            "SELECT value FROM settings WHERE key = ?", (key,)
+        ).fetchone()
+        return row["value"] if row else None
+
+    def set_setting(self, key: str, value: str | None) -> None:
+        with transaction(self._conn):
+            if value is None:
+                self._conn.execute("DELETE FROM settings WHERE key = ?", (key,))
+            else:
+                self._conn.execute(
+                    "INSERT INTO settings (key, value) VALUES (?, ?) "
+                    "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                    (key, value),
+                )
 
     # Desktop history -----------------------------------------------------
 
