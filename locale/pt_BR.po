@@ -1,0 +1,871 @@
+# Brazilian Portuguese translation for AshyWall.
+msgid ""
+msgstr ""
+"Project-Id-Version: ashywall 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-13 01:56-0300\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/ashywall/app.py:38
+msgid "Applying wallpapers from a sandbox is not supported yet"
+msgstr "Aplicar papéis de parede a partir de um sandbox ainda não é suportado"
+
+#: src/ashywall/app.py:40
+msgid "Applying wallpapers is supported only on GNOME in this version"
+msgstr "Nesta versão, aplicar papéis de parede só é suportado no GNOME"
+
+#: src/ashywall/app.py:42
+msgid "The GNOME background settings are not installed"
+msgstr "As configurações de plano de fundo do GNOME não estão instaladas"
+
+#: src/ashywall/app.py:129
+msgid "The Library Could Not Be Opened"
+msgstr "Não foi possível abrir a biblioteca"
+
+#: src/ashywall/app.py:148
+msgid "Browse, organize, preview and apply wallpapers"
+msgstr "Explore, organize, visualize e aplique papéis de parede"
+
+#: src/ashywall/app.py:150
+msgid "AshyWall contributors"
+msgstr "Colaboradores do AshyWall"
+
+#: src/ashywall/app.py:154
+msgid "Owl icon"
+msgstr "Ícone da coruja"
+
+#: src/ashywall/ui/collections_ui.py:14
+msgid "Enter a name for the collection"
+msgstr "Digite um nome para a coleção"
+
+#: src/ashywall/ui/collections_ui.py:16
+msgid "The name is too long"
+msgstr "O nome é longo demais"
+
+#: src/ashywall/ui/collections_ui.py:17
+#, python-brace-format
+msgid "A collection named “{name}” already exists"
+msgstr "Já existe uma coleção chamada “{name}”"
+
+#: src/ashywall/ui/collections_ui.py:35
+msgid "Add to Collection"
+msgstr "Adicionar à coleção"
+
+#: src/ashywall/ui/collections_ui.py:44
+msgid "No collections yet"
+msgstr "Ainda não há coleções"
+
+#: src/ashywall/ui/collections_ui.py:47
+msgid "New collection"
+msgstr "Nova coleção"
+
+#: src/ashywall/ui/collections_ui.py:53
+msgid "Create and Add"
+msgstr "Criar e adicionar"
+
+#: src/ashywall/ui/collections_ui.py:63 src/ashywall/ui/window_states.py:30
+msgid "Collections"
+msgstr "Coleções"
+
+#: src/ashywall/ui/collections_ui.py:139
+#: src/ashywall/ui/preferences_dialog.py:89 src/ashywall/ui/window.py:452
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: src/ashywall/ui/detail_page.py:27 src/ashywall/ui/window_states.py:36
+msgid "System"
+msgstr "Sistema"
+
+#: src/ashywall/ui/detail_page.py:30
+#, python-brace-format
+msgid "Downloaded from {provider}"
+msgstr "Baixado de {provider}"
+
+#: src/ashywall/ui/detail_page.py:33 src/ashywall/ui/window_states.py:47
+msgid "Downloads"
+msgstr "Downloads"
+
+#: src/ashywall/ui/detail_page.py:34
+#, python-brace-format
+msgid "My folder “{name}”"
+msgstr "Minha pasta “{name}”"
+
+#: src/ashywall/ui/detail_page.py:75 src/ashywall/ui/remote_detail_page.py:59
+msgid "Apply"
+msgstr "Aplicar"
+
+#: src/ashywall/ui/detail_page.py:126 src/ashywall/ui/remote_detail_page.py:249
+msgid "Details"
+msgstr "Detalhes"
+
+#: src/ashywall/ui/detail_page.py:129 src/ashywall/ui/remote_detail_page.py:253
+msgid "Dimensions"
+msgstr "Dimensões"
+
+#: src/ashywall/ui/detail_page.py:129 src/ashywall/ui/remote_detail_page.py:253
+#, python-brace-format
+msgid "{size} px"
+msgstr "{size} px"
+
+#: src/ashywall/ui/detail_page.py:132 src/ashywall/ui/remote_detail_page.py:256
+msgid "Aspect Ratio"
+msgstr "Proporção"
+
+#: src/ashywall/ui/detail_page.py:133 src/ashywall/ui/remote_detail_page.py:259
+msgid "File Size"
+msgstr "Tamanho do arquivo"
+
+#: src/ashywall/ui/detail_page.py:134 src/ashywall/ui/remote_detail_page.py:263
+msgid "Format"
+msgstr "Formato"
+
+#: src/ashywall/ui/detail_page.py:134 src/ashywall/ui/preferences_dialog.py:135
+#: src/ashywall/ui/remote_detail_page.py:260
+#: src/ashywall/ui/remote_detail_page.py:300
+msgid "Unknown"
+msgstr "Desconhecido"
+
+#: src/ashywall/ui/detail_page.py:137 src/ashywall/ui/remote_detail_page.py:264
+msgid "Source"
+msgstr "Origem"
+
+#: src/ashywall/ui/detail_page.py:143
+msgid "Location"
+msgstr "Local"
+
+#: src/ashywall/ui/detail_page.py:147 src/ashywall/ui/remote_detail_page.py:149
+msgid "Show in Folder"
+msgstr "Mostrar na pasta"
+
+#: src/ashywall/ui/detail_page.py:155
+msgid "Dark Style Variant"
+msgstr "Variante para o estilo escuro"
+
+#: src/ashywall/ui/detail_page.py:166
+msgid "Author"
+msgstr "Autoria"
+
+#: src/ashywall/ui/detail_page.py:166 src/ashywall/ui/detail_page.py:167
+#: src/ashywall/ui/detail_page.py:230 src/ashywall/ui/detail_page.py:236
+msgid "Not provided by this source"
+msgstr "Não informada por esta origem"
+
+#: src/ashywall/ui/detail_page.py:167 src/ashywall/ui/detail_page.py:246
+msgid "License"
+msgstr "Licença"
+
+#: src/ashywall/ui/detail_page.py:174 src/ashywall/ui/detail_page.py:176
+msgid "Identical Copies"
+msgstr "Cópias idênticas"
+
+#: src/ashywall/ui/detail_page.py:174
+msgid "None in the library"
+msgstr "Nenhuma na biblioteca"
+
+#: src/ashywall/ui/detail_page.py:178
+#, python-brace-format
+msgid "{count} other file with the same content"
+msgid_plural "{count} other files with the same content"
+msgstr[0] "{count} outro arquivo com o mesmo conteúdo"
+msgstr[1] "{count} outros arquivos com o mesmo conteúdo"
+
+#: src/ashywall/ui/detail_page.py:199
+#, python-brace-format
+msgid "System — package {name}"
+msgstr "Sistema — pacote {name}"
+
+#: src/ashywall/ui/detail_page.py:230
+msgid "Uploaded By"
+msgstr "Enviado por"
+
+#: src/ashywall/ui/detail_page.py:233 src/ashywall/ui/detail_page.py:236
+msgid "Original Source"
+msgstr "Fonte original"
+
+#: src/ashywall/ui/detail_page.py:241
+#, python-brace-format
+msgid "Page on {provider}"
+msgstr "Página no {provider}"
+
+#: src/ashywall/ui/detail_page.py:248
+#, python-brace-format
+msgid "Not provided by {provider}. Images remain the property of their owners."
+msgstr ""
+"Não informada pelo {provider}. As imagens continuam sendo propriedade de "
+"seus titulares."
+
+#: src/ashywall/ui/detail_widgets.py:30
+msgid "Open in Browser"
+msgstr "Abrir no navegador"
+
+#: src/ashywall/ui/detail_widgets.py:50
+msgid "Light and Dark Styles"
+msgstr "Estilos claro e escuro"
+
+#: src/ashywall/ui/detail_widgets.py:51
+msgid "Light Style Only"
+msgstr "Somente estilo claro"
+
+#: src/ashywall/ui/detail_widgets.py:52
+msgid "Dark Style Only"
+msgstr "Somente estilo escuro"
+
+#: src/ashywall/ui/detail_widgets.py:62
+msgid "Choose light or dark style"
+msgstr "Escolher estilo claro ou escuro"
+
+#: src/ashywall/ui/detail_widgets.py:63
+msgid "Use for the light and dark styles"
+msgstr "Usar nos estilos claro e escuro"
+
+#: src/ashywall/ui/detail_widgets.py:83
+msgid "Remove from Favorites"
+msgstr "Remover dos favoritos"
+
+#: src/ashywall/ui/detail_widgets.py:83
+msgid "Add to Favorites"
+msgstr "Adicionar aos favoritos"
+
+#: src/ashywall/ui/detail_widgets.py:123
+#, python-brace-format
+msgid "Preview of {title}"
+msgstr "Prévia de {title}"
+
+#: src/ashywall/ui/detail_widgets.py:132
+msgid "Could not load the preview"
+msgstr "Não foi possível carregar a prévia"
+
+#: src/ashywall/ui/detail_widgets.py:156
+msgid "Simulate Screen Crop"
+msgstr "Simular recorte da tela"
+
+#: src/ashywall/ui/detail_widgets.py:164
+msgid "Approximation only: panels, docks and extensions are not shown"
+msgstr "Apenas uma aproximação: painéis, docks e extensões não são exibidos"
+
+#: src/ashywall/ui/detail_widgets.py:206
+#, python-brace-format
+msgid ""
+"Simulated for a {width} × {height} display. Panels, docks and extensions are "
+"not shown."
+msgstr ""
+"Simulação para uma tela de {width} × {height}. Painéis, docks e extensões "
+"não são exibidos."
+
+#: src/ashywall/ui/errors.py:12
+msgid "The server could not be reached. Check your connection and try again."
+msgstr ""
+"Não foi possível acessar o servidor. Verifique sua conexão e tente novamente."
+
+#: src/ashywall/ui/errors.py:15
+msgid "Too many requests in a short time. Wait a minute and try again."
+msgstr ""
+"Muitas requisições em pouco tempo. Aguarde um minuto e tente novamente."
+
+#: src/ashywall/ui/errors.py:18
+msgid "The server sent more data than announced, so the transfer was stopped."
+msgstr ""
+"O servidor enviou mais dados do que o anunciado, então a transferência foi "
+"interrompida."
+
+#: src/ashywall/ui/errors.py:21
+msgid "The server sent data that AshyWall could not validate."
+msgstr "O servidor enviou dados que o AshyWall não conseguiu validar."
+
+#: src/ashywall/ui/errors.py:23
+#, python-brace-format
+msgid "The downloaded file was rejected: {reason}"
+msgstr "O arquivo baixado foi rejeitado: {reason}"
+
+#: src/ashywall/ui/errors.py:25
+#, python-brace-format
+msgid "The server answered with an error ({status})."
+msgstr "O servidor respondeu com um erro ({status})."
+
+#: src/ashywall/ui/gallery_page.py:69
+msgid "Top this month"
+msgstr "Mais populares do mês"
+
+#: src/ashywall/ui/gallery_page.py:70
+msgid "Latest"
+msgstr "Mais recentes"
+
+#: src/ashywall/ui/gallery_page.py:71
+msgid "Most viewed"
+msgstr "Mais vistos"
+
+#: src/ashywall/ui/gallery_page.py:72
+msgid "Most favorited"
+msgstr "Mais favoritados"
+
+#: src/ashywall/ui/gallery_page.py:73
+msgid "Random"
+msgstr "Aleatório"
+
+#: src/ashywall/ui/gallery_page.py:74
+msgid "Relevance"
+msgstr "Relevância"
+
+#: src/ashywall/ui/gallery_page.py:76
+msgid "Name"
+msgstr "Nome"
+
+#: src/ashywall/ui/gallery_page.py:76
+msgid "Recently modified"
+msgstr "Modificados recentemente"
+
+#: src/ashywall/ui/gallery_page.py:76
+msgid "Largest first"
+msgstr "Maiores primeiro"
+
+#: src/ashywall/ui/gallery_page.py:92 src/ashywall/ui/gallery_page.py:99
+#: src/ashywall/ui/gallery_page.py:191 src/ashywall/ui/window.py:128
+msgid "Wallpapers"
+msgstr "Papéis de parede"
+
+#: src/ashywall/ui/gallery_page.py:103
+msgid "Search"
+msgstr "Pesquisar"
+
+#: src/ashywall/ui/gallery_page.py:107
+msgid "Filters and sorting"
+msgstr "Filtros e ordenação"
+
+#: src/ashywall/ui/gallery_page.py:112 src/ashywall/ui/preferences_dialog.py:41
+#: src/ashywall/ui/window_states.py:99
+msgid "Add Folder"
+msgstr "Adicionar pasta"
+
+#: src/ashywall/ui/gallery_page.py:117
+msgid "Rename Collection…"
+msgstr "Renomear coleção…"
+
+#: src/ashywall/ui/gallery_page.py:118
+msgid "Delete Collection…"
+msgstr "Excluir coleção…"
+
+#: src/ashywall/ui/gallery_page.py:121
+msgid "Collection Options"
+msgstr "Opções da coleção"
+
+#: src/ashywall/ui/gallery_page.py:131 src/ashywall/ui/gallery_page.py:366
+msgid "Search by name or path"
+msgstr "Pesquisar por nome ou caminho"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Any orientation"
+msgstr "Qualquer orientação"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Landscape"
+msgstr "Paisagem"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Portrait"
+msgstr "Retrato"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Square"
+msgstr "Quadrada"
+
+#: src/ashywall/ui/gallery_page.py:237
+msgid "Any resolution"
+msgstr "Qualquer resolução"
+
+#: src/ashywall/ui/gallery_page.py:238
+msgid "Full HD or larger"
+msgstr "Full HD ou maior"
+
+#: src/ashywall/ui/gallery_page.py:239
+msgid "QHD or larger"
+msgstr "QHD ou maior"
+
+#: src/ashywall/ui/gallery_page.py:240
+msgid "4K or larger"
+msgstr "4K ou maior"
+
+#: src/ashywall/ui/gallery_page.py:241
+msgid "8K or larger"
+msgstr "8K ou maior"
+
+#: src/ashywall/ui/gallery_page.py:254
+msgid "Orientation"
+msgstr "Orientação"
+
+#: src/ashywall/ui/gallery_page.py:255
+msgid "Resolution"
+msgstr "Resolução"
+
+#: src/ashywall/ui/gallery_page.py:256
+msgid "Sort by"
+msgstr "Ordenar por"
+
+#: src/ashywall/ui/gallery_page.py:266
+msgid ""
+"Resolution compares the long side and the short side in either orientation; "
+"4K means at least 3840 × 2160 px. Pixel size does not show whether an image "
+"was upscaled."
+msgstr ""
+"A resolução compara o lado maior e o lado menor em qualquer orientação; 4K "
+"significa pelo menos 3840 × 2160 px. O tamanho em pixels não indica se a "
+"imagem foi ampliada."
+
+#: src/ashywall/ui/gallery_page.py:277 src/ashywall/ui/window_states.py:93
+#: src/ashywall/ui/window_states.py:157
+msgid "Clear Filters"
+msgstr "Limpar filtros"
+
+#: src/ashywall/ui/gallery_page.py:366
+msgid "Search Wallhaven"
+msgstr "Pesquisar no Wallhaven"
+
+#: src/ashywall/ui/preferences_dialog.py:25 src/ashywall/ui/window.py:160
+msgid "Preferences"
+msgstr "Preferências"
+
+#: src/ashywall/ui/preferences_dialog.py:31 src/ashywall/ui/window_states.py:30
+msgid "Library"
+msgstr "Biblioteca"
+
+#: src/ashywall/ui/preferences_dialog.py:34 src/ashywall/ui/window_states.py:40
+msgid "My Folders"
+msgstr "Minhas pastas"
+
+#: src/ashywall/ui/preferences_dialog.py:36
+msgid ""
+"Images in these folders appear in the library. Removing a folder never "
+"deletes its files."
+msgstr ""
+"As imagens destas pastas aparecem na biblioteca. Remover uma pasta nunca "
+"exclui os arquivos."
+
+#: src/ashywall/ui/preferences_dialog.py:58
+msgid "No folders added"
+msgstr "Nenhuma pasta adicionada"
+
+#: src/ashywall/ui/preferences_dialog.py:72
+msgid "Remove from Library"
+msgstr "Remover da biblioteca"
+
+#: src/ashywall/ui/preferences_dialog.py:84
+msgid "Remove Folder?"
+msgstr "Remover pasta?"
+
+#: src/ashywall/ui/preferences_dialog.py:86
+#, python-brace-format
+msgid ""
+"“{name}” will no longer appear in AshyWall. The folder and its files stay on "
+"disk."
+msgstr ""
+"“{name}” deixará de aparecer no AshyWall. A pasta e os arquivos continuam no "
+"disco."
+
+#: src/ashywall/ui/preferences_dialog.py:90
+msgid "Remove"
+msgstr "Remover"
+
+#: src/ashywall/ui/preferences_dialog.py:102
+msgid "Storage"
+msgstr "Armazenamento"
+
+#: src/ashywall/ui/preferences_dialog.py:104
+msgid "Downloaded Wallpapers"
+msgstr "Papéis de parede baixados"
+
+#: src/ashywall/ui/preferences_dialog.py:111
+msgid "Thumbnail Cache"
+msgstr "Cache de miniaturas"
+
+#: src/ashywall/ui/preferences_dialog.py:111
+msgid "Calculating…"
+msgstr "Calculando…"
+
+#: src/ashywall/ui/preferences_dialog.py:115
+msgid "Clear"
+msgstr "Limpar"
+
+#: src/ashywall/ui/preferences_dialog.py:117
+msgid "Thumbnails are recreated when needed"
+msgstr "As miniaturas são recriadas quando necessário"
+
+#: src/ashywall/ui/preferences_dialog.py:129
+#, python-brace-format
+msgid "{used} of {limit}"
+msgstr "{used} de {limit}"
+
+#: src/ashywall/ui/remote_detail_page.py:115
+#, python-brace-format
+msgid "Low-resolution preview from {provider}. Download to see the full image."
+msgstr ""
+"Prévia em baixa resolução fornecida pelo {provider}. Baixe para ver a imagem "
+"completa."
+
+#: src/ashywall/ui/remote_detail_page.py:132
+#: src/ashywall/ui/remote_detail_page.py:185
+msgid "Not Downloaded"
+msgstr "Não baixado"
+
+#: src/ashywall/ui/remote_detail_page.py:133
+msgid "Download"
+msgstr "Baixar"
+
+#: src/ashywall/ui/remote_detail_page.py:140
+msgid "Cancel Download"
+msgstr "Cancelar download"
+
+#: src/ashywall/ui/remote_detail_page.py:175
+#: src/ashywall/ui/wallpaper_card.py:39
+msgid "Downloaded"
+msgstr "Baixado"
+
+#: src/ashywall/ui/remote_detail_page.py:180
+msgid "Downloading…"
+msgstr "Baixando…"
+
+#: src/ashywall/ui/remote_detail_page.py:185
+msgid "Download Failed"
+msgstr "Falha no download"
+
+#: src/ashywall/ui/remote_detail_page.py:190
+msgid "unknown size"
+msgstr "tamanho desconhecido"
+
+#: src/ashywall/ui/remote_detail_page.py:196
+#, python-brace-format
+msgid "Original file: {size}. It is saved to your Downloads section."
+msgstr "Arquivo original: {size}. Ele é salvo na seção Downloads."
+
+#: src/ashywall/ui/remote_detail_page.py:204
+#, python-brace-format
+msgid "{received} of {total}"
+msgstr "{received} de {total}"
+
+#: src/ashywall/ui/remote_detail_page.py:224
+msgid "Download cancelled"
+msgstr "Download cancelado"
+
+#: src/ashywall/ui/wallpaper_card.py:40
+msgid "Online, not downloaded"
+msgstr "Online, não baixado"
+
+#: src/ashywall/ui/wallpaper_card.py:119
+msgid "Favorite"
+msgstr "Favorito"
+
+#: src/ashywall/ui/wallpaper_card.py:148
+msgid "Could not load image"
+msgstr "Não foi possível carregar a imagem"
+
+#: src/ashywall/ui/window.py:156
+msgid "Refresh Library"
+msgstr "Atualizar biblioteca"
+
+#: src/ashywall/ui/window.py:157
+msgid "Restore Previous Wallpaper"
+msgstr "Restaurar papel de parede anterior"
+
+#: src/ashywall/ui/window.py:161
+msgid "About AshyWall"
+msgstr "Sobre o AshyWall"
+
+#: src/ashywall/ui/window.py:169
+msgid "Main Menu"
+msgstr "Menu principal"
+
+#: src/ashywall/ui/window.py:287
+msgid "Searching Wallhaven…"
+msgstr "Pesquisando no Wallhaven…"
+
+#: src/ashywall/ui/window.py:423
+msgid "New Collection"
+msgstr "Nova coleção"
+
+#: src/ashywall/ui/window.py:423
+msgid "Create"
+msgstr "Criar"
+
+#: src/ashywall/ui/window.py:439
+msgid "Rename Collection"
+msgstr "Renomear coleção"
+
+#: src/ashywall/ui/window.py:439
+msgid "Rename"
+msgstr "Renomear"
+
+#: src/ashywall/ui/window.py:447
+msgid "Delete Collection?"
+msgstr "Excluir coleção?"
+
+#: src/ashywall/ui/window.py:449
+#, python-brace-format
+msgid ""
+"“{name}” will be deleted. Its wallpapers stay in your library and on disk."
+msgstr ""
+"“{name}” será excluída. Os papéis de parede continuam na biblioteca e no "
+"disco."
+
+#: src/ashywall/ui/window.py:453
+msgid "Delete"
+msgstr "Excluir"
+
+#: src/ashywall/ui/window.py:461
+#, python-brace-format
+msgid "Collection “{name}” deleted"
+msgstr "Coleção “{name}” excluída"
+
+#: src/ashywall/ui/window.py:528
+#, python-brace-format
+msgid "Download complete: {title}"
+msgstr "Download concluído: {title}"
+
+#: src/ashywall/ui/window.py:532
+#, python-brace-format
+msgid "Download failed: {reason}"
+msgstr "Falha no download: {reason}"
+
+#: src/ashywall/ui/window.py:551
+msgid "Downloading the original before applying…"
+msgstr "Baixando o original antes de aplicar…"
+
+#: src/ashywall/ui/window.py:560
+msgid "Applying wallpapers is not available"
+msgstr "Aplicar papéis de parede não está disponível"
+
+#: src/ashywall/ui/window.py:568
+#, python-brace-format
+msgid "Could not apply the wallpaper: {error}"
+msgstr "Não foi possível aplicar o papel de parede: {error}"
+
+#: src/ashywall/ui/window.py:573
+msgid "Wallpaper applied"
+msgstr "Papel de parede aplicado"
+
+#: src/ashywall/ui/window.py:574
+msgid "Wallpaper applied to the light style"
+msgstr "Papel de parede aplicado ao estilo claro"
+
+#: src/ashywall/ui/window.py:575
+msgid "Wallpaper applied to the dark style"
+msgstr "Papel de parede aplicado ao estilo escuro"
+
+#: src/ashywall/ui/window.py:580
+msgid "Undo"
+msgstr "Desfazer"
+
+#: src/ashywall/ui/window.py:596
+#, python-brace-format
+msgid "Could not restore the previous wallpaper: {error}"
+msgstr "Não foi possível restaurar o papel de parede anterior: {error}"
+
+#: src/ashywall/ui/window.py:603
+msgid "Previous wallpaper restored"
+msgstr "Papel de parede anterior restaurado"
+
+#: src/ashywall/ui/window.py:608
+msgid "Add Folder to Library"
+msgstr "Adicionar pasta à biblioteca"
+
+#: src/ashywall/ui/window.py:619
+msgid "Only local folders can be added"
+msgstr "Somente pastas locais podem ser adicionadas"
+
+#: src/ashywall/ui/window.py:626
+#, python-brace-format
+msgid "Adding “{name}”…"
+msgstr "Adicionando “{name}”…"
+
+#: src/ashywall/ui/window.py:631
+#, python-brace-format
+msgid "“{name}” removed from the library"
+msgstr "“{name}” removida da biblioteca"
+
+#: src/ashywall/ui/window.py:659
+msgid "Looking for wallpapers…"
+msgstr "Procurando papéis de parede…"
+
+#: src/ashywall/ui/window.py:660
+#, python-brace-format
+msgid "Checking {processed} of {total} images…"
+msgstr "Verificando {processed} de {total} imagens…"
+
+#: src/ashywall/ui/window.py:676
+#, python-brace-format
+msgid "{count} file could not be read"
+msgid_plural "{count} files could not be read"
+msgstr[0] "{count} arquivo não pôde ser lido"
+msgstr[1] "{count} arquivos não puderam ser lidos"
+
+#: src/ashywall/ui/window.py:682
+#, python-brace-format
+msgid "Folder not found: {path}"
+msgstr "Pasta não encontrada: {path}"
+
+#: src/ashywall/ui/window.py:709
+#, python-brace-format
+msgid "The library could not be updated: {error}"
+msgstr "Não foi possível atualizar a biblioteca: {error}"
+
+#: src/ashywall/ui/window_states.py:30
+msgid "Explore"
+msgstr "Explorar"
+
+#: src/ashywall/ui/window_states.py:33
+msgid "All Wallpapers"
+msgstr "Todos os papéis de parede"
+
+#: src/ashywall/ui/window_states.py:53
+msgid "Big Collections"
+msgstr "Coleções Big"
+
+#: src/ashywall/ui/window_states.py:57
+msgid "Favorites"
+msgstr "Favoritos"
+
+#: src/ashywall/ui/window_states.py:71
+msgid "New Collection…"
+msgstr "Nova coleção…"
+
+#: src/ashywall/ui/window_states.py:78
+#, python-brace-format
+msgid "This folder is already in the library through “{path}”"
+msgstr "Esta pasta já está na biblioteca por meio de “{path}”"
+
+#: src/ashywall/ui/window_states.py:83
+#, python-brace-format
+msgid ""
+"This folder contains “{path}”, which is already in the library. Remove it "
+"first."
+msgstr ""
+"Esta pasta contém “{path}”, que já está na biblioteca. Remova-a primeiro."
+
+#: src/ashywall/ui/window_states.py:85
+#, python-brace-format
+msgid "“{path}” is not a folder"
+msgstr "“{path}” não é uma pasta"
+
+#: src/ashywall/ui/window_states.py:91
+msgid "No Matching Wallpapers"
+msgstr "Nenhum papel de parede encontrado"
+
+#: src/ashywall/ui/window_states.py:92 src/ashywall/ui/window_states.py:156
+msgid "Try other search terms or filters."
+msgstr "Tente outros termos de pesquisa ou filtros."
+
+#: src/ashywall/ui/window_states.py:103
+msgid "No System Wallpapers Found"
+msgstr "Nenhum papel de parede do sistema encontrado"
+
+#: src/ashywall/ui/window_states.py:105
+msgid ""
+"AshyWall looked in the GNOME background catalogs and in the shared "
+"backgrounds and wallpapers folders."
+msgstr ""
+"O AshyWall procurou nos catálogos de planos de fundo do GNOME e nas pastas "
+"compartilhadas backgrounds e wallpapers."
+
+#: src/ashywall/ui/window_states.py:111
+msgid "No Images in Your Folders"
+msgstr "Nenhuma imagem nas suas pastas"
+
+#: src/ashywall/ui/window_states.py:111
+msgid "No Folders Added"
+msgstr "Nenhuma pasta adicionada"
+
+#: src/ashywall/ui/window_states.py:113
+msgid ""
+"Add folders with images. AshyWall only reads them; nothing is moved or "
+"deleted."
+msgstr ""
+"Adicione pastas com imagens. O AshyWall apenas as lê; nada é movido ou "
+"excluído."
+
+#: src/ashywall/ui/window_states.py:120
+msgid "No Downloads Yet"
+msgstr "Ainda não há downloads"
+
+#: src/ashywall/ui/window_states.py:121
+msgid "Wallpapers you download from Wallhaven appear here."
+msgstr "Os papéis de parede que você baixar do Wallhaven aparecem aqui."
+
+#: src/ashywall/ui/window_states.py:126
+msgid "This Collection Is Empty"
+msgstr "Esta coleção está vazia"
+
+#: src/ashywall/ui/window_states.py:127
+msgid "Use the bookmark button on a wallpaper's page to add it here."
+msgstr ""
+"Use o botão de marcador na página de um papel de parede para adicioná-lo "
+"aqui."
+
+#: src/ashywall/ui/window_states.py:132
+msgid "No Favorites Yet"
+msgstr "Ainda não há favoritos"
+
+#: src/ashywall/ui/window_states.py:133
+msgid "Use the star on a wallpaper's page to keep it here."
+msgstr "Use a estrela na página de um papel de parede para guardá-lo aqui."
+
+#: src/ashywall/ui/window_states.py:137
+msgid "No Wallpapers Yet"
+msgstr "Ainda não há papéis de parede"
+
+#: src/ashywall/ui/window_states.py:138
+msgid "Add a folder with images to start your library."
+msgstr "Adicione uma pasta com imagens para começar sua biblioteca."
+
+#: src/ashywall/ui/window_states.py:146
+msgid "Not Available Yet"
+msgstr "Ainda não disponível"
+
+#: src/ashywall/ui/window_states.py:147
+msgid "Browsing the Big community collections is planned for a future version."
+msgstr ""
+"A navegação pelas coleções da comunidade Big está planejada para uma versão "
+"futura."
+
+#: src/ashywall/ui/window_states.py:155 src/ashywall/ui/window_states.py:161
+msgid "No Results on Wallhaven"
+msgstr "Nenhum resultado no Wallhaven"
+
+#: src/ashywall/ui/window_states.py:161
+msgid "Try again later."
+msgstr "Tente novamente mais tarde."
+
+#: src/ashywall/ui/window_states.py:167
+msgid "Wallhaven Is Unreachable"
+msgstr "Não foi possível acessar o Wallhaven"
+
+#: src/ashywall/ui/window_states.py:169
+msgid "Too Many Requests"
+msgstr "Muitas requisições"
+
+#: src/ashywall/ui/window_states.py:171
+msgid "Wallhaven Could Not Be Loaded"
+msgstr "Não foi possível carregar o Wallhaven"
+
+#: src/ashywall/ui/window_states.py:176
+msgid "Try Again"
+msgstr "Tentar novamente"
+
+#: src/ashywall/ui/window_states.py:184
+#, python-brace-format
+msgid "{count} result on Wallhaven"
+msgid_plural "{count} results on Wallhaven"
+msgstr[0] "{count} resultado no Wallhaven"
+msgstr[1] "{count} resultados no Wallhaven"
+
+#: src/ashywall/ui/window_states.py:187
+#, python-brace-format
+msgid "{count} shown · page {page} of {last}"
+msgstr "{count} exibidos · página {page} de {last}"
+
+#: src/ashywall/ui/window_states.py:190 src/ashywall/ui/window_states.py:196
+#, python-brace-format
+msgid "{count} wallpaper"
+msgid_plural "{count} wallpapers"
+msgstr[0] "{count} papel de parede"
+msgstr[1] "{count} papéis de parede"

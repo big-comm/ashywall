@@ -1,0 +1,37 @@
+.wallpaper-grid {
+  padding: 12px;
+  background: none;
+}
+
+.wallpaper-grid > child {
+  padding: 8px;
+  border-radius: 16px;
+}
+
+.wallpaper-grid > child:hover {
+  background-color: alpha(currentColor, 0.05);
+}
+
+.thumbnail-frame {
+  border-radius: 10px;
+  background-color: alpha(currentColor, 0.08);
+}
+
+.wallpaper-grid > child:hover .thumbnail-frame,
+.wallpaper-grid > child:focus-visible .thumbnail-frame {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.card-badge {
+  margin: 6px;
+  padding: 5px;
+  border-radius: 999px;
+  color: white;
+  background-color: rgb(0 0 0 / 55%);
+}
+
+.preview-frame {
+  border-radius: 12px;
+  background-color: alpha(currentColor, 0.06);
+}

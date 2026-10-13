@@ -1,0 +1,49 @@
+[project]
+name = "ashywall"
+version = "0.3.0"
+description = "Wallpaper library for GNOME: browse, organize, preview and apply wallpapers"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: GTK",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Desktop Environment :: Gnome",
+]
+dependencies = [
+    "PyGObject",
+    "Pillow>=11.3",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+ashywall = "ashywall:main"
+
+[build-system]
+requires = ["uv_build>=0.9,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+data = { data = "usr" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = [
+    "error",
+    # Emitted by PyGObject's own GLib overrides at import time, not by AshyWall.
+    "ignore:GLib.unix_signal_add_full is deprecated:DeprecationWarning",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E402", "E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

@@ -1,0 +1,18 @@
+[Desktop Entry]
+Name=AshyWall
+GenericName=Wallpaper Library
+GenericName[pt_BR]=Biblioteca de Papéis de Parede
+GenericName[pt]=Biblioteca de Papéis de Parede
+Comment=Browse, organize, preview and apply wallpapers
+Comment[pt_BR]=Explore, organize, visualize e aplique papéis de parede
+Comment[pt]=Explore, organize, visualize e aplique papéis de parede
+Exec=ashywall
+Icon=org.communitybig.ashywall
+StartupWMClass=org.communitybig.ashywall
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=GTK;GNOME;Graphics;Viewer;
+Keywords=wallpaper;background;desktop;image;picture;
+Keywords[pt_BR]=papel de parede;plano de fundo;fundo;área de trabalho;imagem;
+Keywords[pt]=papel de parede;plano de fundo;fundo;área de trabalho;imagem;

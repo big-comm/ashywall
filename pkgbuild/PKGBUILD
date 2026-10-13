@@ -1,0 +1,48 @@
+pkgname=ashywall
+pkgdesc="Wallpaper library for GNOME: browse, organize, preview and apply wallpapers"
+depends=(
+    'gtk4'
+    'libadwaita'
+    'python'
+    'python-gobject'
+    'python-pillow'
+    'gsettings-desktop-schemas'
+)
+optdepends=(
+    'pacman: show which package installed a system wallpaper'
+)
+makedepends=(
+    'git'
+    'python-build'
+    'python-installer'
+    'python-uv-build'
+)
+checkdepends=(
+    'python-pytest'
+)
+
+pkgver=$(date +%y.%m.%d)
+pkgrel=$(date +%H%M)
+
+arch=('any')
+license=('MIT')
+url="https://github.com/big-comm/${pkgname}"
+source=("git+${url}.git")
+md5sums=('SKIP')
+
+build() {
+    cd "${srcdir}/${pkgname}"
+    python -m build --wheel --no-isolation --skip-dependency-check
+}
+
+check() {
+    cd "${srcdir}/${pkgname}"
+    python -m pytest -q -p no:cacheprovider
+}
+
+package() {
+    cd "${srcdir}/${pkgname}"
+    python -m installer --destdir="$pkgdir" dist/*.whl
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+}
