@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ashywall 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-14 09:30-0300\n"
+"POT-Creation-Date: 2026-10-14 09:43-0300\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -136,73 +136,86 @@ msgstr "Desconhecido"
 msgid "Source"
 msgstr "Origem"
 
-#: src/ashywall/ui/detail_page.py:155
+#: src/ashywall/ui/detail_page.py:153
 msgid "Location"
 msgstr "Local"
 
-#: src/ashywall/ui/detail_page.py:159 src/ashywall/ui/remote_detail_page.py:295
+#: src/ashywall/ui/detail_page.py:157 src/ashywall/ui/remote_detail_page.py:295
 msgid "Show in Folder"
 msgstr "Mostrar na pasta"
 
-#: src/ashywall/ui/detail_page.py:168
+#: src/ashywall/ui/detail_page.py:166
 msgid "Dark Style Variant"
 msgstr "Variante para o estilo escuro"
 
-#: src/ashywall/ui/detail_page.py:175 src/ashywall/ui/detail_page.py:263
-#: src/ashywall/ui/detail_page.py:272
+#: src/ashywall/ui/detail_page.py:173 src/ashywall/ui/detail_page.py:310
+#: src/ashywall/ui/detail_page.py:319
 msgid "Author"
 msgstr "Autoria"
 
-#: src/ashywall/ui/detail_page.py:175 src/ashywall/ui/detail_page.py:176
-#: src/ashywall/ui/detail_page.py:268 src/ashywall/ui/detail_page.py:272
-#: src/ashywall/ui/detail_page.py:277
+#: src/ashywall/ui/detail_page.py:173 src/ashywall/ui/detail_page.py:175
+#: src/ashywall/ui/detail_page.py:315 src/ashywall/ui/detail_page.py:319
+#: src/ashywall/ui/detail_page.py:324
 msgid "Not provided by this source"
 msgstr "Não informada por esta origem"
 
-#: src/ashywall/ui/detail_page.py:176 src/ashywall/ui/detail_page.py:292
-#: src/ashywall/ui/detail_page.py:294 src/ashywall/ui/detail_page.py:298
+#: src/ashywall/ui/detail_page.py:175 src/ashywall/ui/detail_page.py:339
+#: src/ashywall/ui/detail_page.py:341 src/ashywall/ui/detail_page.py:345
 msgid "License"
 msgstr "Licença"
 
-#: src/ashywall/ui/detail_page.py:183 src/ashywall/ui/detail_page.py:185
+#: src/ashywall/ui/detail_page.py:178
+msgid "License Text"
+msgstr "Texto da licença"
+
+#: src/ashywall/ui/detail_page.py:189 src/ashywall/ui/detail_page.py:191
 msgid "Identical Copies"
 msgstr "Cópias idênticas"
 
-#: src/ashywall/ui/detail_page.py:183
+#: src/ashywall/ui/detail_page.py:189
 msgid "None in the library"
 msgstr "Nenhuma na biblioteca"
 
-#: src/ashywall/ui/detail_page.py:187
+#: src/ashywall/ui/detail_page.py:193
 #, python-brace-format
 msgid "{count} other file with the same content"
 msgid_plural "{count} other files with the same content"
 msgstr[0] "{count} outro arquivo com o mesmo conteúdo"
 msgstr[1] "{count} outros arquivos com o mesmo conteúdo"
 
-#: src/ashywall/ui/detail_page.py:208
+#: src/ashywall/ui/detail_page.py:220
 #, python-brace-format
 msgid "System — package {name}"
 msgstr "Sistema — pacote {name}"
 
-#: src/ashywall/ui/detail_page.py:267
+#: src/ashywall/ui/detail_page.py:227
+#, python-brace-format
+msgid "{license} (declared by the package {name})"
+msgstr "{license} (declarada pelo pacote {name})"
+
+#: src/ashywall/ui/detail_page.py:244
+msgid "Open License Text"
+msgstr "Abrir texto da licença"
+
+#: src/ashywall/ui/detail_page.py:314
 msgid "Uploaded By"
 msgstr "Enviado por"
 
-#: src/ashywall/ui/detail_page.py:274 src/ashywall/ui/detail_page.py:277
+#: src/ashywall/ui/detail_page.py:321 src/ashywall/ui/detail_page.py:324
 msgid "Original Source"
 msgstr "Fonte original"
 
-#: src/ashywall/ui/detail_page.py:282
+#: src/ashywall/ui/detail_page.py:329
 #, python-brace-format
 msgid "Page on {provider}"
 msgstr "Página no {provider}"
 
-#: src/ashywall/ui/detail_page.py:288
+#: src/ashywall/ui/detail_page.py:335
 #, python-brace-format
 msgid "{license} (declared in the package's PKGBUILD)"
 msgstr "{license} (declarada no PKGBUILD do pacote)"
 
-#: src/ashywall/ui/detail_page.py:300
+#: src/ashywall/ui/detail_page.py:347
 #, python-brace-format
 msgid "Not provided by {provider}. Images remain the property of their owners."
 msgstr "Não informada pelo {provider}. As imagens continuam sendo propriedade de seus titulares."

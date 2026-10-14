@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="usr/share/icons/hicolor/scalable/apps/org.communitybig.ashywall.svg" width="128" height="128" alt="AshyWall icon">
+</p>
+
 # AshyWall
 
 A wallpaper library for GNOME, built first for BigCommunity. AshyWall gathers
@@ -138,10 +142,13 @@ User-facing strings are in English in the code and translated with gettext
 - Applying from a Flatpak sandbox (wallpaper portal) is not implemented.
 - Formats decoded: JPEG, PNG, WebP, AVIF, TIFF and BMP. JPEG XL and HEIF
   wallpapers are not listed yet.
-- Author and license are shown only when the source provides them; local
-  sources currently do not. Wallhaven names the uploader (not necessarily the
-  author) and Bing the photographer; neither publishes a license, and
-  AshyWall says so on each page. Wikimedia Commons gives author and license.
+- Author and license are shown only when the source provides them. For a
+  system wallpaper installed by a package, the license is the one that
+  package declares (with the license text it installed); other local files
+  show none. Wallhaven names the uploader (not necessarily the author) and
+  Bing the photographer; neither publishes a license, and AshyWall says so on
+  each page. Wikimedia Commons gives author and license. AshyWall reports
+  what each source declares and does not grant or verify rights itself.
 - Images above 80 megapixels (far beyond 8K) are shown reduced in the
   full-screen view, and the view says so.
 - The online services may change without notice; AshyWall validates every

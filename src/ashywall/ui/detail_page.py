@@ -12,7 +12,7 @@ from ..paths import display_path
 from ..providers.base import RemoteWallpaper
 from ..providers.registry import provider_name
 from ..services.library_repository import DownloadRecord
-from ..services.package_owner import owning_package
+from ..services.package_owner import PackageInfo, package_info
 from ..services.thumbnails import render_preview
 from .background_tasks import BackgroundRunner
 from .detail_widgets import (
@@ -149,8 +149,6 @@ class DetailPage(Adw.NavigationPage):
             _("Source"), source_description(wallpaper, provenance)
         )
         group.add(self._source_row)
-        if wallpaper.source_kind is SourceKind.SYSTEM:
-            self._lookup_package()
 
         location = property_row(_("Location"), display_path(wallpaper.path))
         open_button = Gtk.Button(
@@ -173,7 +171,15 @@ class DetailPage(Adw.NavigationPage):
                 group.add(row)
         else:
             group.add(property_row(_("Author"), _("Not provided by this source")))
-            group.add(property_row(_("License"), _("Not provided by this source")))
+            self._license_row = property_row(
+                _("License"), _("Not provided by this source")
+            )
+            group.add(self._license_row)
+            self._license_text_row = property_row(_("License Text"))
+            self._license_text_row.set_visible(False)
+            group.add(self._license_text_row)
+            if wallpaper.source_kind is SourceKind.SYSTEM:
+                self._lookup_package()
 
         group.add(self._duplicates_row(duplicates))
         return group
@@ -200,24 +206,65 @@ class DetailPage(Adw.NavigationPage):
 
     def _lookup_package(self) -> None:
         path = self.wallpaper.path
+        self._pending.append(
+            self._runner.submit(
+                lambda: package_info(path), self._show_package, lambda _e: None
+            )
+        )
 
-        def show(package: str | None) -> None:
-            if package:
-                self._source_row.set_subtitle(
-                    GLib.markup_escape_text(
-                        _("System — package {name}").format(name=package)
+    def _show_package(self, package: PackageInfo | None) -> None:
+        if package is None:
+            return
+        self._source_row.set_subtitle(
+            GLib.markup_escape_text(
+                _("System — package {name}").format(name=package.name)
+            )
+        )
+        if package.licenses:
+            # Only what the package declares; AshyWall makes no claim of its own.
+            self._license_row.set_subtitle(
+                GLib.markup_escape_text(
+                    _("{license} (declared by the package {name})").format(
+                        license=", ".join(package.licenses), name=package.name
                     )
                 )
-
-        self._pending.append(
-            self._runner.submit(lambda: owning_package(path), show, lambda _e: None)
-        )
+            )
+        if package.license_files:
+            text = (
+                package.license_files[0]
+                if len(package.license_files) == 1
+                else package.license_files[0].parent
+            )
+            self._license_text_row.set_subtitle(
+                GLib.markup_escape_text(display_path(text))
+            )
+            button = Gtk.Button(
+                icon_name="document-open-symbolic",
+                valign=Gtk.Align.CENTER,
+                tooltip_text=_("Open License Text"),
+            )
+            button.add_css_class("flat")
+            button.connect(
+                "clicked",
+                lambda b: Gtk.FileLauncher(
+                    file=Gio.File.new_for_path(str(text))
+                ).launch(b.get_root(), None, _on_open_done),
+            )
+            self._license_text_row.add_suffix(button)
+            self._license_text_row.set_visible(True)
 
     def _on_show_in_folder(self, _button: Gtk.Button) -> None:
         launcher = Gtk.FileLauncher(
             file=Gio.File.new_for_path(str(self.wallpaper.path))
         )
         launcher.open_containing_folder(self.get_root(), None, _on_launcher_done)
+
+
+def _on_open_done(launcher: Gtk.FileLauncher, result: Gio.AsyncResult) -> None:
+    try:
+        launcher.launch_finish(result)
+    except GLib.Error:
+        pass  # No application to open it, or the user cancelled.
 
 
 def _on_launcher_done(launcher: Gtk.FileLauncher, result: Gio.AsyncResult) -> None:

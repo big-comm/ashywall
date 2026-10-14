@@ -10,6 +10,8 @@ Speed that does not depend on the size of the library.
   passes over a new index.
 - Large batches of new images are probed in worker processes; folder scans
   read directory entries instead of checking each file.
+- System wallpapers installed by a package show the license that package
+  declares, with a link to the license text it installed.
 - Automatic change filters in SQL, skips sorting when it shuffles, checks
   only the files that go into the slideshow and no longer rewrites a full
   slideshow after every indexing.

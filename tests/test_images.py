@@ -131,3 +131,22 @@ def test_display_decoding_applies_orientation_and_limit(tmp_path: Path) -> None:
     assert image.size == (100, 400)
     reduced = decode_for_display(path, max_pixels=10_000)
     assert reduced.size == (50, 200)
+
+
+def test_package_licenses_are_read_as_declared() -> None:
+    from ashywall.services.package_owner import PACKAGE_NAME, parse_licenses
+
+    info = (
+        "Name            : comm-wallpapers-gnome\n"
+        "Licenses        : MIT\n"
+        "Groups          : None\n"
+    )
+    assert parse_licenses(info) == ("MIT",)
+    assert parse_licenses("Licenses        : GPL-2.0-or-later  LGPL-2.1\n") == (
+        "GPL-2.0-or-later",
+        "LGPL-2.1",
+    )
+    assert parse_licenses("Licenses        : None\n") == ()
+    assert parse_licenses("Name : x\n") == ()
+    assert PACKAGE_NAME.match("comm-wallpapers-gnome")
+    assert not PACKAGE_NAME.match("../etc")
