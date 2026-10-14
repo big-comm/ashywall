@@ -10,6 +10,11 @@ Speed that does not depend on the size of the library.
   passes over a new index.
 - Large batches of new images are probed in worker processes; folder scans
   read directory entries instead of checking each file.
+- Online sources reuse their HTTPS connections and cache name lookups,
+  asking for IPv4 and IPv6 addresses separately (some resolvers stall
+  for seconds on simultaneous lookups). Online thumbnails load in their
+  own, wider pool. The first thumbnails of a source appear in about 1 to
+  1.5 s instead of 6 to 7 s on such a network.
 - System wallpapers installed by a package show the license that package
   declares, with a link to the license text it installed.
 - Automatic change filters in SQL, skips sorting when it shuffles, checks

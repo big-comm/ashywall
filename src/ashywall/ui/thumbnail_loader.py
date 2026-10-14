@@ -36,12 +36,16 @@ class ThumbnailLoader:
         remote_cache: RemoteThumbnailCache,
         max_textures: int = 150,
         workers: int = 3,
+        network_workers: int = 6,
     ) -> None:
         self._cache = cache
         self._remote_cache = remote_cache
         self._max_textures = max_textures
         self._textures: OrderedDict[TextureKey, Gdk.Texture] = OrderedDict()
         self._runner = BackgroundRunner(workers, "ashywall-thumbs")
+        # Online thumbnails mostly wait on the network: their own, wider pool
+        # keeps them from queuing behind local decoding (and the reverse).
+        self._network_runner = BackgroundRunner(network_workers, "ashywall-net-thumbs")
 
     def cached(self, entry: GalleryEntry) -> Gdk.Texture | None:
         key = texture_key(entry)
@@ -75,7 +79,9 @@ class ThumbnailLoader:
             self._remember(key, texture)
             on_ready(texture)
 
-        return self._runner.submit(load, ready, on_failed)
+        online = isinstance(entry, RemoteWallpaper) and entry.local_path is None
+        runner = self._network_runner if online else self._runner
+        return runner.submit(load, ready, on_failed)
 
     def _remember(self, key: TextureKey, texture: Gdk.Texture) -> None:
         self._textures[key] = texture
@@ -88,3 +94,4 @@ class ThumbnailLoader:
 
     def shutdown(self) -> None:
         self._runner.shutdown()
+        self._network_runner.shutdown()

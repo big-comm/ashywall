@@ -19,6 +19,7 @@ src/ashywall/
                       indexer), library_repository (queries), image_probe
                       (safe opening), thumbnails, hashing, package_owner,
                       http (size limits, rate limiter, https-only redirects),
+                      connections (persistent HTTPS connections, name cache),
                       remote_images (remote thumbnails, full-resolution
                       preview cache, verified downloads), rotation (GNOME
                       slideshow XML for the automatic change).

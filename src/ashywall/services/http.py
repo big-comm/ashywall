@@ -17,6 +17,7 @@ from collections.abc import Callable
 from typing import Any, Protocol
 
 from .. import __version__
+from .connections import ConnectionPool
 
 # Wikimedia requires a contact address in the User-Agent and throttles clients
 # without one; the other services accept it too.
@@ -75,11 +76,15 @@ class _HttpsOnlyRedirects(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-_DEFAULT_OPENER = urllib.request.build_opener(_HttpsOnlyRedirects)
+_URLLIB_OPENER = urllib.request.build_opener(_HttpsOnlyRedirects)
+_POOL = ConnectionPool()
 
 
 def _default_opener(request: urllib.request.Request, timeout: float) -> Response:
-    return _DEFAULT_OPENER.open(request, timeout=timeout)
+    # Connections are reused unless a proxy is configured, which urllib handles.
+    if urllib.request.getproxies().get("https"):
+        return _URLLIB_OPENER.open(request, timeout=timeout)
+    return _POOL.open(request, timeout)
 
 
 class SlidingWindowLimiter:
