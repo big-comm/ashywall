@@ -41,7 +41,6 @@ from .thumbnail_loader import GalleryEntry, ThumbnailLoader
 from .window_states import (
     NEW_COLLECTION_KEY,
     SidebarEntry,
-    big_unavailable_state,
     filtered_empty_state,
     folder_error_text,
     library_empty_state,
@@ -299,10 +298,6 @@ class MainWindow(Adw.ApplicationWindow):
                 sorts=provider.sorts,
                 searchable=provider.searchable,
             )
-        elif entry.section is None:
-            self._gallery.show_unavailable(entry.title, big_unavailable_state())
-            self._update_counts()
-            return
         else:
             self._gallery.set_section(
                 entry.section, entry.title, collection_id=entry.collection_id

@@ -104,7 +104,7 @@ class AshyWallApplication(Adw.Application):
         database_path = paths.database_path()
         thumbnails = ThumbnailCache(paths.thumbnails_dir())
         cdn = HttpClient()
-        providers = create_providers()
+        providers = create_providers(paths.cache_dir())
         remote_thumbnails = RemoteThumbnailCache(
             paths.thumbnails_dir() / "remote",
             cdn,

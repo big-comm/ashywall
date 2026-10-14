@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.communitybig.ashywall</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>AshyWall</name>
+  <summary>Browse, organize, preview and apply wallpapers</summary>
+  <summary xml:lang="pt-BR">Explore, organize, visualize e aplique papéis de parede</summary>
+  <developer id="org.communitybig">
+    <name>Community Big</name>
+  </developer>
+  <description>
+    <p>AshyWall gathers the wallpapers installed on the system, the images in folders you choose and the ones you download, and applies them to the GNOME desktop.</p>
+    <ul>
+      <li>Filters by orientation and resolution (Full HD, QHD, 4K and 8K)</li>
+      <li>Full-screen view as the desktop shows it, the whole image, or at actual size</li>
+      <li>Wallpapers from BigLinux, Wallhaven, the Bing image of the day and the Wikimedia Commons picture of the day, with author and license when the source gives them</li>
+      <li>Favorites and collections that mix local and online wallpapers</li>
+      <li>Automatic change through GNOME's own slideshow, without a background process</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">org.communitybig.ashywall.desktop</launchable>
+  <url type="homepage">https://github.com/big-comm/ashywall</url>
+  <categories>
+    <category>Graphics</category>
+    <category>Viewer</category>
+  </categories>
+  <keywords>
+    <keyword>wallpaper</keyword>
+    <keyword>background</keyword>
+    <keyword xml:lang="pt-BR">papel de parede</keyword>
+  </keywords>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.0.0" date="2026-10-14">
+      <description>
+        <p>First release: local library, previews and full-screen view, favorites and collections, automatic change, and wallpapers from BigLinux, Wallhaven, Bing and Wikimedia Commons.</p>
+      </description>
+    </release>
+  </releases>
+</component>

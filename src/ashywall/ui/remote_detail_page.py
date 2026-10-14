@@ -402,7 +402,9 @@ class RemoteDetailPage(Adw.NavigationPage):
         self._details_group = Adw.PreferencesGroup(title=_("Details"))
         group = self._details_group
         if item.description:
-            group.add(property_row(_("Description"), item.description))
+            # BigLinux items name their package; other sources give a caption.
+            label = _("Package") if item.origin == "biglinux" else _("Description")
+            group.add(property_row(label, item.description))
         if (featured := featured_date(item.date)) is not None:
             group.add(property_row(_("Featured On"), featured))
         group.add(
@@ -461,9 +463,12 @@ def featured_date(value: str | None) -> str | None:
 
 
 def _format_label(media_type: str | None) -> str:
-    return {"image/jpeg": "JPEG", "image/png": "PNG", "image/webp": "WebP"}.get(
-        media_type or "", _("Unknown")
-    )
+    return {
+        "image/jpeg": "JPEG",
+        "image/png": "PNG",
+        "image/webp": "WebP",
+        "image/avif": "AVIF",
+    }.get(media_type or "", _("Unknown"))
 
 
 def _ignore_launch(launcher: Gtk.FileLauncher, result: Gio.AsyncResult) -> None:

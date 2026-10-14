@@ -282,12 +282,16 @@ def attribution_rows(attribution: Attribution) -> list[Gtk.Widget]:
                 _("Page on {provider}").format(provider=provider), attribution.page_url
             )
         )
-    if attribution.license and attribution.license_url:
-        rows.append(
-            link_row(_("License"), attribution.license_url, attribution.license)
+    license_label = attribution.license
+    if license_label and attribution.origin == "biglinux":
+        # BigLinux packages state the license only in their PKGBUILD.
+        license_label = _("{license} (declared in the package's PKGBUILD)").format(
+            license=license_label
         )
+    if attribution.license and attribution.license_url:
+        rows.append(link_row(_("License"), attribution.license_url, license_label))
     elif attribution.license:
-        rows.append(property_row(_("License"), attribution.license))
+        rows.append(property_row(_("License"), license_label))
     else:
         rows.append(
             property_row(

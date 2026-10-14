@@ -4,10 +4,9 @@ A wallpaper library for GNOME, built first for BigCommunity. AshyWall gathers
 the wallpapers installed on the system and the images in folders you choose,
 lets you preview them and applies them to the desktop.
 
-Status: early development (0.5.0). Local library, preview, favorites,
-collections, applying on GNOME, automatic change and browsing Wallhaven,
-Bing and Wikimedia Commons work. The Big community collections
-are planned and shown as "not available yet" in the interface.
+Version 1.0.0. Local library, preview and full-screen view, favorites,
+collections, applying on GNOME, automatic change, and wallpapers from
+BigLinux, Wallhaven, Bing and Wikimedia Commons. See `CHANGELOG.md`.
 
 ## Features
 
@@ -39,6 +38,12 @@ are planned and shown as "not available yet" in the interface.
   online favorites keep their listing and show up without a connection.
 - **Collections** created by the user, mixing local and online wallpapers.
   Deleting a collection never touches the wallpapers in it.
+- **BigLinux wallpapers**: the remade collection of the
+  `biglinux-wallpapers-base` and `extra-biglinux-wallpapers` packages, read
+  from their GitHub repositories (about 400 AVIF images in 4K). The file
+  list is kept for a day and each image's size, read from the first bytes
+  of the file, for as long as the file does not change. Both packages
+  declare the GPL in their PKGBUILD, which AshyWall shows and links to.
 - **Wallhaven** browsing (search, sorting, orientation and resolution
   filters, endless scrolling). Searches are sorted by relevance unless you
   pick another order; "top this month" only covers the last month's ranking.
@@ -107,8 +112,8 @@ session's wallpaper.
 ## Packaging
 
 `pkgbuild/PKGBUILD` builds a wheel with `uv_build` and installs it with
-`python-installer`. Files under `usr/` (desktop entry, icon, translations,
-licenses) are installed to `/usr`.
+`python-installer`. Files under `usr/` (desktop entry, AppStream metainfo,
+icon, translations, licenses) are installed to `/usr`.
 
 ## Translations
 

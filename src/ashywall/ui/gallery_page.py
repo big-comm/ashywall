@@ -473,16 +473,6 @@ class GalleryPage(Adw.NavigationPage):
             self._status_button.set_action_name(state.action_name)
         self._stack.set_visible_child_name("status")
 
-    def show_unavailable(self, title: str, state: EmptyState) -> None:
-        """For sections that are planned but not implemented yet."""
-        self.set_section(None, title)
-        self._window_title.set_subtitle("")
-        self._search_button.set_active(False)
-        self._search_button.set_sensitive(False)
-        self._filter_button.set_sensitive(False)
-        self._store.remove_all()
-        self.show_status(state)
-
     def replace_entry(self, entry: GalleryEntry) -> None:
         identity = entry_identity(entry)
         for position in range(self._store.get_n_items()):

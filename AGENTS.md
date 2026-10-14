@@ -23,7 +23,8 @@ src/ashywall/
                       preview cache, verified downloads), rotation (GNOME
                       slideshow XML for the automatic change).
   providers/          base (RemoteWallpaper, RemoteQuery, URL validation),
-                      local (system catalogs/folders), wallhaven (API v1),
+                      local (system catalogs/folders), biglinux (BigLinux
+                      wallpaper packages on GitHub), wallhaven (API v1),
                       bing (image of the day), commons (Wikimedia picture
                       of the day), registry (the providers, in sidebar order).
   desktop/gnome.py    Apply/restore through org.gnome.desktop.background.

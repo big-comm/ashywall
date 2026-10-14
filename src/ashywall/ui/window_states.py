@@ -22,7 +22,6 @@ class SidebarEntry:
     collection_id: int | None = None
 
 
-BIG_KEY = "big"
 NEW_COLLECTION_KEY = "new-collection"
 
 
@@ -50,9 +49,6 @@ def sidebar_entries(
             "folder-download-symbolic",
             library,
             Section.DOWNLOADS,
-        ),
-        SidebarEntry(
-            BIG_KEY, _("Big Collections"), "image-x-generic-symbolic", explore, None
         ),
         *(
             SidebarEntry(p.id, p.display_name, p.icon_name, explore, None)
@@ -142,14 +138,6 @@ def library_empty_state(section: Section, has_folders: bool) -> EmptyState:
         _("No Wallpapers Yet"),
         _("Add a folder with images to start your library."),
         *add,
-    )
-
-
-def big_unavailable_state() -> EmptyState:
-    return EmptyState(
-        "web-browser-symbolic",
-        _("Not Available Yet"),
-        _("Browsing the Big community collections is planned for a future version."),
     )
 
 
