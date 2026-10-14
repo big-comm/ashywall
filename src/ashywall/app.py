@@ -157,7 +157,7 @@ class AshyWallApplication(Adw.Application):
             version=__version__,
             comments=_("Browse, organize, preview and apply wallpapers"),
             license_type=Gtk.License.MIT_X11,
-            developer_name=_("AshyWall contributors"),
+            developer_name=_("BigCommunity contributors"),
             website="https://communitybig.org/",
         )
         about.add_legal_section(
