@@ -128,5 +128,13 @@ def test_scan_folder_skips_hidden_non_images_and_directory_symlinks(
     assert list(scan_folder(root)) == [keep]
 
 
+def test_scan_folder_lists_files_before_subfolders_by_name(tmp_path: Path) -> None:
+    names = ["b.png", "a.png", "z/2.png", "z/1.png", "m/deep/x.png", "m/y.png"]
+    for name in names:
+        make_image(tmp_path / name, (8, 8))
+    found = [path.relative_to(tmp_path).as_posix() for path in scan_folder(tmp_path)]
+    assert found == ["a.png", "b.png", "m/y.png", "m/deep/x.png", "z/1.png", "z/2.png"]
+
+
 def test_title_from_path() -> None:
     assert title_from_path(Path("/x/abstract-colors_10.avif")) == "Abstract colors 10"

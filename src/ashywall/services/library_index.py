@@ -3,14 +3,25 @@
 A file is probed (header only) and fingerprinted only when it is new or its
 size/mtime changed. Rows for files that disappeared are deleted; favorites
 are keyed by path, so they come back if the file does.
+
+Reading image headers is mostly Python work, so large batches (a big folder
+added for the first time) are probed in worker processes: they use every
+core and leave the interpreter free for the window meanwhile.
 """
 
+import logging
+import multiprocessing
 import os
 import sqlite3
 import stat
+import sys
 import threading
 import time
-from collections.abc import Callable, Iterable
+import types
+from collections.abc import Callable, Iterable, Iterator
+from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures.process import BrokenProcessPool
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -27,6 +38,11 @@ from .image_probe import ImageInfo, ImageProbeError, probe_image
 from .library_repository import LibraryRepository
 
 WRITE_BATCH_SIZE = 50
+# Below this many new or changed files, starting worker processes costs more
+# than it saves.
+PARALLEL_THRESHOLD = 256
+PROBE_CHUNK = 32
+log = logging.getLogger(__name__)
 
 
 class IndexCancelled(Exception):
@@ -37,6 +53,67 @@ class IndexCancelled(Exception):
 class IndexProgress:
     processed: int
     total: int
+
+
+# width, height, image format, quick signature, status, error
+Inspection = tuple[int, int, str | None, str | None, str, str | None]
+
+
+def inspect_file(
+    path: Path, file_size: int, probe: Callable[[Path], ImageInfo] = probe_image
+) -> Inspection:
+    """Header information and quick signature of one file; never raises for bad images."""
+    try:
+        info = probe(path)
+        quick_hash = quick_signature(path, file_size)
+    except (ImageProbeError, OSError) as failure:
+        return 0, 0, None, None, "invalid", str(failure)[:500]
+    return info.width, info.height, info.image_format, quick_hash, "ok", None
+
+
+def _inspect_batch(jobs: list[tuple[str, int]]) -> list[Inspection]:
+    """Runs in a worker process."""
+    return [inspect_file(Path(path), size) for path, size in jobs]
+
+
+def _workers() -> int:
+    # Leave a core for the desktop and the window.
+    return max(1, min(8, (os.cpu_count() or 2) - 1))
+
+
+@contextmanager
+def _main_script_hidden() -> Iterator[None]:
+    """Keep worker processes from running the program's main script again.
+
+    multiprocessing re-runs a script-launched __main__ in every worker it
+    starts, so an entry point without a __name__ guard would open the
+    application once per worker. Workers need only this module, imported by
+    name. The pool starts its workers while tasks are submitted, which
+    happens entirely inside this block.
+    """
+    main = sys.modules["__main__"]
+    sys.modules["__main__"] = types.ModuleType("__main__")
+    try:
+        yield
+    finally:
+        sys.modules["__main__"] = main
+
+
+def _process_pool() -> ProcessPoolExecutor:
+    # Never fork the threaded interface process: workers come from a clean
+    # server that has loaded only this module (not the application's entry point).
+    context = multiprocessing.get_context("forkserver")
+    context.set_forkserver_preload([__name__])
+    return ProcessPoolExecutor(max_workers=_workers(), mp_context=context)
+
+
+@dataclass(frozen=True, slots=True)
+class _Pending:
+    entry: DiscoveredFile
+    title: str
+    dark: str | None
+    file_stat: os.stat_result
+    known: bool
 
 
 @dataclass(slots=True)
@@ -74,6 +151,7 @@ class LibraryIndexer:
         on_progress: Callable[[IndexProgress], None] | None = None,
         cancel_event: threading.Event | None = None,
         probe: Callable[[Path], ImageInfo] = probe_image,
+        parallel_threshold: int = PARALLEL_THRESHOLD,
     ) -> None:
         self._conn = conn
         self._data_dirs = data_dirs
@@ -82,6 +160,7 @@ class LibraryIndexer:
         self._on_progress = on_progress
         self._cancel = cancel_event or threading.Event()
         self._probe = probe
+        self._parallel_threshold = parallel_threshold
         self._processed = 0
         self._total = 0
 
@@ -134,17 +213,18 @@ class LibraryIndexer:
             )
         }
         seen: set[str] = set()
-        pending: list[tuple[object, ...]] = []
+        pending: list[_Pending] = []
 
         for entry in files:
             self._check_cancelled()
-            self._processed += 1
             key = str(entry.path)
             try:
                 file_stat = os.stat(entry.path)
             except OSError:
+                self._advance()
                 continue
             if key in seen or not stat.S_ISREG(file_stat.st_mode):
+                self._advance()
                 continue
             seen.add(key)
             row = existing.get(key)
@@ -163,17 +243,25 @@ class LibraryIndexer:
                     self._update_metadata(
                         source_id, key, title, dark, entry.picture_options
                     )
+                self._advance()
             else:
-                record = self._inspect(source_id, entry, title, dark, file_stat)
-                pending.append(record)
-                summary.updated += 1 if row else 0
-                summary.added += 0 if row else 1
-                summary.invalid += 1 if record[11] == "invalid" else 0
-            if len(pending) >= WRITE_BATCH_SIZE:
-                self._flush(pending)
-            if self._processed % 25 == 0:
-                self._report()
-        self._flush(pending)
+                pending.append(_Pending(entry, title, dark, file_stat, row is not None))
+
+        records: list[tuple[object, ...]] = []
+        inspections = self._inspect_all(pending)
+        try:
+            for item, inspection in zip(pending, inspections, strict=True):
+                self._check_cancelled()
+                records.append(self._record(source_id, item, inspection))
+                summary.updated += 1 if item.known else 0
+                summary.added += 0 if item.known else 1
+                summary.invalid += 1 if inspection[4] == "invalid" else 0
+                if len(records) >= WRITE_BATCH_SIZE:
+                    self._flush(records)
+                self._advance()
+        finally:
+            inspections.close()  # Stops the worker processes promptly on cancellation.
+        self._flush(records)
         self._report()
 
         gone = [path for path in existing if path not in seen]
@@ -185,28 +273,49 @@ class LibraryIndexer:
                 )
             summary.removed += len(gone)
 
-    def _inspect(
-        self,
-        source_id: int,
-        entry: DiscoveredFile,
-        title: str,
-        dark: str | None,
-        file_stat: os.stat_result,
-    ) -> tuple[object, ...]:
-        width = height = 0
-        image_format: str | None = None
-        quick_hash: str | None = None
-        status, error = "ok", None
+    def _advance(self) -> None:
+        self._processed += 1
+        if self._processed % 25 == 0:
+            self._report()
+
+    def _inspect_all(self, pending: list[_Pending]) -> Iterator[Inspection]:
+        """Inspections in the order of ``pending``, in worker processes for large batches."""
+        if len(pending) < self._parallel_threshold or self._probe is not probe_image:
+            for item in pending:
+                yield inspect_file(item.entry.path, item.file_stat.st_size, self._probe)
+            return
+        jobs = [(str(item.entry.path), item.file_stat.st_size) for item in pending]
+        chunks = [jobs[i : i + PROBE_CHUNK] for i in range(0, len(jobs), PROBE_CHUNK)]
+        done = 0
         try:
-            info = self._probe(entry.path)
-            width, height, image_format = info.width, info.height, info.image_format
-            quick_hash = quick_signature(entry.path, file_stat.st_size)
-        except (ImageProbeError, OSError) as failure:
-            status, error = "invalid", str(failure)[:500]
+            pool = _process_pool()
+            try:
+                with _main_script_hidden():
+                    results = pool.map(_inspect_batch, chunks)  # Submits every chunk.
+                for batch in results:
+                    done += len(batch)
+                    yield from batch
+            finally:
+                # On cancellation, drop the chunks not started yet.
+                pool.shutdown(wait=True, cancel_futures=True)
+        except (BrokenProcessPool, OSError) as error:
+            # Worker processes can be unavailable (limits, sandboxes): go on here.
+            log.warning(
+                "Worker processes failed (%s); indexing continues without them", error
+            )
+            for item in pending[done:]:
+                yield inspect_file(item.entry.path, item.file_stat.st_size)
+
+    @staticmethod
+    def _record(
+        source_id: int, item: _Pending, inspection: Inspection
+    ) -> tuple[object, ...]:
+        width, height, image_format, quick_hash, status, error = inspection
         return (
-            source_id, str(entry.path), title, dark, entry.picture_options, width, height,
-            image_format, file_stat.st_size, file_stat.st_mtime_ns, quick_hash, status, error,
-            int(time.time()),
+            source_id, str(item.entry.path), item.title, item.dark,
+            item.entry.picture_options, width, height, image_format,
+            item.file_stat.st_size, item.file_stat.st_mtime_ns, quick_hash, status,
+            error, int(time.time()),
         )  # fmt: skip
 
     def _update_metadata(

@@ -15,6 +15,7 @@ from ashywall.desktop.gnome import (
     GnomeBackground,
     background_schema_installed,
 )
+from ashywall.services import rotation
 from ashywall.services.library_index import LibraryIndexer
 from ashywall.services.library_repository import LibraryRepository
 from ashywall.services.rotation import (
@@ -221,3 +222,29 @@ def test_nothing_to_rotate_is_an_error(
         manager.start(RotationConfig(source="favorites"))
     with pytest.raises(RotationError):
         manager.next()
+
+
+def test_a_full_slideshow_is_kept_after_indexing(
+    library: LibraryRepository,
+    desktop: GnomeBackground,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Two pictures match but a slideshow holds one: the library is "larger".
+    monkeypatch.setattr(rotation, "MAX_SLIDES", 1)
+    manager = RotationManager(library, desktop, lambda: tmp_path / "slides")
+    state, _replaced = manager.start(RotationConfig(source="folders", shuffle=True))
+    assert len(state.paths) == 1
+    assert manager.refresh() == state  # Not rewritten (and not reshuffled).
+
+    Path(state.paths[0]).unlink()  # Its picture is gone: the list is rebuilt.
+    refreshed = manager.refresh()
+    assert refreshed is not None and refreshed.paths != state.paths
+
+
+def test_slides_skip_missing_files_and_stop_at_the_limit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(rotation, "MAX_SLIDES", 2)
+    files = [make_image(tmp_path / f"{n}.png", (16, 9)) for n in range(3)]
+    assert rotation.slides([tmp_path / "gone.png", *files]) == files[:2]

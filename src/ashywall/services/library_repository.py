@@ -84,6 +84,8 @@ class LibraryQuery:
     min_tier: ResolutionTier | None = None
     sort: SortOrder = SortOrder.TITLE
     collection_id: int | None = None
+    # Automatic change can leave out portrait pictures, whatever the orientation filter.
+    skip_portrait: bool = False
 
     @property
     def has_filters(self) -> bool:
@@ -104,6 +106,8 @@ _SECTION_KINDS: dict[Section, tuple[str, ...]] = {
 }
 
 COLLECTION_NAME_LIMIT = 80
+# Below SQLite's limit on bound parameters.
+_ID_BATCH = 500
 
 _ORIENTATION_SQL: dict[Orientation, str] = {
     Orientation.LANDSCAPE: f"w.width > w.height * {SQUARE_TOLERANCE}",
@@ -132,9 +136,11 @@ _WALLPAPER_COLUMNS = f"""
     w.picture_options, (f.item_key IS NOT NULL) AS is_favorite
 """
 
+# CROSS JOIN keeps SQLite scanning wallpapers once and looking sources up by
+# key; letting it start from sources visits wallpapers in random order.
 _WALLPAPER_JOINS = f"""
     FROM wallpapers w
-    JOIN sources s ON s.id = w.source_id
+    CROSS JOIN sources s ON s.id = w.source_id
     LEFT JOIN favorites f ON f.origin = '{LOCAL_ORIGIN}' AND f.item_key = w.path
 """
 
@@ -146,15 +152,21 @@ def _escape_like(text: str) -> str:
 def _where_clause(query: LibraryQuery) -> tuple[str, list[object]]:
     kinds = _SECTION_KINDS[query.section]
     placeholders = ", ".join("?" for _ in kinds)
-    # The same file can belong to several sources (e.g. a personal folder
-    # that overlaps a system folder); show it once.
     clauses = [
-        "w.status = 'ok'",
-        f"""w.id IN (
-            SELECT MIN(w2.id) FROM wallpapers w2 JOIN sources s2 ON s2.id = w2.source_id
-            WHERE w2.status = 'ok' AND s2.kind IN ({placeholders}) GROUP BY w2.path)""",
+        # Unary plus: almost every row is 'ok', so reading them through the
+        # status index would only add random lookups to a full scan.
+        "+w.status = 'ok'",
+        f"s.kind IN ({placeholders})",
     ]
     params: list[object] = list(kinds)
+    # Cheap filters come first so the costlier checks below see fewer rows.
+    if query.orientation is not None:
+        clauses.append(_ORIENTATION_SQL[query.orientation])
+    if query.min_tier is not None:
+        clauses.append("MAX(w.width, w.height) >= ? AND MIN(w.width, w.height) >= ?")
+        params += [query.min_tier.long_side, query.min_tier.short_side]
+    if query.skip_portrait:
+        clauses.append(f"NOT ({_ORIENTATION_SQL[Orientation.PORTRAIT]})")
     if query.section is Section.FAVORITES:
         clauses.append("f.item_key IS NOT NULL")
     if query.section is Section.COLLECTION:
@@ -164,16 +176,21 @@ def _where_clause(query: LibraryQuery) -> tuple[str, list[object]]:
         )
         params.append(query.collection_id if query.collection_id is not None else -1)
     if text := query.text.strip():
+        # The path is checked first: it is a plain column, the title a subquery.
         clauses.append(
-            f"({_TITLE_SQL} LIKE ? ESCAPE '\\' OR w.path LIKE ? ESCAPE '\\')"
+            f"(w.path LIKE ? ESCAPE '\\' OR {_TITLE_SQL} LIKE ? ESCAPE '\\')"
         )
         pattern = f"%{_escape_like(text)}%"
         params += [pattern, pattern]
-    if query.orientation is not None:
-        clauses.append(_ORIENTATION_SQL[query.orientation])
-    if query.min_tier is not None:
-        clauses.append("MAX(w.width, w.height) >= ? AND MIN(w.width, w.height) >= ?")
-        params += [query.min_tier.long_side, query.min_tier.short_side]
+    # The same file can belong to several sources (e.g. a personal folder
+    # that overlaps a system folder); show it once, from its first row.
+    clauses.append(
+        f"""NOT EXISTS (
+            SELECT 1 FROM wallpapers w2 CROSS JOIN sources s2 ON s2.id = w2.source_id
+            WHERE w2.path = w.path AND w2.id < w.id AND w2.status = 'ok'
+              AND s2.kind IN ({placeholders}))"""
+    )
+    params += kinds
     return " AND ".join(clauses), params
 
 
@@ -270,21 +287,63 @@ class LibraryRepository:
         sql = f"SELECT {_WALLPAPER_COLUMNS} {_WALLPAPER_JOINS} WHERE {where} ORDER BY {_ORDER_SQL[query.sort]}"
         return [_wallpaper_from_row(row) for row in self._conn.execute(sql, params)]
 
-    def count_wallpapers(self, query: LibraryQuery) -> int:
+    def wallpaper_ids(self, query: LibraryQuery) -> list[int]:
+        """The matching ids in display order; the gallery loads rows as they scroll into view."""
         where, params = _where_clause(query)
-        return self._conn.execute(
-            f"SELECT COUNT(*) {_WALLPAPER_JOINS} WHERE {where}", params
-        ).fetchone()[0]
+        cursor = self._conn.cursor()
+        # Plain tuples: much cheaper than Row objects for large libraries.
+        cursor.row_factory = None
+        cursor.execute(
+            f"SELECT w.id {_WALLPAPER_JOINS} WHERE {where} ORDER BY {_ORDER_SQL[query.sort]}",
+            params,
+        )
+        return [row[0] for row in cursor]
+
+    def wallpapers_by_ids(self, ids: list[int]) -> dict[int, Wallpaper]:
+        """Rows for ``ids`` that still exist, keyed by id."""
+        found: dict[int, Wallpaper] = {}
+        for start in range(0, len(ids), _ID_BATCH):
+            batch = ids[start : start + _ID_BATCH]
+            placeholders = ", ".join("?" for _ in batch)
+            rows = self._conn.execute(
+                f"SELECT {_WALLPAPER_COLUMNS} {_WALLPAPER_JOINS} WHERE w.id IN ({placeholders})",
+                batch,
+            )
+            found.update((row["id"], _wallpaper_from_row(row)) for row in rows)
+        return found
+
+    def wallpaper_paths(self, query: LibraryQuery, ordered: bool = True) -> list[Path]:
+        """Paths of the matching wallpapers, in display order unless ``ordered`` is False."""
+        where, params = _where_clause(query)
+        order = f" ORDER BY {_ORDER_SQL[query.sort]}" if ordered else ""
+        cursor = self._conn.cursor()
+        cursor.row_factory = None
+        cursor.execute(f"SELECT w.path {_WALLPAPER_JOINS} WHERE {where}{order}", params)
+        return [Path(path) for (path,) in cursor]
 
     def count_by_section(self) -> dict[Section, int]:
-        counts = {
-            section: self.count_wallpapers(LibraryQuery(section=section))
-            for section in Section
-            if section is not Section.COLLECTION
+        # Kept to a few passes over indexes: this runs after every library change.
+        counts = dict.fromkeys((s for s in Section if s is not Section.COLLECTION), 0)
+        counts[Section.ALL] = self._conn.execute(
+            "SELECT COUNT(DISTINCT path) FROM wallpapers WHERE status = 'ok'"
+        ).fetchone()[0]
+        # A path is unique within the system and downloads sources, and personal
+        # folders never overlap (add_folder refuses it), so rows count per kind.
+        kinds = {
+            SourceKind.SYSTEM.value: Section.SYSTEM,
+            SourceKind.FOLDER.value: Section.FOLDERS,
+            SourceKind.DOWNLOADS.value: Section.DOWNLOADS,
         }
-        counts[Section.FAVORITES] += self._conn.execute(
-            "SELECT COUNT(*) FROM favorites WHERE origin != ? AND metadata IS NOT NULL",
-            (LOCAL_ORIGIN,),
+        for kind, count in self._conn.execute(
+            "SELECT s.kind, COUNT(*) FROM wallpapers w CROSS JOIN sources s "
+            "ON s.id = w.source_id WHERE +w.status = 'ok' GROUP BY s.kind"
+        ):
+            counts[kinds[kind]] = count
+        counts[Section.FAVORITES] = self._conn.execute(
+            "SELECT (SELECT COUNT(DISTINCT w.path) FROM wallpapers w JOIN favorites f "
+            "ON f.origin = ? AND f.item_key = w.path WHERE w.status = 'ok') "
+            "+ (SELECT COUNT(*) FROM favorites WHERE origin != ? AND metadata IS NOT NULL)",
+            (LOCAL_ORIGIN, LOCAL_ORIGIN),
         ).fetchone()[0]
         return counts
 

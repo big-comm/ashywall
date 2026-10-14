@@ -124,6 +124,11 @@ MIGRATIONS: tuple[tuple[str, ...], ...] = (
         # The online title, shown in the library instead of the file name.
         "ALTER TABLE downloads ADD COLUMN title TEXT",
     ),
+    (
+        # Counting the library (and its unreadable files) reads this index
+        # instead of every row.
+        "CREATE INDEX wallpapers_by_status ON wallpapers(status, path)",
+    ),
 )
 
 LATEST_VERSION = len(MIGRATIONS)

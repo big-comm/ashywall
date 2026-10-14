@@ -13,8 +13,9 @@ from ..i18n import _
 from ..models.resolution import TIERS, Orientation, ResolutionTier
 from ..providers.base import RemoteSort
 from ..services.library_repository import LibraryQuery, Section, SortOrder
+from .gallery_model import GalleryModel, LoadRows
 from .thumbnail_loader import GalleryEntry, ThumbnailLoader
-from .wallpaper_card import WallpaperCard, WallpaperItem, entry_identity
+from .wallpaper_card import WallpaperCard
 
 ORIENTATION_CHOICES: tuple[Orientation | None, ...] = (
     None,
@@ -94,7 +95,7 @@ class GalleryPage(Adw.NavigationPage):
         self._sort_chosen = False
         self._remote_sorts: tuple[RemoteSort, ...] = ()
         self._searchable = True
-        self._store = Gio.ListStore(item_type=WallpaperItem)
+        self._store = GalleryModel()
         self._window_title = Adw.WindowTitle(title=_("Wallpapers"))
 
         header = Adw.HeaderBar(title_widget=self._window_title)
@@ -423,26 +424,26 @@ class GalleryPage(Adw.NavigationPage):
         self._quiet = quiet
 
     def show_entries(
-        self, entries: list[GalleryEntry], empty_state: EmptyState, subtitle: str
+        self,
+        entries: list[GalleryEntry],
+        empty_state: EmptyState,
+        subtitle: str,
+        *,
+        local_ids: list[int] | None = None,
+        load: LoadRows | None = None,
     ) -> None:
-        if entries:
+        """Show ``local_ids`` (rows read by ``load`` as they scroll in), then ``entries``."""
+        self._store.reset(local_ids or [], load, entries)
+        shown = self._store.get_n_items() > 0
+        if shown:
             self._stack.set_visible_child_name("grid")
-        self._store.splice(
-            0, self._store.get_n_items(), [WallpaperItem(e) for e in entries]
-        )
         self._window_title.set_subtitle(subtitle)
-        if not entries:
+        if not shown:
             self.show_status(empty_state)
 
     def append_entries(self, entries: list[GalleryEntry]) -> None:
-        known = {
-            entry_identity(self._store.get_item(i).entry)
-            for i in range(self._store.get_n_items())
-        }
-        fresh = [WallpaperItem(e) for e in entries if entry_identity(e) not in known]
-        if fresh:
+        if self._store.append(entries):
             self._stack.set_visible_child_name("grid")
-        self._store.splice(self._store.get_n_items(), 0, fresh)
 
     def show_subtitle(self, subtitle: str) -> None:
         self._window_title.set_subtitle(subtitle)
@@ -474,13 +475,9 @@ class GalleryPage(Adw.NavigationPage):
         self._stack.set_visible_child_name("status")
 
     def replace_entry(self, entry: GalleryEntry) -> None:
-        identity = entry_identity(entry)
-        for position in range(self._store.get_n_items()):
-            if entry_identity(self._store.get_item(position).entry) == identity:
-                self._store.splice(position, 1, [WallpaperItem(entry)])
-                return
+        self._store.replace(entry)
 
     def _on_activate(self, _grid: Gtk.GridView, position: int) -> None:
-        item = self._store.get_item(position)
-        if item is not None:
-            self.emit("entry-activated", item.entry)
+        entry = self._store.entry_at(position)
+        if entry is not None:
+            self.emit("entry-activated", entry)

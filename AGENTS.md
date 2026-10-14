@@ -28,11 +28,11 @@ src/ashywall/
                       bing (image of the day), commons (Wikimedia picture
                       of the day), registry (the providers, in sidebar order).
   desktop/gnome.py    Apply/restore through org.gnome.desktop.background.
-  ui/                 Window, gallery, local and remote detail pages, shared
-                      detail widgets, full-screen image viewer, automatic
-                      change dialog, preferences,
-                      thumbnail loader, index, explore and download
-                      controllers, style.css.
+  ui/                 Window, gallery (lazy list model, library reader),
+                      local and remote detail pages, shared detail widgets,
+                      full-screen image viewer, automatic change dialog,
+                      preferences, thumbnail loader, index, explore and
+                      download controllers, style.css.
 tests/                pytest suite (services, discovery, GNOME settings).
 usr/                  Files installed to /usr (desktop entry, icon, .mo).
 locale/               POT template and .po catalogs.
@@ -44,19 +44,25 @@ pkgbuild/             Arch/BigCommunity PKGBUILD.
 1. Never block the main loop: disk scans, decoding, hashing and subprocesses
    run in worker threads (`BackgroundRunner`, `IndexController`). Results
    return through `GLib.idle_add` (`run_on_main`).
-2. One SQLite connection per thread. Schema changes go in a new entry of
+2. Cost must follow the screen, not the library: never load every row into
+   Python objects on the main thread. The gallery takes ordered ids
+   (`wallpaper_ids`) and reads rows by page (`GalleryModel`); library
+   queries run in `LibraryReader`. Check plans with `EXPLAIN QUERY PLAN` on
+   a large catalog when changing SQL.
+3. One SQLite connection per thread. Schema changes go in a new entry of
    `MIGRATIONS` in `services/database.py`; never edit a released one.
-3. Open images only through `image_probe.open_image` (format allow-list,
+4. Open images only through `image_probe.open_image` (format allow-list,
    size and pixel limits checked before decoding).
-4. Never show invented data: counts come from the catalog, unknown fields say
+5. Never show invented data: counts come from the catalog, unknown fields say
    so, unimplemented features say "not available yet".
-5. Tests must not touch the user's desktop: use
+6. Tests must not touch the user's desktop: use
    `Gio.memory_settings_backend_new()` for GSettings, and run interface
    sessions with `GSETTINGS_BACKEND=keyfile` and their own `XDG_*`
-   directories (never start a `dconf-service` there).
-6. Language: UI strings in English wrapped in `_()`, translated in
+   directories (never start a `dconf-service` there), preferably inside
+   `dbus-run-session` so the application name stays off the real bus.
+7. Language: UI strings in English wrapped in `_()`, translated in
    `locale/pt_BR.po`; code, comments and commits in English.
-7. Online data is untrusted: parse with strict type checks, accept only
+8. Online data is untrusted: parse with strict type checks, accept only
    https URLs on the provider's own hosts, never fetch display-only links
    (sources, pages), and send safe-for-work queries only.
-8. Run before finishing: `python -m pytest` and `ruff check src tests`.
+9. Run before finishing: `python -m pytest` and `ruff check src tests`.

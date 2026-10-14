@@ -16,6 +16,7 @@ import os
 import xml.etree.ElementTree as ElementTree
 from collections.abc import Iterator
 from dataclasses import dataclass, replace
+from operator import attrgetter
 from pathlib import Path
 
 from ..services.image_probe import has_image_extension
@@ -38,8 +39,9 @@ class DiscoveredFile:
 
 def title_from_path(path: Path) -> str:
     """'abstract-colors_10' -> 'Abstract colors 10'."""
-    words = path.stem.replace("_", " ").replace("-", " ").split()
-    text = " ".join(words) or path.name
+    name = os.path.basename(path)
+    words = os.path.splitext(name)[0].replace("_", " ").replace("-", " ").split()
+    text = " ".join(words) or name
     return text[:1].upper() + text[1:]
 
 
@@ -81,16 +83,30 @@ def parse_background_catalog(catalog: Path) -> list[DiscoveredFile]:
 def scan_folder(root: Path) -> Iterator[Path]:
     """Yield image files below ``root``, skipping hidden entries.
 
-    Directory symlinks are not followed, which rules out loops.
+    Files come before subfolders, both by name. Directory symlinks are not
+    followed, which rules out loops. Directory entries already tell what is a
+    file, so this costs one read per folder rather than a call per file.
     """
-    for directory, subdirs, files in os.walk(root, followlinks=False):
-        subdirs[:] = sorted(name for name in subdirs if not name.startswith("."))
-        for name in sorted(files):
-            if name.startswith("."):
+    pending = [os.fspath(root)]
+    while pending:
+        directory = pending.pop()
+        try:
+            with os.scandir(directory) as iterator:
+                entries = sorted(iterator, key=attrgetter("name"))
+        except OSError:
+            continue
+        subdirs = []
+        for entry in entries:
+            if entry.name.startswith("."):
                 continue
-            path = Path(directory, name)
-            if has_image_extension(path) and path.is_file():
-                yield path
+            try:
+                if entry.is_dir(follow_symlinks=False):
+                    subdirs.append(entry.path)
+                elif has_image_extension(entry.name) and entry.is_file():
+                    yield Path(entry.path)
+            except OSError:
+                continue
+        pending.extend(reversed(subdirs))
 
 
 def _catalog_files(data_dirs: list[Path]) -> Iterator[Path]:

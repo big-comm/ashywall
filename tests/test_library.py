@@ -276,3 +276,60 @@ def test_downloads_show_the_title_from_their_source(
     repository.record_download(replace(item, title="Misty peak"), path)
     assert titles(repository, section=Section.DOWNLOADS) == ["Misty peak"]
     assert titles(repository, text="misty") == ["Misty peak"]
+
+
+def test_ids_and_counts_match_the_listing_when_sources_overlap(
+    conn: sqlite3.Connection, layout: dict[str, Path]
+) -> None:
+    backgrounds = layout["data_dir"] / "backgrounds"
+    make_image(backgrounds / "shared.png", (64, 36))
+    make_image(backgrounds / "system-only.png", (3840, 2160))
+    make_image(layout["pictures"] / "mine.png", (36, 64))
+    repository = LibraryRepository(conn)
+    repository.ensure_builtin_sources(layout["downloads"])
+    repository.add_folder(layout["pictures"])
+    repository.add_folder(backgrounds)  # The same files, also as a personal folder.
+    indexer_for(conn, layout).run()
+    repository.set_favorite(repository.list_wallpapers(LibraryQuery())[0], True)
+
+    counts = repository.count_by_section()
+    for section in (Section.ALL, Section.SYSTEM, Section.FOLDERS, Section.FAVORITES):
+        for sort in SortOrder:
+            query = LibraryQuery(section=section, sort=sort)
+            listed = repository.list_wallpapers(query)
+            assert repository.wallpaper_ids(query) == [w.id for w in listed]
+            assert counts[section] == len(listed)
+    assert titles(repository) == ["Mine", "Shared", "System only"]
+    assert counts[Section.FOLDERS] == 3 and counts[Section.SYSTEM] == 2
+
+    ids = repository.wallpaper_ids(LibraryQuery())
+    rows = repository.wallpapers_by_ids([*ids, 999_999])
+    assert sorted(rows) == sorted(ids)  # Missing ids are simply absent.
+    system = repository.wallpaper_paths(LibraryQuery(section=Section.SYSTEM))
+    assert [path.name for path in system] == ["shared.png", "system-only.png"]
+    no_portrait = repository.wallpaper_paths(LibraryQuery(skip_portrait=True))
+    assert [path.name for path in no_portrait] == ["shared.png", "system-only.png"]
+
+
+def test_worker_processes_give_the_same_catalog(
+    tmp_path: Path, layout: dict[str, Path]
+) -> None:
+    for index in range(40):
+        make_image(layout["pictures"] / f"{index:02}.png", (64 + index, 36))
+    (layout["pictures"] / "broken.jpg").write_bytes(b"not an image")
+
+    def catalog(name: str, threshold: int) -> list[tuple]:
+        conn = connect(tmp_path / name)
+        repository = LibraryRepository(conn)
+        repository.ensure_builtin_sources(layout["downloads"])
+        repository.add_folder(layout["pictures"])
+        summary = indexer_for(conn, layout, parallel_threshold=threshold).run()
+        assert (summary.added, summary.invalid) == (41, 1)
+        rows = conn.execute(
+            "SELECT path, width, height, image_format, quick_hash, status "
+            "FROM wallpapers ORDER BY path"
+        ).fetchall()
+        conn.close()
+        return [tuple(row) for row in rows]
+
+    assert catalog("parallel.sqlite3", threshold=1) == catalog("inline.sqlite3", 10_000)

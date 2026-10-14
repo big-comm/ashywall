@@ -15,6 +15,7 @@ from ..services.library_index import IndexProgress, IndexSummary
 from ..services.library_repository import (
     CollectionError,
     FolderError,
+    LibraryQuery,
     LibraryRepository,
     Section,
 )
@@ -34,6 +35,7 @@ from .errors import error_text
 from .explore_controller import ExploreController
 from .gallery_page import GalleryFilters, GalleryPage
 from .index_controller import IndexController
+from .library_reader import LibraryReader
 from .preferences_dialog import PreferencesDialog
 from .remote_detail_page import RemoteDetailPage
 from .rotation_dialog import RotationDialog
@@ -107,6 +109,7 @@ class MainWindow(Adw.ApplicationWindow):
         self._rotation = RotationManager(
             self._repository, services.desktop, paths.slideshow_dir
         )
+        self._library = LibraryReader(services.database_path)
         self._indexer = IndexController(
             services.database_path,
             self._on_index_progress,
@@ -129,7 +132,10 @@ class MainWindow(Adw.ApplicationWindow):
         )
 
         self._gallery = GalleryPage(services.loader, self._on_unreadable)
-        self._gallery.connect("query-changed", lambda _page: self.refresh_gallery())
+        # Search and filters change what is shown, not the sidebar counts.
+        self._gallery.connect(
+            "query-changed", lambda _page: self.refresh_gallery(counts=False)
+        )
         self._gallery.connect("entry-activated", self._on_entry_activated)
         self._gallery.connect("load-more", lambda _page: self._load_more())
         self._navigation = Adw.NavigationView()
@@ -306,9 +312,11 @@ class MainWindow(Adw.ApplicationWindow):
 
     # Content ---------------------------------------------------------------
 
-    def refresh_gallery(self) -> None:
-        self._update_counts()
+    def refresh_gallery(self, *, counts: bool = True) -> None:
+        if counts:
+            self._update_counts()
         if (provider := self._current_provider()) is not None:
+            self._library.cancel()
             self._gallery.show_loading(
                 _("Loading {provider}…").format(provider=provider.display_name)
             )
@@ -317,19 +325,29 @@ class MainWindow(Adw.ApplicationWindow):
         if self._current.section is None:
             return
         query = self._gallery.current_query()
-        entries: list[GalleryEntry] = list(self._repository.list_wallpapers(query))
+        filters = self._gallery.filters()
+        # The current entries stay on screen until the new list arrives.
+        self._library.wallpaper_ids(
+            query,
+            lambda ids: self._show_library(query, filters, ids),
+            self._on_library_failed,
+        )
+
+    def _show_library(
+        self, query: LibraryQuery, filters: GalleryFilters, ids: list[int]
+    ) -> None:
         remote: list[RemoteWallpaper] = []
         if query.section is Section.FAVORITES:
             remote = self._repository.remote_favorites()
         elif query.section is Section.COLLECTION and query.collection_id is not None:
             remote = self._repository.remote_collection_items(query.collection_id)
-        filters = self._gallery.filters()
-        entries += [
+        online: list[GalleryEntry] = [
             item
             for item in self._explore.enrich(remote)
             if remote_matches(item, filters)
         ]
-        if not entries and self._indexer.running and not query.has_filters:
+        total = len(ids) + len(online)
+        if not total and self._indexer.running and not query.has_filters:
             self._gallery.show_loading(self._progress_text())
             return
         has_folders = bool(self._repository.list_sources(SourceKind.FOLDER))
@@ -338,7 +356,16 @@ class MainWindow(Adw.ApplicationWindow):
             if query.has_filters
             else library_empty_state(query.section, has_folders)
         )
-        self._gallery.show_entries(entries, empty, library_subtitle(len(entries)))
+        self._gallery.show_entries(
+            online,
+            empty,
+            library_subtitle(total),
+            local_ids=ids,
+            load=self._repository.wallpapers_by_ids,
+        )
+
+    def _on_library_failed(self, error: Exception) -> None:
+        self._toast(_("The library could not be read: {error}").format(error=error))
 
     def _update_counts(self) -> None:
         counts = self._repository.count_by_section()
@@ -739,7 +766,7 @@ class MainWindow(Adw.ApplicationWindow):
             and section is not Section.FAVORITES
             and self._current_provider() is None
         ):
-            if self._repository.count_wallpapers(self._gallery.current_query()) == 0:
+            if self._gallery.entry_count() == 0:
                 self._gallery.show_loading(self._progress_text())
 
     def _on_index_finished(self, summary: IndexSummary) -> None:
@@ -803,7 +830,7 @@ class MainWindow(Adw.ApplicationWindow):
             self._rotation.saved_config(),
             self._rotation.active_state(),
             self._repository.list_collections(),
-            lambda config: len(self._rotation.candidates(config)),
+            self._rotation.count_candidates,
             self._rotation_title,
             self._start_rotation,
             self._stop_rotation,
@@ -880,6 +907,7 @@ class MainWindow(Adw.ApplicationWindow):
 
     def _on_close_request(self, _window: Adw.ApplicationWindow) -> bool:
         self._indexer.cancel()
+        self._library.shutdown()
         self._explore.shutdown()
         self._downloads.shutdown()
         return False

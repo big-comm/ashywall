@@ -1,5 +1,6 @@
 """Safe image opening: allowed formats, size limits and header-only probing."""
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -44,8 +45,9 @@ class ImageInfo:
     image_format: str
 
 
-def has_image_extension(path: Path) -> bool:
-    return path.suffix.lower() in IMAGE_EXTENSIONS
+def has_image_extension(path: Path | str) -> bool:
+    # os.path on strings: this runs for every file of every scanned folder.
+    return os.path.splitext(path)[1].lower() in IMAGE_EXTENSIONS
 
 
 def open_image(path: Path) -> Image.Image:

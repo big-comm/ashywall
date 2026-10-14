@@ -16,12 +16,12 @@ import time
 from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from itertools import islice
 from pathlib import Path
 from xml.sax.saxutils import escape
 
 from ..desktop.gnome import ApplyMode, DesktopError, GnomeBackground
 from ..models.resolution import Orientation, orientation_of, tier_by_key
-from ..models.wallpaper import Wallpaper
 from .library_repository import LibraryQuery, LibraryRepository, Section
 
 SETTING_KEY = "rotation"
@@ -109,13 +109,25 @@ def eligible(width: int, height: int, config: RotationConfig) -> bool:
     return tier is None or tier.accepts(width, height)
 
 
-def select_paths(repository: LibraryRepository, config: RotationConfig) -> list[Path]:
-    """Existing local files for ``config``, deduplicated, in library order."""
+def select_paths(
+    repository: LibraryRepository, config: RotationConfig, ordered: bool = True
+) -> list[Path]:
+    """Library files for ``config``, deduplicated, in library order if ``ordered``.
+
+    Indexing keeps the catalog in step with the disk, so local files are not
+    checked one by one here; ``slides`` checks the ones that go on screen.
+    """
     section, collection_id = parse_source(config.source)
-    wallpapers: Iterable[Wallpaper] = repository.list_wallpapers(
-        LibraryQuery(section=section, collection_id=collection_id)
+    # The filters run in SQL: a large library is never walked in Python.
+    selected = repository.wallpaper_paths(
+        LibraryQuery(
+            section=section,
+            collection_id=collection_id,
+            min_tier=tier_by_key(config.min_tier) if config.min_tier else None,
+            skip_portrait=config.skip_portrait,
+        ),
+        ordered,
     )
-    candidates = [(w.path, w.width, w.height) for w in wallpapers]
     # Online favorites and collection items count once they are downloaded.
     if section is Section.FAVORITES:
         remote = repository.remote_favorites()
@@ -123,20 +135,21 @@ def select_paths(repository: LibraryRepository, config: RotationConfig) -> list[
         remote = repository.remote_collection_items(collection_id)
     else:
         remote = []
+    if not remote:
+        return selected
+    seen = set(selected)
     downloads: dict[str, dict[str, Path]] = {}
     for item in remote:
         if item.origin not in downloads:
             downloads[item.origin] = repository.downloaded_paths(item.origin)
         path = downloads[item.origin].get(item.remote_id)
-        if path is not None:
-            candidates.append((path, item.width, item.height))
-    seen: set[Path] = set()
-    selected = []
-    for path, width, height in candidates:
-        if path in seen or not eligible(width, height, config) or not path.is_file():
-            continue
-        seen.add(path)
-        selected.append(path)
+        if (
+            path is not None
+            and path not in seen
+            and eligible(item.width, item.height, config)
+        ):
+            seen.add(path)
+            selected.append(path)
     return selected
 
 
@@ -146,7 +159,12 @@ def order_paths(
     ordered = list(paths)
     if shuffle:
         (rng or random.Random()).shuffle(ordered)
-    return ordered[:MAX_SLIDES]
+    return ordered
+
+
+def slides(paths: Iterable[Path]) -> list[Path]:
+    """The first MAX_SLIDES files that exist, so a large library costs no more than a small one."""
+    return list(islice((path for path in paths if path.is_file()), MAX_SLIDES))
 
 
 def slideshow_xml(
@@ -259,13 +277,17 @@ class RotationManager:
         return Path(state.paths[index])
 
     def candidates(self, config: RotationConfig) -> list[Path]:
-        return select_paths(self._repository, config)
+        # Sorting by title costs more than the query itself; a shuffle discards it.
+        return select_paths(self._repository, config, ordered=not config.shuffle)
+
+    def count_candidates(self, config: RotationConfig) -> int:
+        return len(select_paths(self._repository, config, ordered=False))
 
     # Changes ---------------------------------------------------------------
 
     def start(self, config: RotationConfig) -> tuple[RotationState, str | None]:
         """Write and apply a slideshow; returns the state and the replaced desktop state."""
-        paths = order_paths(self.candidates(config), config.shuffle)
+        paths = slides(order_paths(self.candidates(config), config.shuffle))
         if not paths:
             raise RotationError("No wallpapers match these settings")
         previous_active = self.active_state()
@@ -301,16 +323,24 @@ class RotationManager:
         if not available:
             self.stop()
             return None
-        if {str(path) for path in available} == set(state.paths) and all(
-            Path(path).is_file() for path in state.paths
+        # A full slideshow from a larger library stays as it is while its files
+        # remain; rewriting it after every indexing would reshuffle it.
+        listed = {str(path) for path in available}
+        if (
+            len(state.paths) in (len(available), MAX_SLIDES)
+            and all(path in listed for path in state.paths)
+            and all(Path(path).is_file() for path in state.paths)
         ):
             return state
         current = self.current_path(state)
-        paths = order_paths(available, state.config.shuffle)
-        if current in paths:
-            paths.remove(current)
-            paths.insert(0, current)
-        new_state, _replaced = self._write_and_apply(state.config, paths[:MAX_SLIDES])
+        ordered = order_paths(available, state.config.shuffle)
+        if str(current) in listed:  # The picture on screen stays first.
+            ordered = [current, *(path for path in ordered if path != current)]
+        paths = slides(ordered)
+        if not paths:
+            self.stop()
+            return None
+        new_state, _replaced = self._write_and_apply(state.config, paths)
         return new_state
 
     def stop(self) -> Path | None:

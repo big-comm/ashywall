@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+Speed that does not depend on the size of the library.
+
+- The gallery reads only the rows on screen; searches and section changes
+  run off the main loop and drop the queries they outdate.
+- Sidebar counts are recomputed only when the library changes, in a few
+  passes over a new index.
+- Large batches of new images are probed in worker processes; folder scans
+  read directory entries instead of checking each file.
+- Automatic change filters in SQL, skips sorting when it shuffles, checks
+  only the files that go into the slideshow and no longer rewrites a full
+  slideshow after every indexing.
+
 ## 1.0.0 (2026-10-14)
 
 First release.

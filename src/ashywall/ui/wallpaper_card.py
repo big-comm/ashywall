@@ -16,8 +16,9 @@ THUMBNAIL_HEIGHT = 145
 class WallpaperItem(GObject.Object):
     __gtype_name__ = "AshyWallWallpaperItem"
 
-    def __init__(self, entry: GalleryEntry) -> None:
+    def __init__(self, entry: GalleryEntry | None) -> None:
         super().__init__()
+        # None: a library row removed after the gallery was filled.
         self.entry = entry
 
 
@@ -98,8 +99,11 @@ class WallpaperCard(Gtk.Box):
         self.append(self._title)
         self.append(self._meta)
 
-    def bind(self, entry: GalleryEntry) -> None:
+    def bind(self, entry: GalleryEntry | None) -> None:
         self._entry = entry
+        if entry is None:
+            self._show_empty()
+            return
         availability = availability_text(entry)
         self._title.set_label(entry.title)
         self._meta.set_label(dimensions_text(entry))
@@ -127,6 +131,13 @@ class WallpaperCard(Gtk.Box):
                 lambda loaded, expected=entry: self._show_texture(expected, loaded),
                 lambda error, expected=entry: self._show_broken(expected, error),
             )
+
+    def _show_empty(self) -> None:
+        for widget in (self._star, self._availability, self._broken):
+            widget.set_visible(False)
+        self._title.set_label("")
+        self._meta.set_label("")
+        self._picture.set_paintable(None)
 
     def unbind(self) -> None:
         if self._pending is not None:

@@ -18,6 +18,9 @@ BigLinux, Wallhaven, Bing and Wikimedia Commons. See `CHANGELOG.md`.
   directory is never scanned on its own.
 - **Gallery** with virtualized grid, asynchronous thumbnails (disk cache with
   a size limit), search and compact filters for orientation and resolution.
+  Rows are read only as they scroll into view and queries run off the main
+  loop, so a library of 100,000 images responds like a small one (measured:
+  sections and searches answer in under 0.3 s without freezing the window).
 - **Detail page** with a large preview, real pixel dimensions, aspect ratio,
   file size, format, source (including the owning package for system files),
   location and byte-identical copies found in the library.
