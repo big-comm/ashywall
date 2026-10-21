@@ -81,11 +81,16 @@ class _Response:
         self,
         response: http.client.HTTPResponse,
         discard: Callable[[], None],
+        url: str,
     ) -> None:
         self._response = response
         self._discard = discard
         self.status = response.status
         self.headers = response.headers
+        self._url = url
+
+    def geturl(self) -> str:
+        return self._url
 
     def read(self, size: int = -1) -> bytes:
         try:
@@ -243,5 +248,5 @@ class ConnectionPool:
                 raise urllib.error.HTTPError(
                     url, status, response.reason, response.headers, io.BytesIO()
                 )
-            return _Response(response, lambda: self._discard(host, port))
+            return _Response(response, lambda: self._discard(host, port), url)
         raise urllib.error.HTTPError(url, 310, "Too many redirects", None, io.BytesIO())

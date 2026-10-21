@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ashywall\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 12:46-0300\n"
+"POT-Creation-Date: 2026-10-21 16:38-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,7 +81,7 @@ msgstr ""
 
 #: src/ashywall/ui/collections_ui.py:139
 #: src/ashywall/ui/preferences_dialog.py:126
-#: src/ashywall/ui/reading_page.py:563 src/ashywall/ui/reading_page.py:584
+#: src/ashywall/ui/reading_page.py:570 src/ashywall/ui/reading_page.py:591
 #: src/ashywall/ui/window.py:547
 msgid "Cancel"
 msgstr ""
@@ -230,7 +230,7 @@ msgstr ""
 msgid "Not provided by {provider}. Images remain the property of their owners."
 msgstr ""
 
-#: src/ashywall/ui/detail_widgets.py:30 src/ashywall/ui/reading_page.py:631
+#: src/ashywall/ui/detail_widgets.py:30 src/ashywall/ui/reading_page.py:638
 msgid "Open in Browser"
 msgstr ""
 
@@ -544,8 +544,8 @@ msgid ""
 "deletes its files."
 msgstr ""
 
-#: src/ashywall/ui/preferences_dialog.py:67 src/ashywall/ui/reading_page.py:115
-#: src/ashywall/ui/reading_page.py:131 src/ashywall/ui/window.py:324
+#: src/ashywall/ui/preferences_dialog.py:67 src/ashywall/ui/reading_page.py:122
+#: src/ashywall/ui/reading_page.py:138 src/ashywall/ui/window.py:324
 #: src/ashywall/ui/window_states.py:83
 msgid "Reading"
 msgstr ""
@@ -588,7 +588,7 @@ msgid ""
 msgstr ""
 
 #: src/ashywall/ui/preferences_dialog.py:127
-#: src/ashywall/ui/reading_page.py:585
+#: src/ashywall/ui/reading_page.py:592
 msgid "Remove"
 msgstr ""
 
@@ -613,127 +613,137 @@ msgstr ""
 msgid "{used} of {limit}"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:26
+#: src/ashywall/ui/reading_page.py:27
 msgid ""
-"Enter a public HTTPS feed address. Local network addresses are not supported."
+"Enter a public website or HTTPS feed address. Local network addresses are "
+"not supported."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:29
-msgid "This address did not return a supported RSS or Atom feed."
-msgstr ""
-
-#: src/ashywall/ui/reading_page.py:32
-msgid "This source is already in your reading list."
-msgstr ""
-
-#: src/ashywall/ui/reading_page.py:33
-msgid "Use at most 60 characters for the topic."
+#: src/ashywall/ui/reading_page.py:31
+msgid ""
+"No readable feed was found. Paste the site's direct RSS or Atom address."
 msgstr ""
 
 #: src/ashywall/ui/reading_page.py:34
+msgid "This address did not return a supported RSS or Atom feed."
+msgstr ""
+
+#: src/ashywall/ui/reading_page.py:36
+msgid "This site refused access. Try its direct RSS or Atom address."
+msgstr ""
+
+#: src/ashywall/ui/reading_page.py:39
+msgid "This source is already in your reading list."
+msgstr ""
+
+#: src/ashywall/ui/reading_page.py:40
+msgid "Use at most 60 characters for the topic."
+msgstr ""
+
+#: src/ashywall/ui/reading_page.py:41
 msgid "You can add up to 50 sources."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:35
+#: src/ashywall/ui/reading_page.py:42
 msgid "The source could not be saved."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:46
+#: src/ashywall/ui/reading_page.py:53
 msgid "Date not provided"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:102 src/ashywall/ui/reading_page.py:105
+#: src/ashywall/ui/reading_page.py:109 src/ashywall/ui/reading_page.py:112
 msgid "Unread"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:105
+#: src/ashywall/ui/reading_page.py:112
 msgid "Read"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:131 src/ashywall/ui/reading_page.py:347
-#: src/ashywall/ui/reading_page.py:391
+#: src/ashywall/ui/reading_page.py:138 src/ashywall/ui/reading_page.py:354
+#: src/ashywall/ui/reading_page.py:398
 msgid "Articles from your sources"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:135
+#: src/ashywall/ui/reading_page.py:142
 msgid "Manage Sources"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:140 src/ashywall/ui/reading_page.py:343
-#: src/ashywall/ui/reading_page.py:388
+#: src/ashywall/ui/reading_page.py:147 src/ashywall/ui/reading_page.py:350
+#: src/ashywall/ui/reading_page.py:395
 msgid "Refresh Sources"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:145
+#: src/ashywall/ui/reading_page.py:152
 msgid "Search Articles"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:149
+#: src/ashywall/ui/reading_page.py:156
 msgid "Search articles or sources"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:166 src/ashywall/ui/reading_page.py:286
+#: src/ashywall/ui/reading_page.py:173 src/ashywall/ui/reading_page.py:293
 msgid "All Topics"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:181
+#: src/ashywall/ui/reading_page.py:188
 msgid "Filter by Topic"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:183
+#: src/ashywall/ui/reading_page.py:190
 msgid "Unread Only"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:192 src/ashywall/ui/reading_page.py:486
+#: src/ashywall/ui/reading_page.py:199 src/ashywall/ui/reading_page.py:493
 msgid "Sources"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:206 src/ashywall/ui/window_states.py:81
+#: src/ashywall/ui/reading_page.py:213 src/ashywall/ui/window_states.py:81
 msgid "Articles"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:213 src/ashywall/ui/reading_page.py:343
-#: src/ashywall/ui/reading_page.py:409 src/ashywall/ui/reading_page.py:422
-#: src/ashywall/ui/reading_page.py:453 src/ashywall/ui/reading_page.py:504
+#: src/ashywall/ui/reading_page.py:220 src/ashywall/ui/reading_page.py:350
+#: src/ashywall/ui/reading_page.py:416 src/ashywall/ui/reading_page.py:429
+#: src/ashywall/ui/reading_page.py:460 src/ashywall/ui/reading_page.py:511
 msgid "Add Source"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:227
+#: src/ashywall/ui/reading_page.py:234
 msgid "Load More"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:310
+#: src/ashywall/ui/reading_page.py:317
 #, python-brace-format
 msgid "Reading could not be loaded: {error}"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:327
+#: src/ashywall/ui/reading_page.py:334
 msgid "A Quiet Place to Read"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:329
+#: src/ashywall/ui/reading_page.py:336
 msgid "No Matching Articles"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:329
+#: src/ashywall/ui/reading_page.py:336
 msgid "No Articles Yet"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:333
+#: src/ashywall/ui/reading_page.py:340
 msgid ""
 "Add RSS or Atom sources and organize them by topic. Articles open in your "
 "browser."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:337
+#: src/ashywall/ui/reading_page.py:344
 msgid "Try another topic or search, or turn off the unread filter."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:339
+#: src/ashywall/ui/reading_page.py:346
 msgid "Update your sources or add another feed."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:351
+#: src/ashywall/ui/reading_page.py:358
 #, python-brace-format
 msgid "One source could not be updated. Cached articles are still available."
 msgid_plural ""
@@ -741,96 +751,96 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ashywall/ui/reading_page.py:388
+#: src/ashywall/ui/reading_page.py:395
 msgid "Stop Updating"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:391
+#: src/ashywall/ui/reading_page.py:398
 msgid "Updating sources…"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:410
-msgid "Feed Address"
+#: src/ashywall/ui/reading_page.py:417
+msgid "Website or Feed Address"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:411
+#: src/ashywall/ui/reading_page.py:418
 msgid "Topic (optional)"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:414
+#: src/ashywall/ui/reading_page.py:421
 msgid ""
-"Paste the HTTPS address of an RSS or Atom feed. For example, organize "
-"sources under Technology, Health or Science."
+"Enter a website, such as phoronix.com, or an HTTPS RSS or Atom address. "
+"Organize sources under Technology, Health or Science."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:470
+#: src/ashywall/ui/reading_page.py:477
 msgid "Checking Source…"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:489
+#: src/ashywall/ui/reading_page.py:496
 msgid "Your Sources"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:491
+#: src/ashywall/ui/reading_page.py:498
 msgid ""
 "Sources update only when requested. No notifications, embedded images or "
 "article tracking resources are loaded."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:527
+#: src/ashywall/ui/reading_page.py:534
 msgid "No sources added"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:533
+#: src/ashywall/ui/reading_page.py:540
 msgid "Could not update this source"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:541 src/ashywall/ui/reading_page.py:562
+#: src/ashywall/ui/reading_page.py:548 src/ashywall/ui/reading_page.py:569
 msgid "Edit Topic"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:548
+#: src/ashywall/ui/reading_page.py:555
 msgid "Remove Source"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:564
+#: src/ashywall/ui/reading_page.py:571
 msgid "Save"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:579
+#: src/ashywall/ui/reading_page.py:586
 msgid "Remove Source?"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:581
+#: src/ashywall/ui/reading_page.py:588
 #, python-brace-format
 msgid "“{name}” and its cached articles will be removed from Reading."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:598
+#: src/ashywall/ui/reading_page.py:605
 msgid "Article"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:607
+#: src/ashywall/ui/reading_page.py:614
 msgid "This source did not provide a summary."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:614
+#: src/ashywall/ui/reading_page.py:621
 msgid "Summary provided by the source. Read the full article in your browser."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:625 src/ashywall/ui/reading_page.py:629
+#: src/ashywall/ui/reading_page.py:632 src/ashywall/ui/reading_page.py:636
 msgid "Mark as Unread"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:625 src/ashywall/ui/reading_page.py:629
+#: src/ashywall/ui/reading_page.py:632 src/ashywall/ui/reading_page.py:636
 msgid "Mark as Read"
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:638
+#: src/ashywall/ui/reading_page.py:645
 msgid "This article has an invalid address."
 msgstr ""
 
-#: src/ashywall/ui/reading_page.py:648
+#: src/ashywall/ui/reading_page.py:655
 msgid "The article could not be opened in the browser."
 msgstr ""
 

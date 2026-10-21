@@ -212,9 +212,12 @@ class HttpClient:
         params: dict[str, str] | None = None,
         on_progress: Callable[[int, int | None], None] | None = None,
         cancel: threading.Event | None = None,
+        on_response: Callable[[Response], None] | None = None,
     ) -> int:
         """Copy the body into ``sink``; returns the byte count."""
         with self._open(url, params, cancel) as response:
+            if on_response is not None:
+                on_response(response)
             length_header = (
                 response.headers.get("Content-Length") if response.headers else None
             )
@@ -293,6 +296,32 @@ class HttpClient:
             url, parts.append, max_bytes=max_bytes, params=params, cancel=cancel
         )
         return b"".join(parts)
+
+    def get_document(
+        self,
+        url: str,
+        *,
+        max_bytes: int,
+        cancel: threading.Event | None = None,
+    ) -> tuple[bytes, str]:
+        """Read a bounded document and retain its URL for relative feed links."""
+        parts: list[bytes] = []
+        effective_url = url
+
+        def received(response: Response) -> None:
+            nonlocal effective_url
+            effective_url = same_origin_redirect(
+                url, getattr(response, "geturl", lambda: url)()
+            )
+
+        self.stream(
+            url,
+            parts.append,
+            max_bytes=max_bytes,
+            cancel=cancel,
+            on_response=received,
+        )
+        return b"".join(parts), effective_url
 
     def get_json(
         self,

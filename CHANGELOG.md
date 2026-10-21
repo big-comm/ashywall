@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Reading accepts bare website addresses and discovers same-origin RSS/Atom
+  links without loading scripts or embedded resources. Phoronix root
+  addresses use its official feed directly, avoiding homepage access errors.
+- Source errors distinguish missing feeds and sites refusing access, with
+  guidance to enter a direct RSS/Atom address.
+
 - Online server errors (HTTP 5xx, including Wallhaven's 521) identify a
   service outage and suggest trying later, retaining the status and retry
   button in the existing GNOME error page.

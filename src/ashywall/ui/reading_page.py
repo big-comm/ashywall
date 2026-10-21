@@ -7,8 +7,9 @@ from gi.repository import Adw, Gio, GLib, GObject, Gtk, Pango
 
 from ..i18n import _, ngettext
 from ..providers.base import optional_web_url
+from ..services.feed_discovery import FeedDiscoveryError
 from ..services.feeds import FeedAddressError, FeedError
-from ..services.http import TransferCancelled
+from ..services.http import HttpError, TransferCancelled
 from ..services.reading import ReadingService
 from ..services.reading_repository import (
     Article,
@@ -23,10 +24,16 @@ from .errors import error_text
 def reading_error(error: Exception) -> str:
     if isinstance(error, FeedAddressError):
         return _(
-            "Enter a public HTTPS feed address. Local network addresses are not supported."
+            "Enter a public website or HTTPS feed address. Local network addresses are not supported."
+        )
+    if isinstance(error, FeedDiscoveryError):
+        return _(
+            "No readable feed was found. Paste the site's direct RSS or Atom address."
         )
     if isinstance(error, FeedError):
         return _("This address did not return a supported RSS or Atom feed.")
+    if isinstance(error, HttpError) and error.status == 403:
+        return _("This site refused access. Try its direct RSS or Atom address.")
     if isinstance(error, ReadingError):
         return {
             "duplicate": _("This source is already in your reading list."),
@@ -407,11 +414,11 @@ class ReadingPage(Adw.NavigationPage):
         self._dialog_cancels.append(cancel)
         closed = [False]
         dialog = Adw.Dialog(title=_("Add Source"), content_width=480)
-        address = Adw.EntryRow(title=_("Feed Address"))
+        address = Adw.EntryRow(title=_("Website or Feed Address"))
         category = Adw.EntryRow(title=_("Topic (optional)"))
         group = Adw.PreferencesGroup(
             description=_(
-                "Paste the HTTPS address of an RSS or Atom feed. For example, organize sources under Technology, Health or Science."
+                "Enter a website, such as phoronix.com, or an HTTPS RSS or Atom address. Organize sources under Technology, Health or Science."
             )
         )
         group.add(address)

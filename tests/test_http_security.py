@@ -68,6 +68,17 @@ def test_same_origin_redirect_succeeds(transport, location):
     assert len(destinations) == 2
 
 
+def test_document_keeps_redirect_destination_for_relative_links(transport):
+    client, destinations, replies = transport
+    final = Response(200)
+    final.geturl = lambda: "https://www.bing.com/news/"
+    replies.extend([Response(302, "/news/"), final])
+    body, url = client.get_document("https://www.bing.com/start", max_bytes=10)
+    assert body == b"ok"
+    assert url == "https://www.bing.com/news/"
+    assert len(destinations) == 2
+
+
 def test_batched_api_query_can_exceed_image_url_limit(transport):
     client, destinations, replies = transport
     replies.append(Response(200))

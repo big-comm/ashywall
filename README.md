@@ -66,6 +66,11 @@ collections and Reading](docs/screenshots/README.md).*
   text list uses the same GTK/libadwaita navigation as the wallpaper library,
   adapting to narrow windows and the system's light/dark style. Summaries
   are plain text; full articles open in the default browser.
+  Add a direct feed URL or a website address: the reader looks for RSS/Atom
+  links advertised by that page on the same HTTPS origin. Bare hostnames
+  use HTTPS. `phoronix.com` uses its official feed directly, since the
+  homepage may refuse automated access. Sites without readable feed links
+  require a direct feed address.
   Sources update only when explicitly added or refreshed: no startup
   requests, background polling, notifications or embedded article images.
   Cached articles remain available offline. Up to 50 public HTTPS sources
