@@ -156,6 +156,10 @@ without `-si` to build without installing anything.
 
 ## Translations
 
+The release target is the 29-language set used by BigCommunity's LangForge,
+including English source. Current coverage and the mandatory release check
+are documented in [locale/README.md](locale/README.md).
+
 User-facing strings are in English in the code and translated with gettext
 (`locale/*.po`). After changing strings, run:
 

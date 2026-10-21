@@ -83,6 +83,11 @@ When preparing distribution through BigCommunity:
 The exact testing-repository submission process must be checked in the
 distribution's packaging repository before automating publication.
 
+Release validation also requires all 29 BigCommunity language targets,
+including English source. Run `./scripts/validate.sh --release` and follow
+[locale/README.md](locale/README.md). Missing translations block release
+readiness even when development tests pass.
+
 ## Online availability
 
 Provider outages are independent of package installation. For example,

@@ -2,6 +2,17 @@
 # Run the same local checks used by CI, without opening the application.
 set -euo pipefail
 
+translation_args=()
+case "${1:-}" in
+    "") ;;
+    --release) translation_args=(--require-complete) ;;
+    *) printf 'Usage: %s [--release]\n' "$0" >&2; exit 2 ;;
+esac
+if (( $# > 1 )); then
+    printf 'Usage: %s [--release]\n' "$0" >&2
+    exit 2
+fi
+
 PROJECT_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
@@ -14,7 +25,8 @@ export XDG_CACHE_HOME="$validation_dir/cache"
 export XDG_STATE_HOME="$validation_dir/state"
 
 python -m pytest
-ruff check src tests
+ruff check src tests scripts/check-translations.py
+python scripts/check-translations.py "${translation_args[@]}"
 for po in locale/*.po; do
     language="$(basename -- "$po" .po)"
     msgfmt --check -o "$validation_dir/$language.mo" "$po"
