@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from ..i18n import _, ngettext
 from ..models.wallpaper import Collection
 from ..providers.base import RemotePage, RemoteProvider
-from ..services.http import NetworkUnavailable, RateLimited
+from ..services.http import HttpError, NetworkUnavailable, RateLimited
 from ..services.library_repository import FolderError, FolderProblem, Section
 from .errors import error_text
 from .gallery_page import EmptyState
@@ -185,6 +185,12 @@ def remote_error_state(provider: str, error: Exception) -> EmptyState:
         title = _("{provider} Is Unreachable").format(provider=provider)
     elif isinstance(error, RateLimited):
         title = _("Too Many Requests")
+    elif (
+        isinstance(error, HttpError)
+        and error.status is not None
+        and 500 <= error.status < 600
+    ):
+        title = _("{provider} Is Currently Unavailable").format(provider=provider)
     else:
         title = _("{provider} Could Not Be Loaded").format(provider=provider)
     return EmptyState(

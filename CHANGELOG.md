@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Online server errors (HTTP 5xx, including Wallhaven's 521) identify a
+  service outage and suggest trying later, retaining the status and retry
+  button in the existing GNOME error page.
+
 ## 1.1.0 (2026-10-21)
 
 - Local Arch/BigCommunity builds use the reviewed Git snapshot instead of

@@ -22,6 +22,10 @@ def error_text(error: Exception) -> str:
     if isinstance(error, DownloadError):
         return _("The downloaded file was rejected: {reason}").format(reason=error)
     if isinstance(error, HttpError):
+        if error.status is not None and 500 <= error.status < 600:
+            return _(
+                "The service is currently unavailable (HTTP {status}). Try again later."
+            ).format(status=error.status)
         return _("The server answered with an error ({status}).").format(
             status=error.status or "?"
         )

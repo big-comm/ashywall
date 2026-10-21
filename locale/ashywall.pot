@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ashywall\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-21 12:17-0300\n"
+"POT-Creation-Date: 2026-10-21 12:46-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -311,7 +311,12 @@ msgstr ""
 msgid "The downloaded file was rejected: {reason}"
 msgstr ""
 
-#: src/ashywall/ui/errors.py:25
+#: src/ashywall/ui/errors.py:27
+#, python-brace-format
+msgid "The service is currently unavailable (HTTP {status}). Try again later."
+msgstr ""
+
+#: src/ashywall/ui/errors.py:29
 #, python-brace-format
 msgid "The server answered with an error ({status})."
 msgstr ""
@@ -877,7 +882,7 @@ msgid ""
 msgstr ""
 
 #: src/ashywall/ui/remote_detail_page.py:264
-#: src/ashywall/ui/window_states.py:194
+#: src/ashywall/ui/window_states.py:200
 msgid "Try Again"
 msgstr ""
 
@@ -1013,8 +1018,8 @@ msgstr ""
 msgid "Otherwise wallpapers follow the library order"
 msgstr ""
 
-#: src/ashywall/ui/rotation_dialog.py:173 src/ashywall/ui/window_states.py:216
-#: src/ashywall/ui/window_states.py:222
+#: src/ashywall/ui/rotation_dialog.py:173 src/ashywall/ui/window_states.py:222
+#: src/ashywall/ui/window_states.py:228
 #, python-brace-format
 msgid "{count} wallpaper"
 msgid_plural "{count} wallpapers"
@@ -1345,19 +1350,24 @@ msgstr ""
 msgid "Too Many Requests"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:189
+#: src/ashywall/ui/window_states.py:193
+#, python-brace-format
+msgid "{provider} Is Currently Unavailable"
+msgstr ""
+
+#: src/ashywall/ui/window_states.py:195
 #, python-brace-format
 msgid "{provider} Could Not Be Loaded"
 msgstr ""
 
-#: src/ashywall/ui/window_states.py:210
+#: src/ashywall/ui/window_states.py:216
 #, python-brace-format
 msgid "{count} result on {provider}"
 msgid_plural "{count} results on {provider}"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/ashywall/ui/window_states.py:213
+#: src/ashywall/ui/window_states.py:219
 #, python-brace-format
 msgid "{count} shown · page {page} of {last}"
 msgstr ""
