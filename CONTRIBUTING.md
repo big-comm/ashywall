@@ -7,9 +7,11 @@ are a future scope; changes here must keep the GNOME backend working.
 ## Branches
 
 - `dev-xathay`: active development, fixes and local validation.
-- `main`: reviewed changes ready for integration.
-- Integrate through a pull request from `dev-xathay` to `main` once the
-  repository is published and CI passes.
+- `main`: reviewed source used for package builds.
+- The maintainer reviews and validates changes locally, integrates
+  `dev-xathay` directly into `main` and pushes to `big-comm/ashywall`.
+  A pull request is not required for this workflow.
+- After publishing the chosen revision, generate the package with GitRepo.
 
 Local work does not require a GitHub repository. Check `git remote -v`
 before any future push: a configured URL does not establish that a remote
@@ -71,11 +73,12 @@ When preparing distribution through BigCommunity:
 1. Review the tracked files and reachable history before first publication.
    Local planning material, test profiles and screenshots must stay out of
    the publication unless intentionally reviewed.
-2. Publish the reviewed source to the intended repository and confirm the
-   source revision used by the distribution's build recipe. The current
-   upstream PKGBUILD follows the remote default branch; do not assume that
-   it builds an unmerged `dev-xathay` commit.
-3. Submit a package to BigCommunity's **testing package repository** through
+2. Publish the reviewed source directly to `main` in `big-comm/ashywall`,
+   keeping `dev-xathay` for ongoing development. Generate the package in
+   GitRepo from the published revision using `pkgbuild/PKGBUILD`. The
+   recipe follows the remote default branch; changes present only in
+   `dev-xathay` are not included in that build.
+3. Submit the package to BigCommunity's **testing package repository** through
    its established packaging process, keeping the source revision and build
    evidence. A development Git branch does not select a package channel.
 4. Validate fresh installation and upgrade on GNOME, desktop application
