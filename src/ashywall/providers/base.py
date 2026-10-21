@@ -3,7 +3,6 @@
 import json
 import re
 import threading
-import urllib.parse
 from dataclasses import asdict, dataclass, field, replace
 from enum import StrEnum
 from pathlib import Path
@@ -15,6 +14,7 @@ from ..models.resolution import (
     aspect_ratio_label,
     orientation_of,
 )
+from ..services.web_urls import web_url_parts
 
 REMOTE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
@@ -155,15 +155,11 @@ def query_accepts(query: RemoteQuery, item: RemoteWallpaper) -> bool:
 
 def validated_url(value: object, allowed_hosts: frozenset[str] | None) -> str:
     """Return ``value`` if it is a plain https URL on an allowed host."""
-    if not isinstance(value, str) or len(value) > 2048:
-        raise ProviderError("URL missing or too long")
-    parts = urllib.parse.urlsplit(value)
-    if (
-        parts.scheme != "https"
-        or not parts.hostname
-        or parts.username
-        or parts.password
-    ):
+    try:
+        parts = web_url_parts(value)
+    except ValueError as error:
+        raise ProviderError(f"Invalid URL: {error}") from error
+    if parts.scheme != "https":
         raise ProviderError(f"Unsafe URL: {value!r}")
     if parts.port not in (None, 443):
         raise ProviderError(f"Unexpected port in {value!r}")
@@ -174,9 +170,8 @@ def validated_url(value: object, allowed_hosts: frozenset[str] | None) -> str:
 
 def optional_web_url(value: object) -> str | None:
     """A link shown to the user (never fetched by AshyWall): http(s) only."""
-    if not isinstance(value, str) or not value or len(value) > 2048:
-        return None
-    parts = urllib.parse.urlsplit(value)
-    if parts.scheme not in ("http", "https") or not parts.hostname:
+    try:
+        web_url_parts(value)
+    except ValueError:
         return None
     return value

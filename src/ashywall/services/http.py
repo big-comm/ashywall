@@ -5,7 +5,9 @@ sliding-window limiter keeps API calls under a provider's published quota.
 The opener is injectable so tests never touch the network.
 """
 
+import io
 import json
+import math
 import sys
 import threading
 import time
@@ -18,6 +20,7 @@ from typing import Any, Protocol
 
 from .. import __version__
 from .connections import ConnectionPool
+from .web_urls import https_origin, same_origin_redirect
 
 # Wikimedia requires a contact address in the User-Agent and throttles clients
 # without one; the other services accept it too.
@@ -66,14 +69,26 @@ Opener = Callable[[urllib.request.Request, float], Response]
 
 
 class _HttpsOnlyRedirects(urllib.request.HTTPRedirectHandler):
-    """Follow redirects only to https URLs, so a redirect cannot downgrade a transfer."""
+    """Apply the pool's same-origin policy when urllib handles a proxy."""
 
-    def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
-        if urllib.parse.urlsplit(newurl).scheme != "https":
+    def http_error_302(self, req, fp, code, msg, headers):  # type: ignore[no-untyped-def]
+        location = headers.get("Location", headers.get("URI"))
+        try:
+            if location is not None:
+                same_origin_redirect(req.full_url, location)
+        except ValueError as error:
+            # Validate before urllib's urljoin, which can itself raise ValueError.
+            fp.close()
             raise urllib.error.HTTPError(
-                newurl, code, "Refusing non-https redirect", headers, fp
-            )
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+                req.full_url,
+                code,
+                f"Refusing unsafe redirect: {error}",
+                headers,
+                io.BytesIO(),
+            ) from error
+        return super().http_error_302(req, fp, code, msg, headers)
+
+    http_error_301 = http_error_303 = http_error_307 = http_error_308 = http_error_302
 
 
 _URLLIB_OPENER = urllib.request.build_opener(_HttpsOnlyRedirects)
@@ -96,10 +111,13 @@ class SlidingWindowLimiter:
         window: float = 60.0,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
+        if limit <= 0 or not math.isfinite(window) or window <= 0:
+            raise ValueError("The request limit and window must be positive and finite")
         self._limit = limit
         self._window = window
         self._clock = clock
-        self._calls: deque[float] = deque()
+        # Only the last limit reservations are needed, including future slots.
+        self._calls: deque[float] = deque(maxlen=limit)
         self._lock = threading.Lock()
 
     def wait_time(self) -> float:
@@ -110,7 +128,7 @@ class SlidingWindowLimiter:
                 self._calls.popleft()
             delay = 0.0
             if len(self._calls) >= self._limit:
-                delay = self._window - (now - self._calls[0])
+                delay = self._calls[0] + self._window - now
             self._calls.append(now + delay)
             return max(0.0, delay)
 
@@ -133,8 +151,14 @@ class HttpClient:
         cancel: threading.Event | None,
         headers: dict[str, str] | None = None,
     ) -> Response:
+        if cancel is not None and cancel.is_set():
+            raise TransferCancelled()
         if params:
             url = f"{url}?{urllib.parse.urlencode(params)}"
+        try:
+            https_origin(url)
+        except ValueError as error:
+            raise HttpError(f"Invalid request URL: {error}") from error
         if self._limiter is not None:
             delay = self._limiter.wait_time()
             if delay and cancel is not None:
@@ -142,6 +166,8 @@ class HttpClient:
                     raise TransferCancelled()
             elif delay:
                 time.sleep(delay)
+        if cancel is not None and cancel.is_set():
+            raise TransferCancelled()
         request = urllib.request.Request(
             url, headers={"User-Agent": USER_AGENT, "Accept": "*/*", **(headers or {})}
         )

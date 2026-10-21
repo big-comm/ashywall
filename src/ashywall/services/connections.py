@@ -21,6 +21,8 @@ import urllib.request
 from collections.abc import Callable
 from typing import Any
 
+from .web_urls import https_origin, same_origin_redirect
+
 MAX_REDIRECTS = 5
 NAME_CACHE_SECONDS = 300.0
 REDIRECT_CODES = frozenset({301, 302, 303, 307, 308})
@@ -98,7 +100,7 @@ class _Response:
 
 
 class ConnectionPool:
-    """One connection per host and thread; https only, redirects only to https."""
+    """One connection per host and thread; HTTPS with same-origin redirects."""
 
     def __init__(
         self,
@@ -199,10 +201,11 @@ class ConnectionPool:
         url = request.full_url
         headers = dict(request.header_items())
         for _redirect in range(MAX_REDIRECTS + 1):
+            try:
+                host, port = https_origin(url)
+            except ValueError as error:
+                raise urllib.error.URLError(str(error)) from error
             parts = urllib.parse.urlsplit(url)
-            if parts.scheme != "https" or not parts.hostname:
-                raise urllib.error.URLError(f"Refusing non-https URL {url}")
-            host, port = parts.hostname, parts.port or 443
             target = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
             response = self._send(host, port, target, headers, timeout)
             status = response.status
@@ -217,15 +220,16 @@ class ConnectionPool:
                         response.headers,
                         io.BytesIO(),
                     )
-                url = urllib.parse.urljoin(url, location)
-                if urllib.parse.urlsplit(url).scheme != "https":
+                try:
+                    url = same_origin_redirect(url, location)
+                except ValueError as error:
                     raise urllib.error.HTTPError(
                         url,
                         status,
-                        "Refusing non-https redirect",
+                        f"Refusing unsafe redirect: {error}",
                         response.headers,
                         io.BytesIO(),
-                    )
+                    ) from error
                 continue
             if status >= 400:
                 self._finish(response, host, port)

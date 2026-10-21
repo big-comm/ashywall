@@ -4,6 +4,7 @@ import io
 import json
 import threading
 import urllib.error
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from ashywall.providers.base import (
     RemoteQuery,
     RemoteSort,
     RemoteWallpaper,
+    optional_web_url,
     validated_url,
 )
 from ashywall.providers.wallhaven import (
@@ -240,9 +242,26 @@ def test_validated_url() -> None:
         "ftp://w.wallhaven.cc/x",
         None,
         "https://th.wallhaven.cc/x",
+        "https://w.wallhaven.cc:bad/x",
+        "https://[broken/x",
+        "https://user:secret@w.wallhaven.cc/x",
+        "https://w.wallha\tven.cc/x",
     ):
         with pytest.raises(ProviderError):
             validated_url(bad, IMAGE_HOSTS)
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://[broken/image",
+        "https://example.org:bad/image",
+        "https://user:secret@example.org/image",
+        "https://exam\nple.org/image",
+    ],
+)
+def test_malformed_display_link_is_omitted(url) -> None:
+    assert optional_web_url(url) is None
 
 
 def test_remote_wallpaper_json_round_trip() -> None:
@@ -267,6 +286,40 @@ def test_limiter_spaces_out_calls() -> None:
     assert limiter.wait_time() == pytest.approx(60.0)
     now[0] = 61.0
     assert limiter.wait_time() == 0
+
+
+def test_limiter_reserves_future_windows_under_concurrency() -> None:
+    limiter = SlidingWindowLimiter(2, window=60, clock=lambda: 0)
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        delays = list(pool.map(lambda _: limiter.wait_time(), range(8)))
+    assert sorted(delays) == [0, 0, 60, 60, 120, 120, 180, 180]
+
+
+@pytest.mark.parametrize(
+    "limit,window",
+    [
+        (0, 60),
+        (-1, 60),
+        (2, 0),
+        (2, -1),
+        (2, float("inf")),
+        (2, float("nan")),
+    ],
+)
+def test_limiter_rejects_invalid_configuration(limit, window) -> None:
+    with pytest.raises(ValueError):
+        SlidingWindowLimiter(limit, window)
+
+
+def test_cancelled_request_never_reaches_opener() -> None:
+    cancel = threading.Event()
+    cancel.set()
+    opener = FakeOpener({"https://": b"ok"})
+    with pytest.raises(TransferCancelled):
+        HttpClient(opener=opener).get_bytes(
+            "https://example.org/", max_bytes=10, cancel=cancel
+        )
+    assert opener.requests == []
 
 
 def test_response_size_limit() -> None:
