@@ -22,6 +22,8 @@ class PreferencesDialog(Adw.PreferencesDialog):
         runner: BackgroundRunner,
         on_add_folder: Callable[[], None],
         on_remove_folder: Callable[[Source], None],
+        reading_enabled: bool = False,
+        on_reading_enabled: Callable[[bool], None] | None = None,
     ) -> None:
         super().__init__(title=_("Preferences"))
         self._caches = (
@@ -61,6 +63,29 @@ class PreferencesDialog(Adw.PreferencesDialog):
         page.add(self._folders_group)
         page.add(self._build_storage_group())
         self.add(page)
+        reading = Adw.PreferencesPage(
+            title=_("Reading"), icon_name="application-rss+xml-symbolic"
+        )
+        reading_group = Adw.PreferencesGroup(
+            title=_("RSS and Atom"),
+            description=_(
+                "An optional, quiet reading list alongside your wallpaper library. Full articles open in your default browser."
+            ),
+        )
+        enabled = Adw.SwitchRow(
+            title=_("Enable Reading"),
+            subtitle=_(
+                "Show Articles in the sidebar. Sources update only when you request it."
+            ),
+            active=reading_enabled,
+        )
+        if on_reading_enabled is not None:
+            enabled.connect(
+                "notify::active", lambda row, _p: on_reading_enabled(row.get_active())
+            )
+        reading_group.add(enabled)
+        reading.add(reading_group)
+        self.add(reading)
 
     def set_folders(self, folders: list[Source]) -> None:
         for row in self._folder_rows:

@@ -16,6 +16,7 @@ classifiers = [
 dependencies = [
     "PyGObject",
     "Pillow>=11.3",
+    "defusedxml>=0.7.1",
 ]
 
 [project.optional-dependencies]

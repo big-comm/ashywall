@@ -1,5 +1,6 @@
 """Adw.Application entry point."""
 
+import locale
 import logging
 import os
 import sys
@@ -54,6 +55,10 @@ class AshyWallApplication(Adw.Application):
         self._services: WindowServices | None = None
 
     def do_startup(self) -> None:
+        try:
+            locale.setlocale(locale.LC_ALL, "")
+        except locale.Error:
+            pass  # A missing system locale must not prevent startup.
         Adw.Application.do_startup(self)
         GLib.set_application_name("AshyWall")
         Gtk.Window.set_default_icon_name(paths.APP_ID)
@@ -94,6 +99,9 @@ class AshyWallApplication(Adw.Application):
         window.present()
 
     def do_shutdown(self) -> None:
+        for window in self.get_windows():
+            if isinstance(window, MainWindow):
+                window.shutdown()
         if self._services is not None:
             self._services.loader.shutdown()
             self._services.runner.shutdown()

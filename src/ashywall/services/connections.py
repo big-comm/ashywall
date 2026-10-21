@@ -11,6 +11,7 @@ stalls the lookup for the resolver's timeout (often 5 s) every time.
 
 import http.client
 import io
+import ipaddress
 import socket
 import ssl
 import threading
@@ -37,9 +38,11 @@ class NameCache:
         self,
         lookup: Callable[..., list[AddressInfo]] = socket.getaddrinfo,
         clock: Callable[[], float] = time.monotonic,
+        public_only: bool = False,
     ) -> None:
         self._lookup = lookup
         self._clock = clock
+        self._public_only = public_only
         self._entries: dict[tuple[str, int], tuple[float, list[AddressInfo]]] = {}
         self._lock = threading.Lock()
 
@@ -58,6 +61,10 @@ class NameCache:
                 failure = error
         if not addresses:
             raise failure or socket.gaierror(f"No address for {host}")
+        if self._public_only and any(
+            not ipaddress.ip_address(address[4][0]).is_global for address in addresses
+        ):
+            raise OSError("Refusing a non-public feed address")
         with self._lock:
             self._entries[key] = (self._clock(), addresses)
         return addresses

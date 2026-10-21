@@ -45,6 +45,19 @@ BigLinux, Wallhaven, Bing and Wikimedia Commons. See `CHANGELOG.md`.
   online favorites keep their listing and show up without a connection.
 - **Collections** created by the user, mixing local and online wallpapers.
   Deleting a collection never touches the wallpapers in it.
+- **Optional Reading section**, enabled in Preferences → Reading. Add your
+  own RSS 2 or Atom feeds, organize sources by topic, search cached titles
+  and sources, and mark articles as read or unread. A quiet, virtualized
+  text list uses the same GTK/libadwaita navigation as the wallpaper library,
+  adapting to narrow windows and the system's light/dark style. Summaries
+  are plain text; full articles open in the default browser.
+  Sources update only when explicitly added or refreshed: no startup
+  requests, background polling, notifications or embedded article images.
+  Cached articles remain available offline. Up to 50 public HTTPS sources
+  are supported, with 500 recent articles retained per source, 60 items per
+  page and a 2 MB limit per feed. DTDs, XML entities and private network
+  destinations are rejected. Direct connections use validated public DNS
+  addresses; a user-configured HTTPS proxy is trusted to route public hosts.
 - **BigLinux wallpapers**: the remade collection of the
   `biglinux-wallpapers-base` and `extra-biglinux-wallpapers` packages, read
   from their GitHub repositories (about 400 AVIF images in 4K). The file
@@ -99,6 +112,7 @@ fewer than 24 results and the total count is not shown.
 - Python ≥ 3.12, PyGObject
 - GTK ≥ 4.16 and libadwaita ≥ 1.6 (developed and tested with GTK 4.22 and libadwaita 1.9)
 - Pillow ≥ 11.3 (AVIF support)
+- defusedxml ≥ 0.7.1 (safe RSS/Atom parsing)
 - GNOME with `gsettings-desktop-schemas` to apply wallpapers
 
 ## Running from source

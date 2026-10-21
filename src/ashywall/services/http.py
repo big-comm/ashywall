@@ -16,10 +16,11 @@ import urllib.parse
 import urllib.request
 from collections import deque
 from collections.abc import Callable
+from functools import lru_cache
 from typing import Any, Protocol
 
 from .. import __version__
-from .connections import ConnectionPool
+from .connections import ConnectionPool, NameCache
 from .web_urls import https_origin, same_origin_redirect
 
 # Wikimedia requires a contact address in the User-Agent and throttles clients
@@ -102,6 +103,23 @@ def _default_opener(request: urllib.request.Request, timeout: float) -> Response
     return _POOL.open(request, timeout)
 
 
+@lru_cache(maxsize=1)
+def _public_transport() -> tuple[NameCache, ConnectionPool]:
+    names = NameCache(public_only=True)
+    return names, ConnectionPool(names)
+
+
+def _public_opener(request: urllib.request.Request, timeout: float) -> Response:
+    names, pool = _public_transport()
+    if urllib.request.getproxies().get("https"):
+        # Honor the user's proxy after checking local DNS. The configured proxy
+        # is trusted to route the requested public host, as with other HTTPS apps.
+        names.resolve(*https_origin(request.full_url))
+        return _URLLIB_OPENER.open(request, timeout=timeout)
+    # Direct connections use the exact public addresses validated by NameCache.
+    return pool.open(request, timeout)
+
+
 class SlidingWindowLimiter:
     """Allow at most ``limit`` calls in any ``window`` seconds, waiting if needed."""
 
@@ -139,8 +157,9 @@ class HttpClient:
         opener: Opener | None = None,
         timeout: float = DEFAULT_TIMEOUT,
         limiter: SlidingWindowLimiter | None = None,
+        public_only: bool = False,
     ) -> None:
-        self._opener = opener or _default_opener
+        self._opener = opener or (_public_opener if public_only else _default_opener)
         self._timeout = timeout
         self._limiter = limiter
 

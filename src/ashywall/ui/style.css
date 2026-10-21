@@ -49,3 +49,18 @@
   padding: 6px 14px;
   border-radius: 999px;
 }
+
+.reading-list {
+  padding: 12px;
+  background: none;
+}
+
+.reading-list > row {
+  padding: 0;
+  border-radius: 12px;
+  margin-bottom: 4px;
+}
+
+.reading-list > row:hover {
+  background-color: alpha(currentColor, 0.05);
+}

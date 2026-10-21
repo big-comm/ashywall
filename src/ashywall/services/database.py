@@ -129,6 +129,25 @@ MIGRATIONS: tuple[tuple[str, ...], ...] = (
         # instead of every row.
         "CREATE INDEX wallpapers_by_status ON wallpapers(status, path)",
     ),
+    (
+        # Optional reading module; wallpaper tables and settings stay independent.
+        """CREATE TABLE reading_feeds (
+            id INTEGER PRIMARY KEY, url TEXT NOT NULL UNIQUE,
+            title TEXT NOT NULL, category TEXT NOT NULL DEFAULT '',
+            added_at INTEGER NOT NULL, checked_at INTEGER,
+            last_error TEXT
+        )""",
+        """CREATE TABLE reading_articles (
+            id INTEGER PRIMARY KEY,
+            feed_id INTEGER NOT NULL REFERENCES reading_feeds(id) ON DELETE CASCADE,
+            entry_key TEXT NOT NULL, title TEXT NOT NULL, url TEXT NOT NULL,
+            summary TEXT NOT NULL, published_at INTEGER, seen_at INTEGER NOT NULL,
+            is_read INTEGER NOT NULL DEFAULT 0 CHECK(is_read IN (0,1)),
+            UNIQUE(feed_id, entry_key)
+        )""",
+        "CREATE INDEX reading_by_feed ON reading_articles(feed_id, seen_at DESC)",
+        "CREATE INDEX reading_by_date ON reading_articles(COALESCE(published_at, seen_at) DESC, id DESC)",
+    ),
 )
 
 LATEST_VERSION = len(MIGRATIONS)

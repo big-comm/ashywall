@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from gi.repository import Adw, Gio, GLib, Gtk
 
@@ -42,6 +43,7 @@ from .rotation_dialog import RotationDialog
 from .thumbnail_loader import GalleryEntry, ThumbnailLoader
 from .window_states import (
     NEW_COLLECTION_KEY,
+    READING_KEY,
     SidebarEntry,
     filtered_empty_state,
     folder_error_text,
@@ -52,6 +54,9 @@ from .window_states import (
     remote_subtitle,
     sidebar_entries,
 )
+
+if TYPE_CHECKING:
+    from .reading_page import ReadingPage
 
 
 @dataclass
@@ -94,10 +99,17 @@ class MainWindow(Adw.ApplicationWindow):
             title="AshyWall",
         )
         self._services = services
+        self._shut_down = False
         self._repository = services.repository
         self._providers = services.providers
+        self._reading_enabled = (
+            self._repository.get_setting("reading-enabled") == "true"
+        )
+        self._reading: ReadingPage | None = None
         self._entries = sidebar_entries(
-            self._repository.list_collections(), list(self._providers.values())
+            self._repository.list_collections(),
+            list(self._providers.values()),
+            self._reading_enabled,
         )
         self._current = self._entries[0]
         self._count_labels: dict[str, Gtk.Label] = {}
@@ -142,9 +154,12 @@ class MainWindow(Adw.ApplicationWindow):
         self._navigation.add(self._gallery)
         self._navigation.connect("popped", lambda *_args: self._update_counts())
 
+        self._content_page = Adw.NavigationPage(
+            child=self._navigation, title=_("Wallpapers")
+        )
         self._split = Adw.NavigationSplitView(
             sidebar=self._build_sidebar(),
-            content=Adw.NavigationPage(child=self._navigation, title=_("Wallpapers")),
+            content=self._content_page,
             min_sidebar_width=220,
             max_sidebar_width=280,
         )
@@ -173,7 +188,7 @@ class MainWindow(Adw.ApplicationWindow):
 
         menu = Gio.Menu()
         library_section = Gio.Menu()
-        library_section.append(_("Refresh Library"), "win.refresh")
+        library_section.append(_("Refresh Library"), "win.refresh-library")
         library_section.append(_("Restore Previous Wallpaper"), "win.restore-wallpaper")
         menu.append_section(None, library_section)
         rotation_section = Gio.Menu()
@@ -227,7 +242,9 @@ class MainWindow(Adw.ApplicationWindow):
     def _rebuild_sidebar(self, select_key: str | None = None) -> None:
         """Recreate rows after collections change, keeping or moving the selection."""
         self._entries = sidebar_entries(
-            self._repository.list_collections(), list(self._providers.values())
+            self._repository.list_collections(),
+            list(self._providers.values()),
+            self._reading_enabled,
         )
         self._populate_sidebar()
         key = select_key or self._current.key
@@ -290,9 +307,28 @@ class MainWindow(Adw.ApplicationWindow):
     def _select_entry(self, entry: SidebarEntry) -> None:
         self._current = entry
         self._highlight(entry)
-        self._navigation.pop_to_tag("gallery")
         self._explore.stop()
         self._gallery.set_loading_more(False)
+        if entry.key == READING_KEY:
+            self._library.cancel()
+            if self._reading is None:
+                from ..services.reading import ReadingService
+                from .reading_page import ReadingPage
+
+                self._reading = ReadingPage(
+                    ReadingService(self._services.database_path),
+                    self._navigation,
+                    self._toast,
+                )
+                self._navigation.add(self._reading)
+            self._content_page.set_title(_("Reading"))
+            self._navigation.replace([self._reading])
+            self._reading.reload()
+            return
+        if self._reading is not None:
+            self._reading.stop()
+        self._content_page.set_title(_("Wallpapers"))
+        self._navigation.replace([self._gallery])
         provider = self._providers.get(entry.key)
         if provider is not None:
             self._explore.set_provider(provider)
@@ -315,6 +351,8 @@ class MainWindow(Adw.ApplicationWindow):
     def refresh_gallery(self, *, counts: bool = True) -> None:
         if counts:
             self._update_counts()
+        if self._current.key == READING_KEY:
+            return
         if (provider := self._current_provider()) is not None:
             self._library.cancel()
             self._gallery.show_loading(
@@ -718,11 +756,21 @@ class MainWindow(Adw.ApplicationWindow):
             self._services.runner,
             self.add_folder,
             self._remove_folder,
+            reading_enabled=self._reading_enabled,
+            on_reading_enabled=self._set_reading_enabled,
         )
         self._preferences.connect(
             "closed", lambda _d: setattr(self, "_preferences", None)
         )
         self._preferences.present(self)
+
+    def _set_reading_enabled(self, enabled: bool) -> None:
+        self._reading_enabled = enabled
+        self._repository.set_setting("reading-enabled", "true" if enabled else "false")
+        if not enabled and self._reading is not None:
+            self._reading.stop()
+        target = "all" if not enabled and self._current.key == READING_KEY else None
+        self._rebuild_sidebar(select_key=target)
 
     # Indexing ----------------------------------------------------------------
 
@@ -788,7 +836,8 @@ class MainWindow(Adw.ApplicationWindow):
     def _install_actions(self) -> None:
         actions = {
             "add-folder": self.add_folder,
-            "refresh": lambda *_a: self._indexer.start(),
+            "refresh": self._refresh_current,
+            "refresh-library": lambda *_a: self._indexer.start(),
             "restore-wallpaper": self._restore_previous,
             "clear-filters": lambda *_a: self._gallery.clear_filters(),
             "retry-explore": lambda *_a: self.refresh_gallery(),
@@ -803,6 +852,12 @@ class MainWindow(Adw.ApplicationWindow):
             action = Gio.SimpleAction(name=name)
             action.connect("activate", callback)
             self.add_action(action)
+
+    def _refresh_current(self, *_args) -> None:
+        if self._current.key == READING_KEY and self._reading is not None:
+            self._reading.refresh()
+        else:
+            self._indexer.start()
 
     # Automatic change ----------------------------------------------------------
 
@@ -894,6 +949,9 @@ class MainWindow(Adw.ApplicationWindow):
         return provider.details
 
     def _focus_search(self) -> None:
+        if self._current.key == READING_KEY and self._reading is not None:
+            self._reading.focus_search()
+            return
         provider = self._current_provider()
         if self._current.section is not None or (
             provider is not None and provider.searchable
@@ -906,8 +964,16 @@ class MainWindow(Adw.ApplicationWindow):
         )
 
     def _on_close_request(self, _window: Adw.ApplicationWindow) -> bool:
+        self.shutdown()
+        return False
+
+    def shutdown(self) -> None:
+        if self._shut_down:
+            return
+        self._shut_down = True
         self._indexer.cancel()
         self._library.shutdown()
         self._explore.shutdown()
         self._downloads.shutdown()
-        return False
+        if self._reading is not None:
+            self._reading.shutdown()

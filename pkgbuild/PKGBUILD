@@ -6,6 +6,7 @@ depends=(
     'python'
     'python-gobject'
     'python-pillow'
+    'python-defusedxml'
     'gsettings-desktop-schemas'
 )
 optdepends=(

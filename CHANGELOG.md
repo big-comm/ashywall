@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Optional Reading section for RSS 2 and Atom, enabled in Preferences.
+  Native GNOME navigation, topic filters, search, read/unread state and
+  bounded offline caching. Only explicit actions contact sources; article
+  pages, scripts, images and tracking resources are never fetched by the
+  reader. Source updates run independently of cached searches.
+- Feed XML rejects DTDs and entities. Feed connections require public
+  HTTPS destinations and keep the same-origin redirect policy.
+- Reading follows the system theme and locale, with Brazilian Portuguese
+  translations; wallpaper controls and the GNOME desktop backend are retained.
+- Feed dates outside the local calendar's range show the unknown-date label
+  instead of interrupting article rows.
+
 - HTTPS redirects keep the original host and port on direct and proxy
   connections; unsafe or malformed URLs are rejected before being fetched.
 - Invalid links in provider responses are handled as provider errors or

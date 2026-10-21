@@ -23,10 +23,13 @@ class SidebarEntry:
 
 
 NEW_COLLECTION_KEY = "new-collection"
+READING_KEY = "reading"
 
 
 def sidebar_entries(
-    collections: list[Collection], providers: list[RemoteProvider]
+    collections: list[Collection],
+    providers: list[RemoteProvider],
+    reading_enabled: bool = False,
 ) -> list[SidebarEntry]:
     library, explore, group = _("Library"), _("Explore"), _("Collections")
     return [
@@ -70,6 +73,19 @@ def sidebar_entries(
         ),
         SidebarEntry(
             NEW_COLLECTION_KEY, _("New Collection…"), "list-add-symbolic", group, None
+        ),
+        *(
+            [
+                SidebarEntry(
+                    READING_KEY,
+                    _("Articles"),
+                    "application-rss+xml-symbolic",
+                    _("Reading"),
+                    None,
+                )
+            ]
+            if reading_enabled
+            else []
         ),
     ]
 
