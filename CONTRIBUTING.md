@@ -6,12 +6,15 @@ are a future scope; changes here must keep the GNOME backend working.
 
 ## Branches
 
-- `dev-xathay`: active development, fixes and local validation.
-- `main`: reviewed source used for package builds.
-- The maintainer reviews and validates changes locally, integrates
-  `dev-xathay` directly into `main` and pushes to `big-comm/ashywall`.
-  A pull request is not required for this workflow.
-- After publishing the chosen revision, generate the package with GitRepo.
+- `dev-xathay`: all development, fixes, documentation, validation and package
+  builds while AshyWall is in BigCommunity testing.
+- Publish reviewed commits directly to `origin/dev-xathay`. A pull request
+  is not required for this workflow.
+- `main`: retain the already published history. Do not integrate, push or
+  rewrite this branch without a new, explicit maintainer instruction.
+- In GitRepo, select `dev-xathay` as the source branch and `testing` as the
+  package destination. `pkgbuild/PKGBUILD` explicitly fetches `dev-xathay`,
+  independent of the repository's default branch.
 
 Local work does not require a GitHub repository. Check `git remote -v`
 before any future push: a configured URL does not establish that a remote
@@ -78,17 +81,17 @@ When preparing distribution through BigCommunity:
 1. Review the tracked files and reachable history before first publication.
    Local planning material, test profiles and screenshots must stay out of
    the publication unless intentionally reviewed.
-2. Publish the reviewed source directly to `main` in `big-comm/ashywall`,
-   keeping `dev-xathay` for ongoing development. Generate the package in
-   GitRepo from the published revision using `pkgbuild/PKGBUILD`. The
-   recipe follows the remote default branch; changes present only in
-   `dev-xathay` are not included in that build.
+2. Publish the reviewed source to `dev-xathay` in `big-comm/ashywall`.
+   Generate the package in GitRepo with source branch `dev-xathay`,
+   destination `testing` and recipe `pkgbuild/PKGBUILD`. The recipe pins
+   its source to `dev-xathay`; it does not follow the default branch.
 3. Submit the package to BigCommunity's **testing package repository** through
    its established packaging process, keeping the source revision and build
    evidence. A development Git branch does not select a package channel.
 4. Validate fresh installation and upgrade on GNOME, desktop application
    discovery, translations, existing data, online sources, Reading, memory
    under extended use and suspend/resume before stable promotion.
+   Promotion to `main` or stable requires an explicit maintainer instruction.
 
 The exact testing-repository submission process must be checked in the
 distribution's packaging repository before automating publication.

@@ -67,3 +67,7 @@ pkgbuild/             Arch/BigCommunity PKGBUILD.
    https URLs on the provider's own hosts, never fetch display-only links
    (sources, pages), and send safe-for-work queries only.
 9. Run before finishing: `python -m pytest` and `ruff check src tests`.
+10. While AshyWall is in BigCommunity testing, keep all development, commits
+    and pushes on `dev-xathay`. The package recipe must fetch that branch.
+    Do not merge into, push to or rewrite `main` without a new, explicit
+    maintainer instruction to promote the work.

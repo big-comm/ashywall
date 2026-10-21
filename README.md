@@ -67,7 +67,7 @@ código:
 
 ```bash
 sudo pacman -S --needed base-devel git
-git clone https://github.com/big-comm/ashywall.git
+git clone --branch dev-xathay https://github.com/big-comm/ashywall.git
 cd ashywall
 ./scripts/build-local-package.sh -si
 ```
@@ -149,8 +149,8 @@ Para a validação completa, instale também as ferramentas indicadas em
 ```
 
 Os testes usam dados temporários e configurações isoladas do GNOME.
-[CONTRIBUTING.md](CONTRIBUTING.md) documenta o fluxo `dev-xathay` → `main`,
-a publicação direta e a geração de pacotes pelo GitRepo.
+[CONTRIBUTING.md](CONTRIBUTING.md) documenta o trabalho concentrado na
+`dev-xathay`, a publicação direta e a geração de pacotes de testing pelo GitRepo.
 [Traduções](locale/README.md) e [histórico de alterações](CHANGELOG.md)
 têm documentação própria.
 
