@@ -8,6 +8,12 @@ A wallpaper library for GNOME, built first for BigCommunity. AshyWall gathers
 the wallpapers installed on the system and the images in folders you choose,
 lets you preview them and applies them to the desktop.
 
+**Development preview.** The interface currently supports English and
+Brazilian Portuguese; the remaining 27 BigCommunity language targets are
+pending. See [translation status](locale/README.md) and
+[development and testing](CONTRIBUTING.md). Publishing the source does not
+promote a package to BigCommunity's testing or stable repositories.
+
 Version 1.1.0. Local library, preview and full-screen view, favorites,
 collections, applying on GNOME, automatic change, and wallpapers from
 BigLinux, Wallhaven, Bing and Wikimedia Commons, plus an optional RSS/Atom
