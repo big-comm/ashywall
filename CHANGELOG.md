@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Reading exposes a labeled Sources button and groups sources by category.
+  Category changes and confirmed removal are available on each source;
+  adding or moving sources offers existing categories alongside free entry.
+  Category names reuse matching Unicode capitalization and whitespace.
+
 - Reading accepts bare website addresses and discovers same-origin RSS/Atom
   links without loading scripts or embedded resources. Phoronix root
   addresses use its official feed directly, avoiding homepage access errors.

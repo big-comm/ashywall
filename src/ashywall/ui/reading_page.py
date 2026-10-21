@@ -19,6 +19,7 @@ from ..services.reading_repository import (
 )
 from .background_tasks import BackgroundRunner
 from .errors import error_text
+from .reading_categories import CategoryGroup
 
 
 def reading_error(error: Exception) -> str:
@@ -37,7 +38,7 @@ def reading_error(error: Exception) -> str:
     if isinstance(error, ReadingError):
         return {
             "duplicate": _("This source is already in your reading list."),
-            "category-too-long": _("Use at most 60 characters for the topic."),
+            "category-too-long": _("Use at most 60 characters for the category."),
             "too-many-feeds": _("You can add up to 50 sources."),
         }.get(str(error), _("The source could not be saved."))
     return error_text(error)
@@ -139,7 +140,10 @@ class ReadingPage(Adw.NavigationPage):
         )
         header = Adw.HeaderBar(title_widget=self._title)
         self._sources_button = Gtk.Button(
-            icon_name="application-rss+xml-symbolic", tooltip_text=_("Manage Sources")
+            child=Adw.ButtonContent(
+                icon_name="application-rss+xml-symbolic", label=_("Sources")
+            ),
+            tooltip_text=_("Manage Sources"),
         )
         self._sources_button.connect("clicked", lambda _b: self.show_sources())
         header.pack_start(self._sources_button)
@@ -170,7 +174,7 @@ class ReadingPage(Adw.NavigationPage):
         )
         self._search_button = search_button
 
-        self._topics = Gtk.DropDown.new_from_strings([_("All Topics")])
+        self._topics = Gtk.DropDown.new_from_strings([_("All Categories")])
         topic_factory = Gtk.SignalListItemFactory()
         topic_factory.connect(
             "setup",
@@ -185,16 +189,26 @@ class ReadingPage(Adw.NavigationPage):
             lambda _f, item: item.get_child().set_label(item.get_item().get_string()),
         )
         self._topics.set_factory(topic_factory)
-        self._topics.set_tooltip_text(_("Filter by Topic"))
+        self._topics.set_tooltip_text(_("Filter by Category"))
         self._topics.connect("notify::selected", lambda *_a: self._filters_changed())
         self._unread = Gtk.ToggleButton(label=_("Unread Only"))
         self._unread.connect("toggled", lambda _b: self._filters_changed())
         filters = Gtk.Box(
             spacing=8, margin_start=12, margin_end=12, margin_top=8, margin_bottom=8
         )
+        spacer = Gtk.Box(hexpand=True)
         filters.append(self._topics)
-        filters.append(Gtk.Box(hexpand=True))
+        filters.append(spacer)
         filters.append(self._unread)
+        filter_bin = Adw.BreakpointBin(child=filters, width_request=1, height_request=1)
+        narrow = Adw.Breakpoint(
+            condition=Adw.BreakpointCondition.parse("max-width: 420sp")
+        )
+        narrow.add_setter(filters, "orientation", Gtk.Orientation.VERTICAL)
+        narrow.add_setter(spacer, "visible", False)
+        narrow.add_setter(self._unread, "halign", Gtk.Align.END)
+        narrow.add_setter(self._title, "visible", False)
+        filter_bin.add_breakpoint(narrow)
 
         self._banner = Adw.Banner(title="", button_label=_("Sources"), revealed=False)
         self._banner.connect("button-clicked", lambda _b: self.show_sources())
@@ -240,7 +254,7 @@ class ReadingPage(Adw.NavigationPage):
         self._more.add_css_class("pill")
         self._more.connect("clicked", lambda _b: self.reload(append=True))
         body = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        for widget in (self._banner, filters, self._stack, self._more):
+        for widget in (self._banner, filter_bin, self._stack, self._more):
             body.append(widget)
         toolbar = Adw.ToolbarView(content=body)
         toolbar.add_top_bar(header)
@@ -290,7 +304,7 @@ class ReadingPage(Adw.NavigationPage):
                 self._quiet = True
                 self._categories = categories
                 self._topics.set_model(
-                    Gtk.StringList.new([_("All Topics"), *categories])
+                    Gtk.StringList.new([_("All Categories"), *categories])
                 )
                 self._topics.set_selected(
                     categories.index(query.category) + 1
@@ -337,11 +351,11 @@ class ReadingPage(Adw.NavigationPage):
             )
             self._status.set_description(
                 _(
-                    "Add RSS or Atom sources and organize them by topic. Articles open in your browser."
+                    "Add RSS or Atom sources and organize them by category. Articles open in your browser."
                 )
                 if not self._feeds
                 else (
-                    _("Try another topic or search, or turn off the unread filter.")
+                    _("Try another category or search, or turn off the unread filter.")
                     if filtered
                     else _("Update your sources or add another feed.")
                 )
@@ -415,14 +429,14 @@ class ReadingPage(Adw.NavigationPage):
         closed = [False]
         dialog = Adw.Dialog(title=_("Add Source"), content_width=480)
         address = Adw.EntryRow(title=_("Website or Feed Address"))
-        category = Adw.EntryRow(title=_("Topic (optional)"))
+        category_group = CategoryGroup(self._categories)
+        category = category_group.entry
         group = Adw.PreferencesGroup(
             description=_(
                 "Enter a website, such as phoronix.com, or an HTTPS RSS or Atom address. Organize sources under Technology, Health or Science."
             )
         )
         group.add(address)
-        group.add(category)
         error_label = Gtk.Label(wrap=True, xalign=0, visible=False)
         error_label.add_css_class("error")
         submit = Gtk.Button(
@@ -441,7 +455,7 @@ class ReadingPage(Adw.NavigationPage):
             margin_start=24,
             margin_end=24,
         )
-        for widget in (group, error_label, submit):
+        for widget in (group, category_group, error_label, submit):
             content.append(widget)
         toolbar = Adw.ToolbarView(content=content)
         toolbar.add_top_bar(Adw.HeaderBar())
@@ -460,7 +474,7 @@ class ReadingPage(Adw.NavigationPage):
             submit.set_label(_("Add Source"))
             submit.set_sensitive(True)
             address.set_sensitive(True)
-            category.set_sensitive(True)
+            category_group.set_sensitive(True)
             error_label.set_label(reading_error(error))
             error_label.set_visible(True)
 
@@ -476,7 +490,7 @@ class ReadingPage(Adw.NavigationPage):
             submit.set_sensitive(False)
             submit.set_label(_("Checking Source…"))
             address.set_sensitive(False)
-            category.set_sensitive(False)
+            category_group.set_sensitive(False)
             error_label.set_visible(False)
             self._network.submit(
                 lambda: self._service.add(url, topic, cancel), done, failed
@@ -492,28 +506,35 @@ class ReadingPage(Adw.NavigationPage):
         self._sources_dialog = Adw.Dialog(
             title=_("Sources"), content_width=540, content_height=520
         )
-        self._source_group = Adw.PreferencesGroup(
-            title=_("Your Sources"),
-            description=_(
-                "Sources update only when requested. No notifications, embedded images or article tracking resources are loaded."
-            ),
-        )
-        self._source_rows = []
-        content = Gtk.Box(
+        self._source_groups = []
+        self._source_content = Gtk.Box(
             orientation=Gtk.Orientation.VERTICAL,
+            spacing=24,
             margin_start=18,
             margin_end=18,
             margin_top=18,
             margin_bottom=24,
         )
-        content.append(self._source_group)
+        description = Gtk.Label(
+            label=_(
+                "Select a source to change its category. Use the trash button to remove it."
+            ),
+            wrap=True,
+            xalign=0,
+        )
+        description.add_css_class("dim-label")
+        self._source_content.append(description)
         header = Adw.HeaderBar()
-        add = Gtk.Button(icon_name="list-add-symbolic", tooltip_text=_("Add Source"))
+        add = Gtk.Button(
+            child=Adw.ButtonContent(
+                icon_name="list-add-symbolic", label=_("Add Source")
+            )
+        )
         add.connect("clicked", lambda _b: self.add_source())
         header.pack_end(add)
         toolbar = Adw.ToolbarView(
             content=Gtk.ScrolledWindow(
-                child=content, hscrollbar_policy=Gtk.PolicyType.NEVER
+                child=self._source_content, hscrollbar_policy=Gtk.PolicyType.NEVER
             )
         )
         toolbar.add_top_bar(header)
@@ -527,54 +548,96 @@ class ReadingPage(Adw.NavigationPage):
     def _update_sources(self) -> None:
         if self._sources_dialog is None:
             return
-        for row in self._source_rows:
-            self._source_group.remove(row)
-        self._source_rows = []
+        for group in self._source_groups:
+            self._source_content.remove(group)
+        self._source_groups = []
         if not self._feeds:
-            row = Adw.ActionRow(title=_("No sources added"))
-            self._source_rows.append(row)
-            self._source_group.add(row)
-        for feed in self._feeds:
-            subtitle = " · ".join(part for part in (feed.category, feed.url) if part)
-            if feed.last_error:
-                subtitle = _("Could not update this source") + "\n" + subtitle
-            row = Adw.ActionRow(
-                title=GLib.markup_escape_text(feed.title),
-                subtitle=GLib.markup_escape_text(subtitle),
-                subtitle_lines=2,
+            group = Adw.PreferencesGroup(title=_("Your Sources"))
+            group.add(Adw.ActionRow(title=_("No sources added")))
+            self._source_content.append(group)
+            self._source_groups.append(group)
+        categories = sorted(
+            {feed.category for feed in self._feeds},
+            key=lambda category: (not bool(category), category.casefold()),
+        )
+        for category in categories:
+            feeds = [feed for feed in self._feeds if feed.category == category]
+            group = Adw.PreferencesGroup(
+                title=GLib.markup_escape_text(category)
+                if category
+                else _("Uncategorized"),
+                description=ngettext(
+                    "{count} source", "{count} sources", len(feeds)
+                ).format(count=len(feeds)),
             )
-            edit = Gtk.Button(
-                icon_name="document-edit-symbolic",
-                tooltip_text=_("Edit Topic"),
-                valign=Gtk.Align.CENTER,
-            )
-            edit.add_css_class("flat")
-            edit.connect("clicked", lambda _b, source=feed: self._edit_topic(source))
-            remove = Gtk.Button(
-                icon_name="user-trash-symbolic",
-                tooltip_text=_("Remove Source"),
-                valign=Gtk.Align.CENTER,
-            )
-            remove.add_css_class("flat")
-            remove.connect(
-                "clicked", lambda _b, source=feed: self._remove_source(source)
-            )
-            row.add_suffix(edit)
-            row.add_suffix(remove)
-            self._source_group.add(row)
-            self._source_rows.append(row)
+            for feed in feeds:
+                subtitle = feed.url
+                if feed.last_error:
+                    subtitle = _("Could not update this source") + "\n" + subtitle
+                row = Adw.ActionRow(
+                    title=GLib.markup_escape_text(feed.title),
+                    subtitle=GLib.markup_escape_text(subtitle),
+                    title_lines=1,
+                    subtitle_lines=2,
+                    activatable=True,
+                    tooltip_text=_("Change Category"),
+                )
+                row.connect(
+                    "activated", lambda _r, source=feed: self._edit_topic(source)
+                )
+                edit = Gtk.Button(
+                    icon_name="folder-symbolic",
+                    tooltip_text=_("Change Category"),
+                    valign=Gtk.Align.CENTER,
+                )
+                edit.add_css_class("flat")
+                edit.connect(
+                    "clicked", lambda _b, source=feed: self._edit_topic(source)
+                )
+                remove = Gtk.Button(
+                    icon_name="user-trash-symbolic",
+                    tooltip_text=_("Remove Source"),
+                    valign=Gtk.Align.CENTER,
+                )
+                remove.add_css_class("flat")
+                remove.connect(
+                    "clicked", lambda _b, source=feed: self._remove_source(source)
+                )
+                row.add_suffix(edit)
+                row.add_suffix(remove)
+                group.add(row)
+            self._source_content.append(group)
+            self._source_groups.append(group)
 
     def _edit_topic(self, feed: ReadingFeed) -> None:
-        entry = Gtk.Entry(text=feed.category, max_length=60, activates_default=True)
-        dialog = Adw.AlertDialog(heading=_("Edit Topic"), extra_child=entry)
+        group = CategoryGroup(self._categories, feed.category)
+        dialog = Adw.AlertDialog(
+            heading=_("Change Category"),
+            body=feed.title,
+        )
+        dialog.set_body_use_markup(False)
+        error_label = Gtk.Label(wrap=True, xalign=0, visible=False)
+        error_label.add_css_class("error")
+        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        content.append(group)
+        content.append(error_label)
+        dialog.set_extra_child(content)
         dialog.add_response("cancel", _("Cancel"))
         dialog.add_response("save", _("Save"))
         dialog.set_response_appearance("save", Adw.ResponseAppearance.SUGGESTED)
         dialog.set_default_response("save")
+
+        def changed(_entry):
+            valid = len(" ".join(group.entry.get_text().split())) <= 60
+            dialog.set_response_enabled("save", valid)
+            error_label.set_label(reading_error(ReadingError("category-too-long")))
+            error_label.set_visible(not valid)
+
+        group.entry.connect("changed", changed)
         dialog.connect(
             "response",
             lambda _d, response: (
-                self._mutate("edit", feed.id, entry.get_text())
+                self._mutate("edit", feed.id, group.entry.get_text())
                 if response == "save"
                 else None
             ),

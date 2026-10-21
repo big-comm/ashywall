@@ -66,6 +66,11 @@ collections and Reading](docs/screenshots/README.md).*
   text list uses the same GTK/libadwaita navigation as the wallpaper library,
   adapting to narrow windows and the system's light/dark style. Summaries
   are plain text; full articles open in the default browser.
+  The **Sources** button opens a list grouped by category. Select a source
+  or its folder button to move it to an existing or new category; leave
+  the category empty for Uncategorized. The trash button removes a source
+  and its cached articles after confirmation. Reading history in other
+  sources is preserved. Categories can also be reused when adding a source.
   Add a direct feed URL or a website address: the reader looks for RSS/Atom
   links advertised by that page on the same HTTPS origin. Bare hostnames
   use HTTPS. `phoronix.com` uses its official feed directly, since the

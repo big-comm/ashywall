@@ -297,6 +297,47 @@ def test_duplicate_sources_and_long_topics_are_rejected(conn):
         repo.add(URL + "2", "x" * 61, document())
 
 
+def test_categories_reuse_unicode_names_and_moves_preserve_article_state(conn):
+    repo = ReadingRepository(conn)
+    first = repo.add(URL, "Saúde", document(2))
+    second = repo.add(URL + "2", "  SAÚDE  ", document(1))
+    third = repo.add(URL + "3", "Ciência de dados", document(1))
+    assert {feed.category for feed in repo.feeds()} == {"Saúde", "Ciência de dados"}
+    articles, _ = repo.articles(ReadingQuery(category="Saúde"))
+    selected = next(article for article in articles if article.feed_id == second)
+    repo.mark_read(selected.id, True)
+    repo.edit(second, "  ciência   DE dados  ")
+    moved, _ = repo.articles(ReadingQuery(category="Ciência de dados"))
+    assert {article.feed_id for article in moved} == {second, third}
+    assert next(article for article in moved if article.feed_id == second).is_read
+    assert len(repo.articles(ReadingQuery(category="Saúde"))[0]) == 2
+    repo.edit(first, "  ")
+    assert next(feed for feed in repo.feeds() if feed.id == first).category == ""
+    assert len(repo.articles(ReadingQuery())[0]) == 4
+
+
+def test_removing_one_source_preserves_other_sources_and_wallpaper_settings(conn):
+    repo = ReadingRepository(conn)
+    removed = repo.add(URL, "Technology", document(2))
+    kept = repo.add(URL + "2", "Health", document(1))
+    article = repo.articles(ReadingQuery(category="Health"))[0][0]
+    repo.mark_read(article.id, True)
+    conn.execute("INSERT INTO settings VALUES ('reading-removal-check','keep')")
+    repo.remove(removed)
+    assert [feed.id for feed in repo.feeds()] == [kept]
+    remaining = repo.articles(ReadingQuery())[0]
+    assert len(remaining) == 1 and remaining[0].is_read
+    assert not conn.execute(
+        "SELECT 1 FROM reading_articles WHERE feed_id=?", (removed,)
+    ).fetchone()
+    assert (
+        conn.execute(
+            "SELECT value FROM settings WHERE key='reading-removal-check'"
+        ).fetchone()[0]
+        == "keep"
+    )
+
+
 def test_migration_preserves_existing_wallpaper_state(tmp_path):
     path = tmp_path / "old.sqlite3"
     old = sqlite3.connect(path)
