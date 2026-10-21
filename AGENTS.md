@@ -62,7 +62,8 @@ pkgbuild/             Arch/BigCommunity PKGBUILD.
    directories (never start a `dconf-service` there), preferably inside
    `dbus-run-session` so the application name stays off the real bus.
 7. Language: UI strings in English wrapped in `_()`, translated in
-   `locale/pt_BR.po`; code, comments and commits in English.
+   `locale/pt_BR.po`; code, comments and commits in English. Keep the public
+   README in English.
 8. Online data is untrusted: parse with strict type checks, accept only
    https URLs on the provider's own hosts, never fetch display-only links
    (sources, pages), and send safe-for-work queries only.
