@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev-xathay]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Tests, lint, metadata and local package
+    runs-on: ubuntu-24.04
+    container: archlinux:latest
+    timeout-minutes: 20
+    steps:
+      - name: Install Arch build and validation dependencies
+        run: |
+          pacman -Syu --noconfirm --needed \
+            base-devel git sudo gtk4 libadwaita python python-gobject \
+            python-pillow python-defusedxml gsettings-desktop-schemas \
+            gnome-desktop-4 python-pytest ruff python-build \
+            python-installer python-uv-build gettext appstream desktop-file-utils
+          useradd --create-home builder
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Give the unprivileged builder ownership of the checkout
+        run: chown -R builder:builder "$GITHUB_WORKSPACE"
+      - name: Validate the checkout
+        run: sudo -u builder ./scripts/validate.sh
+      - name: Build and test a package from this commit
+        run: sudo -u builder ./scripts/build-local-package.sh --noconfirm

@@ -124,6 +124,9 @@ fewer than 24 results and the total count is not shown.
 
 ## Tests
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the `dev-xathay` workflow, complete
+local validation and the separate BigCommunity testing-package stage.
+
 ```sh
 python -m pytest
 ```
