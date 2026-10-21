@@ -9,9 +9,7 @@ libadwaita. Browse system and online wallpapers, organize collections,
 preview images and apply them to your desktop. An optional RSS/Atom reader
 keeps your news sources in the same application.
 
-**1.1.0 — development preview.** Available in English and Brazilian
-Portuguese; the other 27 [BigCommunity language targets](locale/README.md)
-are pending. See the [changelog](CHANGELOG.md).
+**1.1.0 — development preview.** See the [changelog](CHANGELOG.md).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/biglinux-wallpaper-dark.png">
@@ -74,7 +72,7 @@ steps. See [development, validation and GitRepo packaging](CONTRIBUTING.md).
 ## Contribute
 
 - [Development and testing](CONTRIBUTING.md)
-- [Translations: 29-language release target](locale/README.md)
+- [Translations](locale/README.md)
 - [Feature guide and limitations](docs/FEATURES.md)
 - [Changelog](CHANGELOG.md)
 
