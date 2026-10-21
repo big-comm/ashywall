@@ -8,9 +8,10 @@ A wallpaper library for GNOME, built first for BigCommunity. AshyWall gathers
 the wallpapers installed on the system and the images in folders you choose,
 lets you preview them and applies them to the desktop.
 
-Version 1.0.0. Local library, preview and full-screen view, favorites,
+Version 1.1.0. Local library, preview and full-screen view, favorites,
 collections, applying on GNOME, automatic change, and wallpapers from
-BigLinux, Wallhaven, Bing and Wikimedia Commons. See `CHANGELOG.md`.
+BigLinux, Wallhaven, Bing and Wikimedia Commons, plus an optional RSS/Atom
+reading list. See `CHANGELOG.md`.
 
 ## Features
 
@@ -135,6 +136,20 @@ session's wallpaper.
 `pkgbuild/PKGBUILD` builds a wheel with `uv_build` and installs it with
 `python-installer`. Files under `usr/` (desktop entry, AppStream metainfo,
 icon, translations, licenses) are installed to `/usr`.
+
+To update an existing Arch/BigCommunity installation from this checkout,
+close AshyWall and run:
+
+```sh
+./scripts/build-local-package.sh -si
+```
+
+The helper builds the current committed source, including local commits not
+pushed upstream. It verifies the source archive, runs the test suite and
+leaves packages in `dist/packages/`; `-si` installs dependencies if needed
+and updates AshyWall through pacman. Commit source changes first so the
+package always corresponds to a reviewable Git snapshot. Use the helper
+without `-si` to build without installing anything.
 
 ## Translations
 

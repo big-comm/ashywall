@@ -17,6 +17,7 @@
       <li>Wallpapers from BigLinux, Wallhaven, the Bing image of the day and the Wikimedia Commons picture of the day, with author and license when the source gives them</li>
       <li>Favorites and collections that mix local and online wallpapers</li>
       <li>Automatic change through GNOME's own slideshow, without a background process</li>
+      <li>Optional RSS and Atom reading list with topics, cached search and read state; full articles open in the default browser</li>
     </ul>
   </description>
   <launchable type="desktop-id">org.communitybig.ashywall.desktop</launchable>
@@ -40,6 +41,11 @@
   </supports>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.1.0" date="2026-10-21">
+      <description>
+        <p>Optional RSS and Atom reading with native GNOME navigation, topic filters and offline caching. Faster library browsing, stricter HTTPS redirects and concurrent request limits.</p>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-10-14">
       <description>
         <p>First release: local library, previews and full-screen view, favorites and collections, automatic change, and wallpapers from BigLinux, Wallhaven, Bing and Wikimedia Commons.</p>

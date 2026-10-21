@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2026-10-21)
+
+- Local Arch/BigCommunity builds use the reviewed Git snapshot instead of
+  fetching upstream, so unpushed changes can be installed through pacman.
 
 - Optional Reading section for RSS 2 and Atom, enabled in Preferences.
   Native GNOME navigation, topic filters, search, read/unread state and

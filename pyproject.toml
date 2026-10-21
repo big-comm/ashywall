@@ -1,6 +1,6 @@
 [project]
 name = "ashywall"
-version = "1.0.0"
+version = "1.1.0"
 description = "Wallpaper library for GNOME: browse, organize, preview and apply wallpapers"
 readme = "README.md"
 license = "MIT"

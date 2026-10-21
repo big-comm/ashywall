@@ -1,7 +1,7 @@
 # Brazilian Portuguese translation for AshyWall.
 msgid ""
 msgstr ""
-"Project-Id-Version: ashywall 1.0.0\n"
+"Project-Id-Version: ashywall 1.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-21 12:17-0300\n"
 "Language: pt_BR\n"
