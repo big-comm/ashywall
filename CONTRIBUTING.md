@@ -13,8 +13,10 @@ are a future scope; changes here must keep the GNOME backend working.
 
 Local work does not require a GitHub repository. Check `git remote -v`
 before any future push: a configured URL does not establish that a remote
-repository already exists. The intended upstream is `big-comm/ashywall`;
-publishing it and configuring distribution are separate release steps.
+repository already exists. The upstream is
+[`big-comm/ashywall`](https://github.com/big-comm/ashywall), available locally
+as the `bigcomm` remote. Source publication and configuring distribution
+are separate release steps.
 
 Commits use English imperative subjects, with a body when the technical
 reason needs explanation. Keep changes focused; review the staged diff
