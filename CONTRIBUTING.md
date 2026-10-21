@@ -20,6 +20,11 @@ repository already exists. The upstream is
 as the `bigcomm` remote. Source publication and configuring distribution
 are separate release steps.
 
+GitRepo identifies the source repository through `origin`. Keep that remote
+pointing to `https://github.com/big-comm/ashywall.git`, even when the
+`bigcomm` alias is also configured. A personal fork can use a separate
+remote such as `xathay`.
+
 Commits use English imperative subjects, with a body when the technical
 reason needs explanation. Keep changes focused; review the staged diff
 and attachments for private data before committing. Do not add automatic
