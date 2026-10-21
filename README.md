@@ -19,6 +19,14 @@ collections, applying on GNOME, automatic change, and wallpapers from
 BigLinux, Wallhaven, Bing and Wikimedia Commons, plus an optional RSS/Atom
 reading list. See `CHANGELOG.md`.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/biglinux-wallpaper-dark.png">
+  <img src="docs/screenshots/biglinux-wallpaper-light.png" alt="AshyWall's native GNOME interface previewing a BigLinux wallpaper with a pink sky, mountains and a lake" width="1280">
+</picture>
+
+*BigLinux wallpaper preview. [More screenshots, including the system library,
+collections and Reading](docs/screenshots/README.md).*
+
 ## Features
 
 - **System wallpapers** discovered from GNOME background catalogs
