@@ -1,12 +1,12 @@
 pkgname=ashywall
 pkgdesc="Wallpaper library for GNOME: browse, organize, preview and apply wallpapers"
 depends=(
-    'gtk4'
-    'libadwaita'
-    'python'
+    'gtk4>=4.16'
+    'libadwaita>=1.6'
+    'python>=3.12'
     'python-gobject'
-    'python-pillow'
-    'python-defusedxml'
+    'python-pillow>=11.3'
+    'python-defusedxml>=0.7.1'
     'gsettings-desktop-schemas'
 )
 optdepends=(
