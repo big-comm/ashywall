@@ -18,9 +18,9 @@ bg cs da de el en es et fi fr he hr hu is it ja ko nl no pl
 pt_BR pt ro ru sk sv tr uk zh
 ```
 
-Current state: English source and a complete Brazilian Portuguese catalog.
-The other 27 catalogs are pending. Do not create empty catalogs or copy
-English messages into foreign catalogs merely to claim coverage.
+Current state: all 29 targets are complete (English source plus 28
+catalogs). Do not create empty catalogs or copy English messages into
+foreign catalogs merely to claim coverage.
 
 The BigCommunity
 [translation-aware package template](https://github.com/big-comm/pkgbuild-template-translator)

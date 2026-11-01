@@ -5,7 +5,34 @@
   <project_license>MIT</project_license>
   <name>AshyWall</name>
   <summary>Browse, organize, preview and apply wallpapers</summary>
+  <summary xml:lang="bg">Разглеждане, подреждане, преглед и прилагане на тапети</summary>
+  <summary xml:lang="cs">Procházet, uspořádávat, prohlížet a nastavovat tapety</summary>
+  <summary xml:lang="da">Gennemse, organisér, forhåndsvis og anvend baggrundsbilleder</summary>
+  <summary xml:lang="de">Hintergrundbilder durchsuchen, organisieren, ansehen und anwenden</summary>
+  <summary xml:lang="el">Περιηγηθείτε, οργανώστε, κάντε προεπισκόπηση και εφαρμόστε ταπετσαρίες</summary>
+  <summary xml:lang="es">Explorar, organizar, previsualizar y aplicar fondos de pantalla</summary>
+  <summary xml:lang="et">Sirvi, korralda, eelvaata ja rakenda taustapilte</summary>
+  <summary xml:lang="fi">Selaa, järjestä ja esikatsele taustakuvia ja ota niitä käyttöön</summary>
+  <summary xml:lang="fr">Parcourir, organiser, prévisualiser et appliquer des fonds d’écran</summary>
+  <summary xml:lang="he">עיון, ארגון, תצוגה מקדימה והחלה של תמונות רקע</summary>
+  <summary xml:lang="hr">Pregledavajte, organizirajte, pretpregledajte i primijenite pozadine</summary>
+  <summary xml:lang="hu">Háttérképek böngészése, rendszerezése, előnézete és alkalmazása</summary>
+  <summary xml:lang="is">Skoða, skipuleggja, forskoða og virkja bakgrunnsmyndir</summary>
+  <summary xml:lang="it">Sfoglia, organizza, visualizza in anteprima e applica sfondi</summary>
+  <summary xml:lang="ja">壁紙を閲覧、整理、プレビューして適用します</summary>
+  <summary xml:lang="ko">배경 화면을 둘러보고 정리하고 미리 보고 적용합니다</summary>
+  <summary xml:lang="nl">Achtergronden verkennen, ordenen, bekijken en toepassen</summary>
+  <summary xml:lang="no">Bla gjennom, organiser, forhåndsvis og bruk bakgrunnsbilder</summary>
+  <summary xml:lang="pl">Przeglądanie, porządkowanie, podgląd i ustawianie tapet</summary>
   <summary xml:lang="pt-BR">Explore, organize, visualize e aplique papéis de parede</summary>
+  <summary xml:lang="pt">Explorar, organizar, pré-visualizar e aplicar papéis de parede</summary>
+  <summary xml:lang="ro">Răsfoiți, organizați, previzualizați și aplicați imagini de fundal</summary>
+  <summary xml:lang="ru">Обзор, упорядочивание, предпросмотр и применение обоев</summary>
+  <summary xml:lang="sk">Prehliadať, usporadúvať, zobrazovať a nastavovať tapety</summary>
+  <summary xml:lang="sv">Bläddra bland, ordna, förhandsgranska och tillämpa bakgrundsbilder</summary>
+  <summary xml:lang="tr">Duvar kağıtlarına göz atın, düzenleyin, önizleyin ve uygulayın</summary>
+  <summary xml:lang="uk">Огляд, упорядкування, попередній перегляд і застосування шпалер</summary>
+  <summary xml:lang="zh">浏览、整理、预览并应用壁纸</summary>
   <developer id="org.communitybig">
     <name>Community Big</name>
   </developer>
@@ -29,7 +56,62 @@
   <keywords>
     <keyword>wallpaper</keyword>
     <keyword>background</keyword>
+    <keyword xml:lang="bg">тапет</keyword>
+    <keyword xml:lang="bg">тапети</keyword>
+    <keyword xml:lang="cs">tapeta</keyword>
+    <keyword xml:lang="cs">tapety</keyword>
+    <keyword xml:lang="da">baggrundsbillede</keyword>
+    <keyword xml:lang="da">baggrund</keyword>
+    <keyword xml:lang="de">Hintergrundbild</keyword>
+    <keyword xml:lang="de">Hintergrund</keyword>
+    <keyword xml:lang="el">ταπετσαρία</keyword>
+    <keyword xml:lang="el">φόντο</keyword>
+    <keyword xml:lang="es">Fondo de pantalla</keyword>
+    <keyword xml:lang="es">Fondo</keyword>
+    <keyword xml:lang="et">taustapilt</keyword>
+    <keyword xml:lang="et">taust</keyword>
+    <keyword xml:lang="fi">taustakuva</keyword>
+    <keyword xml:lang="fi">tausta</keyword>
+    <keyword xml:lang="fr">Fond d'écran</keyword>
+    <keyword xml:lang="fr">Arrière-plan</keyword>
+    <keyword xml:lang="he">רקע</keyword>
+    <keyword xml:lang="he">תמונת רקע</keyword>
+    <keyword xml:lang="hr">pozadina</keyword>
+    <keyword xml:lang="hr">slika pozadine</keyword>
+    <keyword xml:lang="hu">háttérkép</keyword>
+    <keyword xml:lang="hu">háttér</keyword>
+    <keyword xml:lang="is">bakgrunnur</keyword>
+    <keyword xml:lang="is">bakgrunnsmynd</keyword>
+    <keyword xml:lang="it">Sfondo</keyword>
+    <keyword xml:lang="it">Sfondi</keyword>
+    <keyword xml:lang="ja">壁紙</keyword>
+    <keyword xml:lang="ja">背景</keyword>
+    <keyword xml:lang="ko">배경 화면</keyword>
+    <keyword xml:lang="ko">배경</keyword>
+    <keyword xml:lang="nl">achtergrond</keyword>
+    <keyword xml:lang="nl">bureaubladachtergrond</keyword>
+    <keyword xml:lang="no">bakgrunn</keyword>
+    <keyword xml:lang="no">bakgrunnsbilde</keyword>
+    <keyword xml:lang="pl">tapeta</keyword>
+    <keyword xml:lang="pl">tapety</keyword>
     <keyword xml:lang="pt-BR">papel de parede</keyword>
+    <keyword xml:lang="pt-BR">plano de fundo</keyword>
+    <keyword xml:lang="pt">papel de parede</keyword>
+    <keyword xml:lang="pt">fundo</keyword>
+    <keyword xml:lang="ro">imagine de fundal</keyword>
+    <keyword xml:lang="ro">fundal</keyword>
+    <keyword xml:lang="ru">обои</keyword>
+    <keyword xml:lang="ru">фон</keyword>
+    <keyword xml:lang="sk">tapeta</keyword>
+    <keyword xml:lang="sk">tapety</keyword>
+    <keyword xml:lang="sv">bakgrund</keyword>
+    <keyword xml:lang="sv">bakgrundsbild</keyword>
+    <keyword xml:lang="tr">duvar kağıdı</keyword>
+    <keyword xml:lang="tr">arka plan</keyword>
+    <keyword xml:lang="uk">шпалери</keyword>
+    <keyword xml:lang="uk">тло</keyword>
+    <keyword xml:lang="zh">壁纸</keyword>
+    <keyword xml:lang="zh">背景</keyword>
   </keywords>
   <requires>
     <display_length compare="ge">360</display_length>

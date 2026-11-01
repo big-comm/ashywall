@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- The interface is available in the 29 BigCommunity languages. Catalogs
+  follow each language's GNOME terminology and plural rules; the desktop
+  entry and AppStream summary are localized as well. Checked in German,
+  Hebrew (right-to-left), Japanese and Russian sessions.
+
 - Reading exposes a labeled Sources button and groups sources by category.
   Category changes and confirmed removal are available on each source;
   adding or moving sources offers existing categories alongside free entry.

@@ -1,0 +1,1477 @@
+# nl translation for AshyWall.
+# This file is distributed under the same license as the ashywall package.
+msgid ""
+msgstr ""
+"Project-Id-Version: ashywall 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-21 16:58-0300\n"
+"PO-Revision-Date: 2026-11-01 12:00-0300\n"
+"Last-Translator: BigCommunity contributors\n"
+"Language-Team: BigCommunity\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: src/ashywall/app.py:39
+msgid "Applying wallpapers from a sandbox is not supported yet"
+msgstr "Achtergronden toepassen vanuit een sandbox wordt nog niet ondersteund"
+
+#: src/ashywall/app.py:41
+msgid "Applying wallpapers is supported only on GNOME in this version"
+msgstr ""
+"In deze versie wordt het toepassen van achtergronden alleen in GNOME "
+"ondersteund"
+
+#: src/ashywall/app.py:43
+msgid "The GNOME background settings are not installed"
+msgstr "De achtergrondinstellingen van GNOME zijn niet geïnstalleerd"
+
+#: src/ashywall/app.py:147
+msgid "The Library Could Not Be Opened"
+msgstr "De bibliotheek kon niet worden geopend"
+
+#: src/ashywall/app.py:166
+msgid "Browse, organize, preview and apply wallpapers"
+msgstr "Achtergronden verkennen, ordenen, bekijken en toepassen"
+
+#: src/ashywall/app.py:168
+msgid "BigCommunity contributors"
+msgstr "BigCommunity-bijdragers"
+
+#: src/ashywall/app.py:172
+msgid "Owl icon"
+msgstr "Uilpictogram"
+
+#: src/ashywall/ui/collections_ui.py:14
+msgid "Enter a name for the collection"
+msgstr "Voer een naam in voor de collectie"
+
+#: src/ashywall/ui/collections_ui.py:16
+msgid "The name is too long"
+msgstr "De naam is te lang"
+
+#: src/ashywall/ui/collections_ui.py:17
+#, python-brace-format
+msgid "A collection named “{name}” already exists"
+msgstr "Er bestaat al een collectie met de naam ‘{name}’"
+
+#: src/ashywall/ui/collections_ui.py:35
+msgid "Add to Collection"
+msgstr "Aan collectie toevoegen"
+
+#: src/ashywall/ui/collections_ui.py:44
+msgid "No collections yet"
+msgstr "Nog geen collecties"
+
+#: src/ashywall/ui/collections_ui.py:47
+msgid "New collection"
+msgstr "Nieuwe collectie"
+
+#: src/ashywall/ui/collections_ui.py:53
+msgid "Create and Add"
+msgstr "Aanmaken en toevoegen"
+
+#: src/ashywall/ui/collections_ui.py:63 src/ashywall/ui/window_states.py:34
+msgid "Collections"
+msgstr "Collecties"
+
+#: src/ashywall/ui/collections_ui.py:139
+#: src/ashywall/ui/preferences_dialog.py:126
+#: src/ashywall/ui/reading_page.py:625 src/ashywall/ui/reading_page.py:654
+#: src/ashywall/ui/window.py:547
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: src/ashywall/ui/detail_page.py:32 src/ashywall/ui/rotation_dialog.py:29
+#: src/ashywall/ui/window_states.py:40
+msgid "System"
+msgstr "Systeem"
+
+#: src/ashywall/ui/detail_page.py:35
+#, python-brace-format
+msgid "Downloaded from {provider}"
+msgstr "Gedownload van {provider}"
+
+#: src/ashywall/ui/detail_page.py:38 src/ashywall/ui/rotation_dialog.py:31
+#: src/ashywall/ui/window_states.py:51
+msgid "Downloads"
+msgstr "Downloads"
+
+#: src/ashywall/ui/detail_page.py:39
+#, python-brace-format
+msgid "My folder “{name}”"
+msgstr "Mijn map ‘{name}’"
+
+#: src/ashywall/ui/detail_page.py:76 src/ashywall/ui/remote_detail_page.py:89
+msgid "Apply"
+msgstr "Toepassen"
+
+#: src/ashywall/ui/detail_page.py:138 src/ashywall/ui/remote_detail_page.py:402
+msgid "Details"
+msgstr "Details"
+
+#: src/ashywall/ui/detail_page.py:141 src/ashywall/ui/remote_detail_page.py:412
+msgid "Dimensions"
+msgstr "Afmetingen"
+
+#: src/ashywall/ui/detail_page.py:141 src/ashywall/ui/remote_detail_page.py:412
+#, python-brace-format
+msgid "{size} px"
+msgstr "{size} px"
+
+#: src/ashywall/ui/detail_page.py:144 src/ashywall/ui/remote_detail_page.py:415
+msgid "Aspect Ratio"
+msgstr "Beeldverhouding"
+
+#: src/ashywall/ui/detail_page.py:145 src/ashywall/ui/remote_detail_page.py:418
+msgid "File Size"
+msgstr "Bestandsgrootte"
+
+#: src/ashywall/ui/detail_page.py:146 src/ashywall/ui/remote_detail_page.py:422
+msgid "Format"
+msgstr "Formaat"
+
+#: src/ashywall/ui/detail_page.py:146 src/ashywall/ui/preferences_dialog.py:169
+#: src/ashywall/ui/remote_detail_page.py:419
+#: src/ashywall/ui/remote_detail_page.py:471
+#: src/ashywall/ui/rotation_dialog.py:184
+msgid "Unknown"
+msgstr "Onbekend"
+
+#: src/ashywall/ui/detail_page.py:149 src/ashywall/ui/remote_detail_page.py:423
+msgid "Source"
+msgstr "Bron"
+
+#: src/ashywall/ui/detail_page.py:153
+msgid "Location"
+msgstr "Locatie"
+
+#: src/ashywall/ui/detail_page.py:157 src/ashywall/ui/remote_detail_page.py:295
+msgid "Show in Folder"
+msgstr "In map tonen"
+
+#: src/ashywall/ui/detail_page.py:166
+msgid "Dark Style Variant"
+msgstr "Variant voor donkere stijl"
+
+#: src/ashywall/ui/detail_page.py:173 src/ashywall/ui/detail_page.py:310
+#: src/ashywall/ui/detail_page.py:319
+msgid "Author"
+msgstr "Maker"
+
+#: src/ashywall/ui/detail_page.py:173 src/ashywall/ui/detail_page.py:175
+#: src/ashywall/ui/detail_page.py:315 src/ashywall/ui/detail_page.py:319
+#: src/ashywall/ui/detail_page.py:324
+msgid "Not provided by this source"
+msgstr "Niet opgegeven door deze bron"
+
+#: src/ashywall/ui/detail_page.py:175 src/ashywall/ui/detail_page.py:339
+#: src/ashywall/ui/detail_page.py:341 src/ashywall/ui/detail_page.py:345
+msgid "License"
+msgstr "Licentie"
+
+#: src/ashywall/ui/detail_page.py:178
+msgid "License Text"
+msgstr "Licentietekst"
+
+#: src/ashywall/ui/detail_page.py:189 src/ashywall/ui/detail_page.py:191
+msgid "Identical Copies"
+msgstr "Identieke kopieën"
+
+#: src/ashywall/ui/detail_page.py:189
+msgid "None in the library"
+msgstr "Geen in de bibliotheek"
+
+#: src/ashywall/ui/detail_page.py:193
+#, python-brace-format
+msgid "{count} other file with the same content"
+msgid_plural "{count} other files with the same content"
+msgstr[0] "{count} ander bestand met dezelfde inhoud"
+msgstr[1] "{count} andere bestanden met dezelfde inhoud"
+
+#: src/ashywall/ui/detail_page.py:220
+#, python-brace-format
+msgid "System — package {name}"
+msgstr "Systeem — pakket {name}"
+
+#: src/ashywall/ui/detail_page.py:227
+#, python-brace-format
+msgid "{license} (declared by the package {name})"
+msgstr "{license} (opgegeven door het pakket {name})"
+
+#: src/ashywall/ui/detail_page.py:244
+msgid "Open License Text"
+msgstr "Licentietekst openen"
+
+#: src/ashywall/ui/detail_page.py:314
+msgid "Uploaded By"
+msgstr "Geüpload door"
+
+#: src/ashywall/ui/detail_page.py:321 src/ashywall/ui/detail_page.py:324
+msgid "Original Source"
+msgstr "Oorspronkelijke bron"
+
+#: src/ashywall/ui/detail_page.py:329
+#, python-brace-format
+msgid "Page on {provider}"
+msgstr "Pagina op {provider}"
+
+#: src/ashywall/ui/detail_page.py:335
+#, python-brace-format
+msgid "{license} (declared in the package's PKGBUILD)"
+msgstr "{license} (opgegeven in de PKGBUILD van het pakket)"
+
+#: src/ashywall/ui/detail_page.py:347
+#, python-brace-format
+msgid "Not provided by {provider}. Images remain the property of their owners."
+msgstr ""
+"Niet opgegeven door {provider}. Afbeeldingen blijven eigendom van hun "
+"eigenaars."
+
+#: src/ashywall/ui/detail_widgets.py:30 src/ashywall/ui/reading_page.py:701
+msgid "Open in Browser"
+msgstr "Openen in browser"
+
+#: src/ashywall/ui/detail_widgets.py:50
+msgid "Light and Dark Styles"
+msgstr "Lichte en donkere stijl"
+
+#: src/ashywall/ui/detail_widgets.py:51
+msgid "Light Style Only"
+msgstr "Alleen lichte stijl"
+
+#: src/ashywall/ui/detail_widgets.py:52
+msgid "Dark Style Only"
+msgstr "Alleen donkere stijl"
+
+#: src/ashywall/ui/detail_widgets.py:62
+msgid "Choose light or dark style"
+msgstr "Lichte of donkere stijl kiezen"
+
+#: src/ashywall/ui/detail_widgets.py:63
+msgid "Use for the light and dark styles"
+msgstr "Gebruiken voor lichte en donkere stijl"
+
+#: src/ashywall/ui/detail_widgets.py:83
+msgid "Remove from Favorites"
+msgstr "Verwijderen uit favorieten"
+
+#: src/ashywall/ui/detail_widgets.py:83
+msgid "Add to Favorites"
+msgstr "Toevoegen aan favorieten"
+
+#: src/ashywall/ui/detail_widgets.py:123
+#, python-brace-format
+msgid "Preview of {title}"
+msgstr "Voorbeeld van {title}"
+
+#: src/ashywall/ui/detail_widgets.py:132
+msgid "Could not load the preview"
+msgstr "Kon het voorbeeld niet laden"
+
+#: src/ashywall/ui/detail_widgets.py:137
+msgid "View Full Screen"
+msgstr "Schermvullend bekijken"
+
+#: src/ashywall/ui/detail_widgets.py:181
+msgid "Simulate Screen Crop"
+msgstr "Schermuitsnede simuleren"
+
+#: src/ashywall/ui/detail_widgets.py:189
+msgid "Approximation only: panels, docks and extensions are not shown"
+msgstr ""
+"Alleen een benadering: panelen, docks en uitbreidingen worden niet getoond"
+
+#: src/ashywall/ui/detail_widgets.py:263
+#, python-brace-format
+msgid ""
+"Simulated for a {width} × {height} display. Panels, docks and extensions are "
+"not shown."
+msgstr ""
+"Gesimuleerd voor een scherm van {width} × {height}. Panelen, docks en "
+"uitbreidingen worden niet getoond."
+
+#: src/ashywall/ui/errors.py:12
+msgid "The server could not be reached. Check your connection and try again."
+msgstr ""
+"De server kon niet worden bereikt. Controleer uw verbinding en probeer het "
+"opnieuw."
+
+#: src/ashywall/ui/errors.py:15
+msgid "Too many requests in a short time. Wait a minute and try again."
+msgstr ""
+"Te veel verzoeken in korte tijd. Wacht een minuut en probeer het opnieuw."
+
+#: src/ashywall/ui/errors.py:18
+msgid "The server sent more data than announced, so the transfer was stopped."
+msgstr ""
+"De server stuurde meer gegevens dan aangekondigd, dus de overdracht is "
+"gestopt."
+
+#: src/ashywall/ui/errors.py:21
+msgid "The server sent data that AshyWall could not validate."
+msgstr "De server stuurde gegevens die AshyWall niet kon valideren."
+
+#: src/ashywall/ui/errors.py:23
+#, python-brace-format
+msgid "The downloaded file was rejected: {reason}"
+msgstr "Het gedownloade bestand is geweigerd: {reason}"
+
+#: src/ashywall/ui/errors.py:27
+#, python-brace-format
+msgid "The service is currently unavailable (HTTP {status}). Try again later."
+msgstr ""
+"De dienst is momenteel niet beschikbaar (HTTP {status}). Probeer het later "
+"opnieuw."
+
+#: src/ashywall/ui/errors.py:29
+#, python-brace-format
+msgid "The server answered with an error ({status})."
+msgstr "De server antwoordde met een fout ({status})."
+
+#: src/ashywall/ui/gallery_page.py:61
+msgid "Top this month"
+msgstr "Top van deze maand"
+
+#: src/ashywall/ui/gallery_page.py:62
+msgid "Latest"
+msgstr "Nieuwste"
+
+#: src/ashywall/ui/gallery_page.py:63
+msgid "Most viewed"
+msgstr "Meest bekeken"
+
+#: src/ashywall/ui/gallery_page.py:64
+msgid "Most favorited"
+msgstr "Meeste favorieten"
+
+#: src/ashywall/ui/gallery_page.py:65
+msgid "Random"
+msgstr "Willekeurig"
+
+#: src/ashywall/ui/gallery_page.py:66
+msgid "Relevance"
+msgstr "Relevantie"
+
+#: src/ashywall/ui/gallery_page.py:71
+msgid "Name"
+msgstr "Naam"
+
+#: src/ashywall/ui/gallery_page.py:71
+msgid "Recently modified"
+msgstr "Onlangs gewijzigd"
+
+#: src/ashywall/ui/gallery_page.py:71
+msgid "Largest first"
+msgstr "Grootste eerst"
+
+#: src/ashywall/ui/gallery_page.py:87 src/ashywall/ui/gallery_page.py:99
+#: src/ashywall/ui/gallery_page.py:191 src/ashywall/ui/rotation_dialog.py:108
+#: src/ashywall/ui/window.py:158 src/ashywall/ui/window.py:330
+msgid "Wallpapers"
+msgstr "Achtergronden"
+
+#: src/ashywall/ui/gallery_page.py:103
+msgid "Search"
+msgstr "Zoeken"
+
+#: src/ashywall/ui/gallery_page.py:107
+msgid "Filters and sorting"
+msgstr "Filters en sortering"
+
+#: src/ashywall/ui/gallery_page.py:112 src/ashywall/ui/preferences_dialog.py:55
+#: src/ashywall/ui/window_states.py:116
+msgid "Add Folder"
+msgstr "Map toevoegen"
+
+#: src/ashywall/ui/gallery_page.py:117
+msgid "Rename Collection…"
+msgstr "Collectie hernoemen…"
+
+#: src/ashywall/ui/gallery_page.py:118
+msgid "Delete Collection…"
+msgstr "Collectie verwijderen…"
+
+#: src/ashywall/ui/gallery_page.py:121
+msgid "Collection Options"
+msgstr "Collectie-opties"
+
+#: src/ashywall/ui/gallery_page.py:131 src/ashywall/ui/gallery_page.py:420
+msgid "Search by name or path"
+msgstr "Zoeken op naam of pad"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Any orientation"
+msgstr "Elke oriëntatie"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Landscape"
+msgstr "Liggend"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Portrait"
+msgstr "Staand"
+
+#: src/ashywall/ui/gallery_page.py:233
+msgid "Square"
+msgstr "Vierkant"
+
+#: src/ashywall/ui/gallery_page.py:237 src/ashywall/ui/rotation_dialog.py:39
+msgid "Any resolution"
+msgstr "Elke resolutie"
+
+#: src/ashywall/ui/gallery_page.py:238 src/ashywall/ui/rotation_dialog.py:40
+msgid "Full HD or larger"
+msgstr "Full HD of groter"
+
+#: src/ashywall/ui/gallery_page.py:239 src/ashywall/ui/rotation_dialog.py:41
+msgid "QHD or larger"
+msgstr "QHD of groter"
+
+#: src/ashywall/ui/gallery_page.py:240 src/ashywall/ui/rotation_dialog.py:42
+msgid "4K or larger"
+msgstr "4K of groter"
+
+#: src/ashywall/ui/gallery_page.py:241 src/ashywall/ui/rotation_dialog.py:43
+msgid "8K or larger"
+msgstr "8K of groter"
+
+#: src/ashywall/ui/gallery_page.py:254
+msgid "Orientation"
+msgstr "Oriëntatie"
+
+#: src/ashywall/ui/gallery_page.py:255
+msgid "Resolution"
+msgstr "Resolutie"
+
+#: src/ashywall/ui/gallery_page.py:256
+msgid "Sort by"
+msgstr "Sorteren op"
+
+#: src/ashywall/ui/gallery_page.py:270
+msgid ""
+"Resolution compares the long side and the short side in either orientation; "
+"4K means at least 3840 × 2160 px. Pixel size does not show whether an image "
+"was upscaled."
+msgstr ""
+"De resolutie vergelijkt de lange en de korte zijde, ongeacht de oriëntatie; "
+"4K betekent minstens 3840 × 2160 px. De pixelgrootte laat niet zien of een "
+"afbeelding is opgeschaald."
+
+#: src/ashywall/ui/gallery_page.py:281 src/ashywall/ui/window_states.py:110
+#: src/ashywall/ui/window_states.py:173
+msgid "Clear Filters"
+msgstr "Filters wissen"
+
+#: src/ashywall/ui/gallery_page.py:418
+#, python-brace-format
+msgid "Search {provider}"
+msgstr "Zoeken in {provider}"
+
+#: src/ashywall/ui/image_viewer.py:76
+#, python-brace-format
+msgid "Full-screen view of {title}"
+msgstr "Schermvullende weergave van {title}"
+
+#: src/ashywall/ui/image_viewer.py:87
+msgid "Could not open the image"
+msgstr "Kon de afbeelding niet openen"
+
+#: src/ashywall/ui/image_viewer.py:140
+msgid "As Wallpaper"
+msgstr "Als achtergrond"
+
+#: src/ashywall/ui/image_viewer.py:141
+msgid "Fill the screen, as the desktop shows it (W)"
+msgstr "Het scherm vullen, zoals het bureaublad het toont (W)"
+
+#: src/ashywall/ui/image_viewer.py:145
+msgid "Whole Image"
+msgstr "Hele afbeelding"
+
+#: src/ashywall/ui/image_viewer.py:146
+msgid "Fit the whole image on the screen (F)"
+msgstr "De hele afbeelding in het scherm passen (F)"
+
+#: src/ashywall/ui/image_viewer.py:150
+msgid "Actual Size"
+msgstr "Ware grootte"
+
+#: src/ashywall/ui/image_viewer.py:151
+msgid "One image pixel per screen pixel (1)"
+msgstr "Eén beeldpixel per schermpixel (1)"
+
+#: src/ashywall/ui/image_viewer.py:172
+msgid "Close (Esc)"
+msgstr "Sluiten (Esc)"
+
+#: src/ashywall/ui/image_viewer.py:336
+#, python-brace-format
+msgid "{width} × {height} px"
+msgstr "{width} × {height} px"
+
+#: src/ashywall/ui/image_viewer.py:343
+#, python-brace-format
+msgid "shown reduced to {width} × {height} to save memory"
+msgstr "verkleind weergegeven tot {width} × {height} om geheugen te besparen"
+
+#: src/ashywall/ui/image_viewer.py:348
+#, python-brace-format
+msgid "{zoom}% of actual size"
+msgstr "{zoom}% van de ware grootte"
+
+#: src/ashywall/ui/preferences_dialog.py:28 src/ashywall/ui/window.py:199
+msgid "Preferences"
+msgstr "Voorkeuren"
+
+#: src/ashywall/ui/preferences_dialog.py:32
+msgid "Thumbnail Cache"
+msgstr "Miniaturencache"
+
+#: src/ashywall/ui/preferences_dialog.py:33
+msgid "Thumbnails are recreated when needed"
+msgstr "Miniaturen worden opnieuw aangemaakt wanneer nodig"
+
+#: src/ashywall/ui/preferences_dialog.py:37
+msgid "Full-Resolution Previews"
+msgstr "Voorbeelden op volledige resolutie"
+
+#: src/ashywall/ui/preferences_dialog.py:38
+msgid "Online wallpapers are fetched again when opened"
+msgstr ""
+"Online achtergronden worden opnieuw opgehaald wanneer ze worden geopend"
+
+#: src/ashywall/ui/preferences_dialog.py:45 src/ashywall/ui/window_states.py:34
+msgid "Library"
+msgstr "Bibliotheek"
+
+#: src/ashywall/ui/preferences_dialog.py:48
+#: src/ashywall/ui/rotation_dialog.py:30 src/ashywall/ui/window_states.py:44
+msgid "My Folders"
+msgstr "Mijn mappen"
+
+#: src/ashywall/ui/preferences_dialog.py:50
+msgid ""
+"Images in these folders appear in the library. Removing a folder never "
+"deletes its files."
+msgstr ""
+"Afbeeldingen in deze mappen verschijnen in de bibliotheek. Een map "
+"verwijderen verwijdert nooit de bestanden erin."
+
+#: src/ashywall/ui/preferences_dialog.py:67 src/ashywall/ui/reading_page.py:123
+#: src/ashywall/ui/reading_page.py:139 src/ashywall/ui/window.py:324
+#: src/ashywall/ui/window_states.py:83
+msgid "Reading"
+msgstr "Lezen"
+
+#: src/ashywall/ui/preferences_dialog.py:70
+msgid "RSS and Atom"
+msgstr "RSS en Atom"
+
+#: src/ashywall/ui/preferences_dialog.py:72
+msgid ""
+"An optional, quiet reading list alongside your wallpaper library. Full "
+"articles open in your default browser."
+msgstr ""
+"Een optionele, rustige leeslijst naast uw achtergrondbibliotheek. Volledige "
+"artikelen worden geopend in uw standaardbrowser."
+
+#: src/ashywall/ui/preferences_dialog.py:76
+msgid "Enable Reading"
+msgstr "Lezen inschakelen"
+
+#: src/ashywall/ui/preferences_dialog.py:78
+msgid "Show Articles in the sidebar. Sources update only when you request it."
+msgstr ""
+"Artikelen tonen in de zijbalk. Bronnen worden alleen bijgewerkt wanneer u "
+"daarom vraagt."
+
+#: src/ashywall/ui/preferences_dialog.py:95
+msgid "No folders added"
+msgstr "Geen mappen toegevoegd"
+
+#: src/ashywall/ui/preferences_dialog.py:109
+msgid "Remove from Library"
+msgstr "Verwijderen uit bibliotheek"
+
+#: src/ashywall/ui/preferences_dialog.py:121
+msgid "Remove Folder?"
+msgstr "Map verwijderen?"
+
+#: src/ashywall/ui/preferences_dialog.py:123
+#, python-brace-format
+msgid ""
+"“{name}” will no longer appear in AshyWall. The folder and its files stay on "
+"disk."
+msgstr ""
+"‘{name}’ verschijnt niet langer in AshyWall. De map en de bestanden erin "
+"blijven op de schijf."
+
+#: src/ashywall/ui/preferences_dialog.py:127
+#: src/ashywall/ui/reading_page.py:655
+msgid "Remove"
+msgstr "Verwijderen"
+
+#: src/ashywall/ui/preferences_dialog.py:139
+msgid "Storage"
+msgstr "Opslag"
+
+#: src/ashywall/ui/preferences_dialog.py:141
+msgid "Downloaded Wallpapers"
+msgstr "Gedownloade achtergronden"
+
+#: src/ashywall/ui/preferences_dialog.py:148
+msgid "Calculating…"
+msgstr "Berekenen…"
+
+#: src/ashywall/ui/preferences_dialog.py:151
+msgid "Clear"
+msgstr "Wissen"
+
+#: src/ashywall/ui/preferences_dialog.py:165
+#, python-brace-format
+msgid "{used} of {limit}"
+msgstr "{used} van {limit}"
+
+#: src/ashywall/ui/reading_categories.py:14
+msgid ""
+"Choose an existing category or enter a new one. Leave it empty for "
+"Uncategorized."
+msgstr ""
+"Kies een bestaande categorie of voer een nieuwe in. Laat het leeg voor "
+"‘Zonder categorie’."
+
+#: src/ashywall/ui/reading_categories.py:17
+msgid "Category (optional)"
+msgstr "Categorie (optioneel)"
+
+#: src/ashywall/ui/reading_categories.py:21
+msgid "Choose a Category"
+msgstr "Kies een categorie"
+
+#: src/ashywall/ui/reading_categories.py:23
+msgid "Existing Categories"
+msgstr "Bestaande categorieën"
+
+#: src/ashywall/ui/reading_page.py:28
+msgid ""
+"Enter a public website or HTTPS feed address. Local network addresses are "
+"not supported."
+msgstr ""
+"Voer een openbare website of een HTTPS-feedadres in. Adressen op het lokale "
+"netwerk worden niet ondersteund."
+
+#: src/ashywall/ui/reading_page.py:32
+msgid ""
+"No readable feed was found. Paste the site's direct RSS or Atom address."
+msgstr ""
+"Er is geen leesbare feed gevonden. Plak het directe RSS- of Atom-adres van "
+"de website."
+
+#: src/ashywall/ui/reading_page.py:35
+msgid "This address did not return a supported RSS or Atom feed."
+msgstr "Dit adres gaf geen ondersteunde RSS- of Atom-feed terug."
+
+#: src/ashywall/ui/reading_page.py:37
+msgid "This site refused access. Try its direct RSS or Atom address."
+msgstr ""
+"Deze website weigerde de toegang. Probeer het directe RSS- of Atom-adres."
+
+#: src/ashywall/ui/reading_page.py:40
+msgid "This source is already in your reading list."
+msgstr "Deze bron staat al in uw leeslijst."
+
+#: src/ashywall/ui/reading_page.py:41
+msgid "Use at most 60 characters for the category."
+msgstr "Gebruik maximaal 60 tekens voor de categorie."
+
+#: src/ashywall/ui/reading_page.py:42
+msgid "You can add up to 50 sources."
+msgstr "U kunt maximaal 50 bronnen toevoegen."
+
+#: src/ashywall/ui/reading_page.py:43
+msgid "The source could not be saved."
+msgstr "De bron kon niet worden opgeslagen."
+
+#: src/ashywall/ui/reading_page.py:54
+msgid "Date not provided"
+msgstr "Datum niet opgegeven"
+
+#: src/ashywall/ui/reading_page.py:110 src/ashywall/ui/reading_page.py:113
+msgid "Unread"
+msgstr "Ongelezen"
+
+#: src/ashywall/ui/reading_page.py:113
+msgid "Read"
+msgstr "Gelezen"
+
+#: src/ashywall/ui/reading_page.py:139 src/ashywall/ui/reading_page.py:368
+#: src/ashywall/ui/reading_page.py:412
+msgid "Articles from your sources"
+msgstr "Artikelen uit uw bronnen"
+
+#: src/ashywall/ui/reading_page.py:144 src/ashywall/ui/reading_page.py:213
+#: src/ashywall/ui/reading_page.py:507
+msgid "Sources"
+msgstr "Bronnen"
+
+#: src/ashywall/ui/reading_page.py:146
+msgid "Manage Sources"
+msgstr "Bronnen beheren"
+
+#: src/ashywall/ui/reading_page.py:151 src/ashywall/ui/reading_page.py:364
+#: src/ashywall/ui/reading_page.py:409
+msgid "Refresh Sources"
+msgstr "Bronnen bijwerken"
+
+#: src/ashywall/ui/reading_page.py:156
+msgid "Search Articles"
+msgstr "Artikelen zoeken"
+
+#: src/ashywall/ui/reading_page.py:160
+msgid "Search articles or sources"
+msgstr "Artikelen of bronnen zoeken"
+
+#: src/ashywall/ui/reading_page.py:177 src/ashywall/ui/reading_page.py:307
+msgid "All Categories"
+msgstr "Alle categorieën"
+
+#: src/ashywall/ui/reading_page.py:192
+msgid "Filter by Category"
+msgstr "Filteren op categorie"
+
+#: src/ashywall/ui/reading_page.py:194
+msgid "Unread Only"
+msgstr "Alleen ongelezen"
+
+#: src/ashywall/ui/reading_page.py:227 src/ashywall/ui/window_states.py:81
+msgid "Articles"
+msgstr "Artikelen"
+
+#: src/ashywall/ui/reading_page.py:234 src/ashywall/ui/reading_page.py:364
+#: src/ashywall/ui/reading_page.py:430 src/ashywall/ui/reading_page.py:443
+#: src/ashywall/ui/reading_page.py:474 src/ashywall/ui/reading_page.py:530
+msgid "Add Source"
+msgstr "Bron toevoegen"
+
+#: src/ashywall/ui/reading_page.py:248
+msgid "Load More"
+msgstr "Meer laden"
+
+#: src/ashywall/ui/reading_page.py:331
+#, python-brace-format
+msgid "Reading could not be loaded: {error}"
+msgstr "Lezen kon niet worden geladen: {error}"
+
+#: src/ashywall/ui/reading_page.py:348
+msgid "A Quiet Place to Read"
+msgstr "Een rustige plek om te lezen"
+
+#: src/ashywall/ui/reading_page.py:350
+msgid "No Matching Articles"
+msgstr "Geen overeenkomende artikelen"
+
+#: src/ashywall/ui/reading_page.py:350
+msgid "No Articles Yet"
+msgstr "Nog geen artikelen"
+
+#: src/ashywall/ui/reading_page.py:354
+msgid ""
+"Add RSS or Atom sources and organize them by category. Articles open in your "
+"browser."
+msgstr ""
+"Voeg RSS- of Atom-bronnen toe en orden ze per categorie. Artikelen worden "
+"geopend in uw browser."
+
+#: src/ashywall/ui/reading_page.py:358
+msgid "Try another category or search, or turn off the unread filter."
+msgstr ""
+"Probeer een andere categorie of zoekopdracht, of schakel het filter voor "
+"ongelezen uit."
+
+#: src/ashywall/ui/reading_page.py:360
+msgid "Update your sources or add another feed."
+msgstr "Werk uw bronnen bij of voeg een andere feed toe."
+
+#: src/ashywall/ui/reading_page.py:372
+#, python-brace-format
+msgid "One source could not be updated. Cached articles are still available."
+msgid_plural ""
+"{count} sources could not be updated. Cached articles are still available."
+msgstr[0] ""
+"Eén bron kon niet worden bijgewerkt. Artikelen in de cache zijn nog "
+"beschikbaar."
+msgstr[1] ""
+"{count} bronnen konden niet worden bijgewerkt. Artikelen in de cache zijn "
+"nog beschikbaar."
+
+#: src/ashywall/ui/reading_page.py:409
+msgid "Stop Updating"
+msgstr "Bijwerken stoppen"
+
+#: src/ashywall/ui/reading_page.py:412
+msgid "Updating sources…"
+msgstr "Bronnen bijwerken…"
+
+#: src/ashywall/ui/reading_page.py:431
+msgid "Website or Feed Address"
+msgstr "Website- of feedadres"
+
+#: src/ashywall/ui/reading_page.py:436
+msgid ""
+"Enter a website, such as phoronix.com, or an HTTPS RSS or Atom address. "
+"Organize sources under Technology, Health or Science."
+msgstr ""
+"Voer een website in, zoals phoronix.com, of een HTTPS-adres voor RSS of "
+"Atom. Orden bronnen bijvoorbeeld onder Technologie, Gezondheid of Wetenschap."
+
+#: src/ashywall/ui/reading_page.py:491
+msgid "Checking Source…"
+msgstr "Bron controleren…"
+
+#: src/ashywall/ui/reading_page.py:520
+msgid ""
+"Select a source to change its category. Use the trash button to remove it."
+msgstr ""
+"Selecteer een bron om de categorie te wijzigen. Gebruik de prullenbakknop om "
+"hem te verwijderen."
+
+#: src/ashywall/ui/reading_page.py:555
+msgid "Your Sources"
+msgstr "Uw bronnen"
+
+#: src/ashywall/ui/reading_page.py:556
+msgid "No sources added"
+msgstr "Geen bronnen toegevoegd"
+
+#: src/ashywall/ui/reading_page.py:568
+msgid "Uncategorized"
+msgstr "Zonder categorie"
+
+#: src/ashywall/ui/reading_page.py:570
+#, python-brace-format
+msgid "{count} source"
+msgid_plural "{count} sources"
+msgstr[0] "{count} bron"
+msgstr[1] "{count} bronnen"
+
+#: src/ashywall/ui/reading_page.py:576
+msgid "Could not update this source"
+msgstr "Kon deze bron niet bijwerken"
+
+#: src/ashywall/ui/reading_page.py:583 src/ashywall/ui/reading_page.py:590
+#: src/ashywall/ui/reading_page.py:615
+msgid "Change Category"
+msgstr "Categorie wijzigen"
+
+#: src/ashywall/ui/reading_page.py:599
+msgid "Remove Source"
+msgstr "Bron verwijderen"
+
+#: src/ashywall/ui/reading_page.py:626
+msgid "Save"
+msgstr "Opslaan"
+
+#: src/ashywall/ui/reading_page.py:649
+msgid "Remove Source?"
+msgstr "Bron verwijderen?"
+
+#: src/ashywall/ui/reading_page.py:651
+#, python-brace-format
+msgid "“{name}” and its cached articles will be removed from Reading."
+msgstr "‘{name}’ en de artikelen in de cache worden verwijderd uit Lezen."
+
+#: src/ashywall/ui/reading_page.py:668
+msgid "Article"
+msgstr "Artikel"
+
+#: src/ashywall/ui/reading_page.py:677
+msgid "This source did not provide a summary."
+msgstr "Deze bron heeft geen samenvatting gegeven."
+
+#: src/ashywall/ui/reading_page.py:684
+msgid "Summary provided by the source. Read the full article in your browser."
+msgstr "Samenvatting van de bron. Lees het volledige artikel in uw browser."
+
+#: src/ashywall/ui/reading_page.py:695 src/ashywall/ui/reading_page.py:699
+msgid "Mark as Unread"
+msgstr "Als ongelezen markeren"
+
+#: src/ashywall/ui/reading_page.py:695 src/ashywall/ui/reading_page.py:699
+msgid "Mark as Read"
+msgstr "Als gelezen markeren"
+
+#: src/ashywall/ui/reading_page.py:708
+msgid "This article has an invalid address."
+msgstr "Dit artikel heeft een ongeldig adres."
+
+#: src/ashywall/ui/reading_page.py:718
+msgid "The article could not be opened in the browser."
+msgstr "Het artikel kon niet in de browser worden geopend."
+
+#: src/ashywall/ui/remote_detail_page.py:156
+#, python-brace-format
+msgid ""
+"Reduced preview: {provider} asks apps to load originals ({size}) only when "
+"you want them."
+msgstr ""
+"Verkleind voorbeeld: {provider} vraagt apps om originelen ({size}) alleen te "
+"laden wanneer u dat wilt."
+
+#: src/ashywall/ui/remote_detail_page.py:163
+#, python-brace-format
+msgid ""
+"Reduced preview: your connection is metered, so the original ({size}) is not "
+"loaded automatically."
+msgstr ""
+"Verkleind voorbeeld: uw verbinding heeft een datalimiet, dus het origineel "
+"({size}) wordt niet automatisch geladen."
+
+#: src/ashywall/ui/remote_detail_page.py:168
+#, python-brace-format
+msgid ""
+"Reduced preview: the original is large ({size}), so it is loaded only when "
+"you ask."
+msgstr ""
+"Verkleind voorbeeld: het origineel is groot ({size}), dus het wordt alleen "
+"geladen wanneer u erom vraagt."
+
+#: src/ashywall/ui/remote_detail_page.py:171
+msgid "Load Full Resolution"
+msgstr "Volledige resolutie laden"
+
+#: src/ashywall/ui/remote_detail_page.py:179
+#: src/ashywall/ui/remote_detail_page.py:336
+msgid "unknown size"
+msgstr "onbekende grootte"
+
+#: src/ashywall/ui/remote_detail_page.py:220
+#, python-brace-format
+msgid "Loading the full-resolution image ({size})…"
+msgstr "Afbeelding op volledige resolutie laden ({size})…"
+
+#: src/ashywall/ui/remote_detail_page.py:240
+#, python-brace-format
+msgid "Loading the full-resolution image: {received} of {total}…"
+msgstr "Afbeelding op volledige resolutie laden: {received} van {total}…"
+
+#: src/ashywall/ui/remote_detail_page.py:261
+#, python-brace-format
+msgid ""
+"Showing a reduced preview: the full-resolution image could not be loaded. "
+"{reason}"
+msgstr ""
+"Verkleind voorbeeld getoond: de afbeelding op volledige resolutie kon niet "
+"worden geladen. {reason}"
+
+#: src/ashywall/ui/remote_detail_page.py:264
+#: src/ashywall/ui/window_states.py:200
+msgid "Try Again"
+msgstr "Opnieuw proberen"
+
+#: src/ashywall/ui/remote_detail_page.py:278
+#: src/ashywall/ui/remote_detail_page.py:331
+msgid "Not Downloaded"
+msgstr "Niet gedownload"
+
+#: src/ashywall/ui/remote_detail_page.py:279
+msgid "Download"
+msgstr "Downloaden"
+
+#: src/ashywall/ui/remote_detail_page.py:286
+msgid "Cancel Download"
+msgstr "Downloaden annuleren"
+
+#: src/ashywall/ui/remote_detail_page.py:321
+#: src/ashywall/ui/wallpaper_card.py:40
+msgid "Downloaded"
+msgstr "Gedownload"
+
+#: src/ashywall/ui/remote_detail_page.py:326
+msgid "Downloading…"
+msgstr "Downloaden…"
+
+#: src/ashywall/ui/remote_detail_page.py:331
+msgid "Download Failed"
+msgstr "Downloaden mislukt"
+
+#: src/ashywall/ui/remote_detail_page.py:342
+#, python-brace-format
+msgid "Original file: {size}. It is saved to your Downloads section."
+msgstr ""
+"Origineel bestand: {size}. Het wordt opgeslagen in de sectie Downloads."
+
+#: src/ashywall/ui/remote_detail_page.py:350
+#, python-brace-format
+msgid "{received} of {total}"
+msgstr "{received} van {total}"
+
+#: src/ashywall/ui/remote_detail_page.py:372
+msgid "Download cancelled"
+msgstr "Downloaden geannuleerd"
+
+#: src/ashywall/ui/remote_detail_page.py:406
+msgid "Package"
+msgstr "Pakket"
+
+#: src/ashywall/ui/remote_detail_page.py:406
+msgid "Description"
+msgstr "Beschrijving"
+
+#: src/ashywall/ui/remote_detail_page.py:409
+msgid "Featured On"
+msgstr "Uitgelicht op"
+
+#: src/ashywall/ui/rotation_dialog.py:17
+#, python-brace-format
+msgid "Every minute"
+msgid_plural "Every {count} minutes"
+msgstr[0] "Elke minuut"
+msgstr[1] "Elke {count} minuten"
+
+#: src/ashywall/ui/rotation_dialog.py:22
+#, python-brace-format
+msgid "Every hour"
+msgid_plural "Every {count} hours"
+msgstr[0] "Elk uur"
+msgstr[1] "Elke {count} uur"
+
+#: src/ashywall/ui/rotation_dialog.py:23
+msgid "Every day"
+msgstr "Elke dag"
+
+#: src/ashywall/ui/rotation_dialog.py:28 src/ashywall/ui/window_states.py:37
+msgid "All Wallpapers"
+msgstr "Alle achtergronden"
+
+#: src/ashywall/ui/rotation_dialog.py:32 src/ashywall/ui/window_states.py:61
+msgid "Favorites"
+msgstr "Favorieten"
+
+#: src/ashywall/ui/rotation_dialog.py:68
+msgid "Automatic Change"
+msgstr "Automatisch wisselen"
+
+#: src/ashywall/ui/rotation_dialog.py:89
+msgid ""
+"GNOME changes the wallpaper on its own, so AshyWall does not need to stay "
+"open. New files join the list the next time AshyWall opens."
+msgstr ""
+"GNOME wisselt de achtergrond zelf, dus AshyWall hoeft niet open te blijven. "
+"Nieuwe bestanden komen in de lijst wanneer AshyWall de volgende keer wordt "
+"geopend."
+
+#: src/ashywall/ui/rotation_dialog.py:94
+msgid "Change Wallpaper Automatically"
+msgstr "Achtergrond automatisch wisselen"
+
+#: src/ashywall/ui/rotation_dialog.py:98
+msgid "Now Showing"
+msgstr "Nu getoond"
+
+#: src/ashywall/ui/rotation_dialog.py:101 src/ashywall/ui/window.py:196
+msgid "Next Wallpaper"
+msgstr "Volgende achtergrond"
+
+#: src/ashywall/ui/rotation_dialog.py:110
+msgid "Use Wallpapers From"
+msgstr "Achtergronden gebruiken uit"
+
+#: src/ashywall/ui/rotation_dialog.py:117
+msgid "Minimum Resolution"
+msgstr "Minimale resolutie"
+
+#: src/ashywall/ui/rotation_dialog.py:122
+msgid "Skip Portrait Images"
+msgstr "Staande afbeeldingen overslaan"
+
+#: src/ashywall/ui/rotation_dialog.py:124
+msgid "Matching Wallpapers"
+msgstr "Overeenkomende achtergronden"
+
+#: src/ashywall/ui/rotation_dialog.py:131
+msgid "Timing"
+msgstr "Tijdschema"
+
+#: src/ashywall/ui/rotation_dialog.py:133
+msgid "Change"
+msgstr "Wisselen"
+
+#: src/ashywall/ui/rotation_dialog.py:138
+msgid "Shuffle"
+msgstr "Willekeurige volgorde"
+
+#: src/ashywall/ui/rotation_dialog.py:139
+msgid "Otherwise wallpapers follow the library order"
+msgstr "Anders volgen de achtergronden de volgorde van de bibliotheek"
+
+#: src/ashywall/ui/rotation_dialog.py:173 src/ashywall/ui/window_states.py:222
+#: src/ashywall/ui/window_states.py:228
+#, python-brace-format
+msgid "{count} wallpaper"
+msgid_plural "{count} wallpapers"
+msgstr[0] "{count} achtergrond"
+msgstr[1] "{count} achtergronden"
+
+#: src/ashywall/ui/rotation_dialog.py:177
+msgid "No wallpapers match: choose another source or resolution"
+msgstr "Geen overeenkomende achtergronden: kies een andere bron of resolutie"
+
+#: src/ashywall/ui/wallpaper_card.py:41
+msgid "Online, not downloaded"
+msgstr "Online, niet gedownload"
+
+#: src/ashywall/ui/wallpaper_card.py:123
+msgid "Favorite"
+msgstr "Favoriet"
+
+#: src/ashywall/ui/wallpaper_card.py:159
+msgid "Could not load image"
+msgstr "Kon afbeelding niet laden"
+
+#: src/ashywall/ui/window.py:191
+msgid "Refresh Library"
+msgstr "Bibliotheek vernieuwen"
+
+#: src/ashywall/ui/window.py:192
+msgid "Restore Previous Wallpaper"
+msgstr "Vorige achtergrond herstellen"
+
+#: src/ashywall/ui/window.py:195
+msgid "Automatic Change…"
+msgstr "Automatisch wisselen…"
+
+#: src/ashywall/ui/window.py:200
+msgid "About AshyWall"
+msgstr "Over AshyWall"
+
+#: src/ashywall/ui/window.py:208
+msgid "Main Menu"
+msgstr "Hoofdmenu"
+
+#: src/ashywall/ui/window.py:359
+#, python-brace-format
+msgid "Loading {provider}…"
+msgstr "{provider} laden…"
+
+#: src/ashywall/ui/window.py:406
+#, python-brace-format
+msgid "The library could not be read: {error}"
+msgstr "De bibliotheek kon niet worden gelezen: {error}"
+
+#: src/ashywall/ui/window.py:518
+msgid "New Collection"
+msgstr "Nieuwe collectie"
+
+#: src/ashywall/ui/window.py:518
+msgid "Create"
+msgstr "Aanmaken"
+
+#: src/ashywall/ui/window.py:534
+msgid "Rename Collection"
+msgstr "Collectie hernoemen"
+
+#: src/ashywall/ui/window.py:534
+msgid "Rename"
+msgstr "Hernoemen"
+
+#: src/ashywall/ui/window.py:542
+msgid "Delete Collection?"
+msgstr "Collectie verwijderen?"
+
+#: src/ashywall/ui/window.py:544
+#, python-brace-format
+msgid ""
+"“{name}” will be deleted. Its wallpapers stay in your library and on disk."
+msgstr ""
+"‘{name}’ wordt verwijderd. De achtergronden blijven in uw bibliotheek en op "
+"de schijf."
+
+#: src/ashywall/ui/window.py:548
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: src/ashywall/ui/window.py:556
+#, python-brace-format
+msgid "Collection “{name}” deleted"
+msgstr "Collectie ‘{name}’ verwijderd"
+
+#: src/ashywall/ui/window.py:635
+#, python-brace-format
+msgid "Download complete: {title}"
+msgstr "Downloaden voltooid: {title}"
+
+#: src/ashywall/ui/window.py:639
+#, python-brace-format
+msgid "Download failed: {reason}"
+msgstr "Downloaden mislukt: {reason}"
+
+#: src/ashywall/ui/window.py:658
+msgid "Downloading the original before applying…"
+msgstr "Het origineel downloaden vóór het toepassen…"
+
+#: src/ashywall/ui/window.py:667
+msgid "Applying wallpapers is not available"
+msgstr "Achtergronden toepassen is niet beschikbaar"
+
+#: src/ashywall/ui/window.py:675
+#, python-brace-format
+msgid "Could not apply the wallpaper: {error}"
+msgstr "Kon de achtergrond niet toepassen: {error}"
+
+#: src/ashywall/ui/window.py:681
+msgid "Wallpaper applied"
+msgstr "Achtergrond toegepast"
+
+#: src/ashywall/ui/window.py:682
+msgid "Wallpaper applied to the light style"
+msgstr "Achtergrond toegepast op de lichte stijl"
+
+#: src/ashywall/ui/window.py:683
+msgid "Wallpaper applied to the dark style"
+msgstr "Achtergrond toegepast op de donkere stijl"
+
+#: src/ashywall/ui/window.py:688
+msgid "Undo"
+msgstr "Ongedaan maken"
+
+#: src/ashywall/ui/window.py:704
+#, python-brace-format
+msgid "Could not restore the previous wallpaper: {error}"
+msgstr "Kon de vorige achtergrond niet herstellen: {error}"
+
+#: src/ashywall/ui/window.py:712
+msgid "Previous wallpaper restored"
+msgstr "Vorige achtergrond hersteld"
+
+#: src/ashywall/ui/window.py:717
+msgid "Add Folder to Library"
+msgstr "Map aan bibliotheek toevoegen"
+
+#: src/ashywall/ui/window.py:728
+msgid "Only local folders can be added"
+msgstr "Alleen lokale mappen kunnen worden toegevoegd"
+
+#: src/ashywall/ui/window.py:735
+#, python-brace-format
+msgid "Adding “{name}”…"
+msgstr "‘{name}’ toevoegen…"
+
+#: src/ashywall/ui/window.py:740
+#, python-brace-format
+msgid "“{name}” removed from the library"
+msgstr "‘{name}’ verwijderd uit de bibliotheek"
+
+#: src/ashywall/ui/window.py:779
+msgid "Looking for wallpapers…"
+msgstr "Achtergronden zoeken…"
+
+#: src/ashywall/ui/window.py:780
+#, python-brace-format
+msgid "Checking {processed} of {total} images…"
+msgstr "{processed} van {total} afbeeldingen controleren…"
+
+#: src/ashywall/ui/window.py:796
+#, python-brace-format
+msgid "{count} file could not be read"
+msgid_plural "{count} files could not be read"
+msgstr[0] "{count} bestand kon niet worden gelezen"
+msgstr[1] "{count} bestanden konden niet worden gelezen"
+
+#: src/ashywall/ui/window.py:803
+#, python-brace-format
+msgid "Folder not found: {path}"
+msgstr "Map niet gevonden: {path}"
+
+#: src/ashywall/ui/window.py:832
+#, python-brace-format
+msgid "The library could not be updated: {error}"
+msgstr "De bibliotheek kon niet worden bijgewerkt: {error}"
+
+#: src/ashywall/ui/window.py:871
+msgid "Automatic change stopped: no wallpapers match its settings"
+msgstr ""
+"Automatisch wisselen gestopt: geen achtergronden komen overeen met de "
+"instellingen"
+
+#: src/ashywall/ui/window.py:877
+#, python-brace-format
+msgid "Automatic change could not be updated: {error}"
+msgstr "Automatisch wisselen kon niet worden bijgewerkt: {error}"
+
+#: src/ashywall/ui/window.py:910
+#, python-brace-format
+msgid "Automatic change could not start: {error}"
+msgstr "Automatisch wisselen kon niet starten: {error}"
+
+#: src/ashywall/ui/window.py:922
+#, python-brace-format
+msgid "Could not keep the current wallpaper: {error}"
+msgstr "Kon de huidige achtergrond niet behouden: {error}"
+
+#: src/ashywall/ui/window.py:927
+msgid "Automatic change turned off"
+msgstr "Automatisch wisselen uitgeschakeld"
+
+#: src/ashywall/ui/window.py:928
+#, python-brace-format
+msgid "Automatic change turned off; “{name}” stays as the wallpaper"
+msgstr "Automatisch wisselen uitgeschakeld; ‘{name}’ blijft de achtergrond"
+
+#: src/ashywall/ui/window.py:936
+#, python-brace-format
+msgid "Could not change the wallpaper: {error}"
+msgstr "Kon de achtergrond niet wisselen: {error}"
+
+#: src/ashywall/ui/window.py:939
+#, python-brace-format
+msgid "Now showing {name}"
+msgstr "Nu getoond: {name}"
+
+#: src/ashywall/ui/window_states.py:34
+msgid "Explore"
+msgstr "Ontdekken"
+
+#: src/ashywall/ui/window_states.py:75
+msgid "New Collection…"
+msgstr "Nieuwe collectie…"
+
+#: src/ashywall/ui/window_states.py:95
+#, python-brace-format
+msgid "This folder is already in the library through “{path}”"
+msgstr "Deze map staat al in de bibliotheek via ‘{path}’"
+
+#: src/ashywall/ui/window_states.py:100
+#, python-brace-format
+msgid ""
+"This folder contains “{path}”, which is already in the library. Remove it "
+"first."
+msgstr ""
+"Deze map bevat ‘{path}’, dat al in de bibliotheek staat. Verwijder die eerst."
+
+#: src/ashywall/ui/window_states.py:102
+#, python-brace-format
+msgid "“{path}” is not a folder"
+msgstr "‘{path}’ is geen map"
+
+#: src/ashywall/ui/window_states.py:108
+msgid "No Matching Wallpapers"
+msgstr "Geen overeenkomende achtergronden"
+
+#: src/ashywall/ui/window_states.py:109 src/ashywall/ui/window_states.py:172
+msgid "Try other search terms or filters."
+msgstr "Probeer andere zoektermen of filters."
+
+#: src/ashywall/ui/window_states.py:120
+msgid "No System Wallpapers Found"
+msgstr "Geen systeemachtergronden gevonden"
+
+#: src/ashywall/ui/window_states.py:122
+msgid ""
+"AshyWall looked in the GNOME background catalogs and in the shared "
+"backgrounds and wallpapers folders."
+msgstr ""
+"AshyWall heeft gezocht in de achtergrondcatalogi van GNOME en in de gedeelde "
+"mappen backgrounds en wallpapers."
+
+#: src/ashywall/ui/window_states.py:128
+msgid "No Images in Your Folders"
+msgstr "Geen afbeeldingen in uw mappen"
+
+#: src/ashywall/ui/window_states.py:128
+msgid "No Folders Added"
+msgstr "Geen mappen toegevoegd"
+
+#: src/ashywall/ui/window_states.py:130
+msgid ""
+"Add folders with images. AshyWall only reads them; nothing is moved or "
+"deleted."
+msgstr ""
+"Voeg mappen met afbeeldingen toe. AshyWall leest ze alleen; er wordt niets "
+"verplaatst of verwijderd."
+
+#: src/ashywall/ui/window_states.py:137
+msgid "No Downloads Yet"
+msgstr "Nog geen downloads"
+
+#: src/ashywall/ui/window_states.py:138
+msgid "Wallpapers you download from online sources appear here."
+msgstr "Achtergronden die u van onlinebronnen downloadt, verschijnen hier."
+
+#: src/ashywall/ui/window_states.py:143
+msgid "This Collection Is Empty"
+msgstr "Deze collectie is leeg"
+
+#: src/ashywall/ui/window_states.py:144
+msgid "Use the bookmark button on a wallpaper's page to add it here."
+msgstr ""
+"Gebruik de bladwijzerknop op de pagina van een achtergrond om hem hier toe "
+"te voegen."
+
+#: src/ashywall/ui/window_states.py:149
+msgid "No Favorites Yet"
+msgstr "Nog geen favorieten"
+
+#: src/ashywall/ui/window_states.py:150
+msgid "Use the star on a wallpaper's page to keep it here."
+msgstr ""
+"Gebruik de ster op de pagina van een achtergrond om hem hier te bewaren."
+
+#: src/ashywall/ui/window_states.py:154
+msgid "No Wallpapers Yet"
+msgstr "Nog geen achtergronden"
+
+#: src/ashywall/ui/window_states.py:155
+msgid "Add a folder with images to start your library."
+msgstr "Voeg een map met afbeeldingen toe om uw bibliotheek te beginnen."
+
+#: src/ashywall/ui/window_states.py:166 src/ashywall/ui/window_states.py:178
+#, python-brace-format
+msgid "No Results on {provider}"
+msgstr "Geen resultaten op {provider}"
+
+#: src/ashywall/ui/window_states.py:168
+msgid ""
+"“Top this month” only includes wallpapers ranked in the last month. Sort by "
+"relevance or most favorited to search all of Wallhaven."
+msgstr ""
+"‘Top van deze maand’ bevat alleen achtergronden die in de afgelopen maand "
+"gerangschikt zijn. Sorteer op relevantie of meeste favorieten om heel "
+"Wallhaven te doorzoeken."
+
+#: src/ashywall/ui/window_states.py:179
+msgid "Try again later."
+msgstr "Probeer het later opnieuw."
+
+#: src/ashywall/ui/window_states.py:185
+#, python-brace-format
+msgid "{provider} Is Unreachable"
+msgstr "{provider} is onbereikbaar"
+
+#: src/ashywall/ui/window_states.py:187
+msgid "Too Many Requests"
+msgstr "Te veel verzoeken"
+
+#: src/ashywall/ui/window_states.py:193
+#, python-brace-format
+msgid "{provider} Is Currently Unavailable"
+msgstr "{provider} is momenteel niet beschikbaar"
+
+#: src/ashywall/ui/window_states.py:195
+#, python-brace-format
+msgid "{provider} Could Not Be Loaded"
+msgstr "{provider} kon niet worden geladen"
+
+#: src/ashywall/ui/window_states.py:216
+#, python-brace-format
+msgid "{count} result on {provider}"
+msgid_plural "{count} results on {provider}"
+msgstr[0] "{count} resultaat op {provider}"
+msgstr[1] "{count} resultaten op {provider}"
+
+#: src/ashywall/ui/window_states.py:219
+#, python-brace-format
+msgid "{count} shown · page {page} of {last}"
+msgstr "{count} getoond · pagina {page} van {last}"
