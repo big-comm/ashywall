@@ -80,10 +80,21 @@ def parse_background_catalog(catalog: Path) -> list[DiscoveredFile]:
     return entries
 
 
+def storable_name(name: str) -> bool:
+    """False for file names that are not valid UTF-8 (the catalog stores text)."""
+    try:
+        name.encode("utf-8")
+    except UnicodeEncodeError:
+        return False
+    return True
+
+
 def scan_folder(root: Path) -> Iterator[Path]:
     """Yield image files below ``root``, skipping hidden entries.
 
-    Files come before subfolders, both by name. Directory symlinks are not
+    Names that are not valid UTF-8 (old archives, FAT copies) are skipped:
+    the catalog could not store them. Files come before subfolders, both by
+    name. Directory symlinks are not
     followed, which rules out loops. Directory entries already tell what is a
     file, so this costs one read per folder rather than a call per file.
     """
@@ -97,7 +108,7 @@ def scan_folder(root: Path) -> Iterator[Path]:
             continue
         subdirs = []
         for entry in entries:
-            if entry.name.startswith("."):
+            if entry.name.startswith(".") or not storable_name(entry.name):
                 continue
             try:
                 if entry.is_dir(follow_symlinks=False):

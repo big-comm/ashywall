@@ -9,6 +9,7 @@ import hashlib
 import io
 import os
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -53,6 +54,9 @@ def render_scaled_jpeg(path: Path, max_side: int, quality: int) -> bytes:
 
 
 def _flatten_to_rgb(image: Image.Image) -> Image.Image:
+    if image.mode.startswith("I"):
+        # 16-bit grayscale: a plain RGB conversion clips everything above 255.
+        image = image.convert("I").point(lambda value: value / 256).convert("L")
     if image.mode in ("RGBA", "LA") or (
         image.mode == "P" and "transparency" in image.info
     ):
@@ -101,6 +105,21 @@ class CacheDirectory:
     def __init__(self, root: Path, max_bytes: int) -> None:
         self.root = root
         self.max_bytes = max_bytes
+        self._written = 0
+        self._prune_lock = threading.Lock()
+
+    def note_written(self, size: int) -> None:
+        """Prune again once a tenth of the limit was written since the last time.
+
+        Called from worker threads, so a long session (scrolling through a
+        large library) stays near the limit instead of only at the next start.
+        """
+        with self._prune_lock:
+            self._written += size
+            if self._written < self.max_bytes // 10:
+                return
+            self._written = 0
+        self.prune()
 
     def _entries(self) -> list[tuple[float, int, Path]]:
         entries = []
@@ -172,4 +191,5 @@ class ThumbnailCache(CacheDirectory):
         except BaseException:
             Path(temporary).unlink(missing_ok=True)
             raise
+        self.note_written(len(data))
         return target

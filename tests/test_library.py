@@ -333,3 +333,50 @@ def test_worker_processes_give_the_same_catalog(
         return [tuple(row) for row in rows]
 
     assert catalog("parallel.sqlite3", threshold=1) == catalog("inline.sqlite3", 10_000)
+
+
+def test_names_that_are_not_utf8_are_skipped(
+    conn: sqlite3.Connection, layout: dict[str, Path]
+) -> None:
+    make_image(layout["pictures"] / "good.png", (64, 36))
+    bad = os.fsencode(layout["pictures"]) + b"/bad-\xff.png"
+    make_image(Path(os.fsdecode(bad)), (64, 36))
+    repository = LibraryRepository(conn)
+    repository.add_folder(layout["pictures"])
+
+    summary = indexer_for(conn, layout).run()  # Used to fail for the whole run.
+
+    assert summary.added == 1
+    assert titles(repository, section=Section.FOLDERS) == ["Good"]
+
+
+def test_a_folder_removed_while_indexing_does_not_stop_the_rest(
+    tmp_path: Path, layout: dict[str, Path]
+) -> None:
+    first, second = layout["pictures"] / "first", layout["pictures"] / "second"
+    make_image(first / "gone.png", (64, 36))
+    make_image(second / "kept.png", (64, 36))
+    db_path = tmp_path / "removed.sqlite3"
+    conn = connect(db_path)
+    repository = LibraryRepository(conn)
+    removed = repository.add_folder(first)
+    repository.add_folder(second)
+    window = connect(db_path)  # The window's own connection.
+
+    def probe(path: Path):
+        if path.parent == first:
+            LibraryRepository(window).remove_folder(removed.id)
+        return probe_image(path)
+
+    indexer_for(conn, layout, probe=probe).run()
+
+    assert titles(repository, section=Section.FOLDERS) == ["Kept"]
+    window.close()
+    conn.close()
+
+
+def test_a_damaged_catalog_raises_a_database_error(tmp_path: Path) -> None:
+    path = tmp_path / "library.sqlite3"
+    path.write_bytes(os.urandom(4096))
+    with pytest.raises(database.DatabaseError):
+        connect(path)

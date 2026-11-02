@@ -150,3 +150,24 @@ def test_package_licenses_are_read_as_declared() -> None:
     assert parse_licenses("Name : x\n") == ()
     assert PACKAGE_NAME.match("comm-wallpapers-gnome")
     assert not PACKAGE_NAME.match("../etc")
+
+
+def test_sixteen_bit_grayscale_keeps_its_tones(tmp_path: Path) -> None:
+    path = tmp_path / "gray16.png"
+    image = Image.new("I;16", (64, 64))
+    image.putdata([32768] * (64 * 64))  # Mid gray.
+    image.save(path)
+    with Image.open(io.BytesIO(render_preview(path))) as preview:
+        red, _green, _blue = preview.convert("RGB").getpixel((10, 10))
+    assert 110 < red < 145  # Not clipped to white.
+
+
+def test_thumbnail_cache_stays_bounded_while_running(tmp_path: Path) -> None:
+    cache = ThumbnailCache(tmp_path / "thumbs", max_bytes=200_000)
+    for index in range(30):
+        source = tmp_path / f"{index}.png"
+        Image.frombytes("RGB", (400, 200), os.urandom(400 * 200 * 3)).save(source)
+        stat = source.stat()
+        cache.ensure(source, stat.st_size, stat.st_mtime_ns)
+    # Pruned as it goes (noisy thumbnails are ~30 kB), not only at the next start.
+    assert cache.total_size() <= 200_000 * 1.2

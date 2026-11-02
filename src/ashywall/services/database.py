@@ -158,9 +158,16 @@ class DatabaseError(Exception):
 
 
 def connect(path: Path) -> sqlite3.Connection:
-    """Open the catalog, creating or migrating it as needed."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path, timeout=10.0, autocommit=True)
+    """Open the catalog, creating or migrating it as needed.
+
+    Raises DatabaseError when the catalog cannot be opened (damaged file,
+    unwritable folder), so the window can say so instead of crashing.
+    """
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(path, timeout=10.0, autocommit=True)
+    except (OSError, sqlite3.Error) as error:
+        raise DatabaseError(f"{path}: {error}") from error
     try:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA journal_mode = WAL")
@@ -168,6 +175,9 @@ def connect(path: Path) -> sqlite3.Connection:
         conn.execute("PRAGMA foreign_keys = ON")
         conn.execute("PRAGMA busy_timeout = 10000")
         migrate(conn)
+    except sqlite3.DatabaseError as error:
+        conn.close()
+        raise DatabaseError(f"{path}: {error}") from error
     except BaseException:
         conn.close()
         raise
@@ -194,6 +204,8 @@ def migrate(conn: sqlite3.Connection) -> None:
         raise DatabaseError(
             f"Catalog schema {schema_version(conn)} is newer than this version supports ({LATEST_VERSION})"
         )
+    if schema_version(conn) == LATEST_VERSION:
+        return  # Up to date: no need to wait for the write lock.
     for version in range(1, LATEST_VERSION + 1):
         with transaction(conn):
             # Re-check inside the lock: another connection may have migrated.
