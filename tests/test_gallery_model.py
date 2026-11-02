@@ -94,3 +94,63 @@ def test_replace_and_append_update_single_positions() -> None:
     assert changes[-1] == (4, 0, 1) and model.get_n_items() == 5
     model.replace(remote("a"))
     assert changes[-1] == (3, 1, 1)
+
+
+def test_reset_with_the_same_list_updates_only_rows_read() -> None:
+    rows = Rows()
+    model = GalleryModel()
+    ids = list(range(PAGE_SIZE * 3))
+    model.reset(ids, rows, [remote("a")])
+    model.get_item(PAGE_SIZE + 1)  # Only the second page has been read.
+    changes = []
+    model.connect("items-changed", lambda _m, *args: changes.append(args))
+
+    model.reset(list(ids), rows, [remote("a")])
+    assert changes == []  # Nothing changed: the grid keeps its place.
+
+    rows.missing = {PAGE_SIZE + 2}  # Removed by the indexer meanwhile.
+    model.reset(list(ids), rows, [remote("a")])
+    assert changes == [(PAGE_SIZE, PAGE_SIZE, PAGE_SIZE)]
+    assert model.get_item(PAGE_SIZE + 2).entry is None
+
+    model.reset(ids[:-1], rows, [remote("a")])  # A different list: full reset.
+    assert changes[-2:] == [(0, len(ids) + 1, 0), (0, 0, len(ids))]
+
+
+def test_cancelled_work_never_reports_back(monkeypatch) -> None:
+    import threading
+
+    from ashywall.ui import background_tasks
+
+    calls: list = []
+    # Deliver straight away instead of through the main loop.
+    monkeypatch.setattr(
+        background_tasks,
+        "run_on_main",
+        lambda callback, *args: calls.append((callback, args)),
+    )
+    runner = background_tasks.BackgroundRunner(1, "test")
+    started, release = threading.Event(), threading.Event()
+    delivered = []
+
+    def work() -> int:
+        started.set()
+        release.wait(5)
+        return 1
+
+    future = runner.submit(work, delivered.append, delivered.append)
+    assert started.wait(5)
+    future.cancel()  # Already running: only its outcome can be dropped.
+    release.set()
+    runner.shutdown()
+    future.result(5)
+    for callback, args in calls:
+        callback(*args)
+    assert calls and delivered == []
+
+    kept = background_tasks.BackgroundRunner(1, "test")
+    kept.submit(lambda: 2, delivered.append).result(5)
+    for callback, args in calls[1:]:
+        callback(*args)
+    kept.shutdown()
+    assert delivered == [2]

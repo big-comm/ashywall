@@ -196,8 +196,9 @@ class RotationDialog(Adw.Dialog):
     def _start(self) -> None:
         outcome = self._on_start(self.config())
         if isinstance(outcome, str):
+            # A failed change leaves a running slideshow as it was: only a
+            # failed first start means it is off.
             self._toast(outcome)
-            self._active = False
         else:
             self._active = True
         self._set_switch(self._active)

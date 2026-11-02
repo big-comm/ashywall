@@ -71,7 +71,7 @@ class RemoteDetailPage(Adw.NavigationPage):
         apply_unavailable_reason: str | None,
         collection_picker: Gtk.Widget,
     ) -> None:
-        super().__init__(title=item.title, tag="remote-detail")
+        super().__init__(title=item.title)
         self.item = item
         self._runner = runner
         self._remote_thumbnails = remote_thumbnails

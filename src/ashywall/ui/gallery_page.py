@@ -7,7 +7,7 @@ it which sort options apply and feeds it entries.
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from gi.repository import Adw, Gio, GObject, Gtk
+from gi.repository import Adw, Gio, GLib, GObject, Gtk
 
 from ..i18n import _
 from ..models.resolution import TIERS, Orientation, ResolutionTier
@@ -459,6 +459,9 @@ class GalleryPage(Adw.NavigationPage):
         adjustment = self._scrolled.get_vadjustment()
         return adjustment.get_upper() > adjustment.get_page_size() + 1
 
+    def showing_loading(self) -> bool:
+        return self._stack.get_visible_child_name() == "loading"
+
     def show_loading(self, text: str) -> None:
         self._loading_label.set_label(text)
         self._window_title.set_subtitle("")
@@ -467,7 +470,8 @@ class GalleryPage(Adw.NavigationPage):
     def show_status(self, state: EmptyState) -> None:
         self._status_page.set_icon_name(state.icon)
         self._status_page.set_title(state.title)
-        self._status_page.set_description(state.description)
+        # Descriptions can quote error text, which is not markup.
+        self._status_page.set_description(GLib.markup_escape_text(state.description))
         self._status_button.set_visible(state.action_name is not None)
         if state.action_name is not None:
             self._status_button.set_label(state.action_label or "")

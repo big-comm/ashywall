@@ -59,7 +59,7 @@ class DetailPage(Adw.NavigationPage):
         apply_unavailable_reason: str | None,
         collection_picker: Gtk.Widget,
     ) -> None:
-        super().__init__(title=wallpaper.title, tag="detail")
+        super().__init__(title=wallpaper.title)
         self.wallpaper = wallpaper
         self._runner = runner
         self._pending: list[Future[None]] = []

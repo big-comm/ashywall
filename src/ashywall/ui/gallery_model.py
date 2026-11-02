@@ -59,6 +59,18 @@ class GalleryModel(GObject.Object, Gio.ListModel):
         load: LoadRows | None,
         online: Iterable[GalleryEntry] = (),
     ) -> None:
+        online = list(online)
+        if (
+            self._ids
+            and ids == self._ids
+            and load == self._load
+            and [entry_identity(entry) for entry in online]
+            == [entry_identity(item.entry) for item in self._online]
+        ):
+            # Same list (indexing finished, a favorite changed): keep the
+            # scroll position and widgets, and update only rows read so far.
+            self._refresh(online)
+            return
         # Two signals, each matching the model's state when it is emitted:
         # given one that removes and adds, GridView looks for items to keep
         # across the whole range, reading every new row.
@@ -109,6 +121,20 @@ class GalleryModel(GObject.Object, Gio.ListModel):
         return item.entry if item is not None else None
 
     # Internals -------------------------------------------------------------
+
+    def _refresh(self, online: list[GalleryEntry]) -> None:
+        self._overrides.clear()
+        for number, page in list(self._pages.items()):
+            ids = self._ids[number * PAGE_SIZE : (number + 1) * PAGE_SIZE]
+            rows = self._load(ids) if self._load is not None else {}
+            entries = [rows.get(i) for i in ids]
+            if entries != [item.entry for item in page]:
+                self._pages[number] = [WallpaperItem(entry) for entry in entries]
+                self.items_changed(number * PAGE_SIZE, len(ids), len(ids))
+        for index, entry in enumerate(online):
+            if self._online[index].entry != entry:
+                self._online[index] = WallpaperItem(entry)
+                self.items_changed(len(self._ids) + index, 1, 1)
 
     def _add_online(self, entries: Iterable[GalleryEntry]) -> int:
         added = 0

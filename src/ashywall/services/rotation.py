@@ -239,7 +239,7 @@ class RotationManager:
     # State -----------------------------------------------------------------
 
     def saved_config(self) -> RotationConfig:
-        state = self._saved_state()
+        state = self.active_state()
         if state is not None:
             return state.config
         text = self._repository.get_setting(f"{SETTING_KEY}.config")
@@ -317,7 +317,9 @@ class RotationManager:
         """
         state = self.active_state()
         if state is None:
-            self._forget()
+            # Kept, not forgotten: "Restore Previous Wallpaper" after applying a
+            # picture by hand brings this slideshow back, and its file must
+            # still exist then. The next start or stop removes it.
             return None
         available = self.candidates(state.config)
         if not available:

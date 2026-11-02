@@ -214,6 +214,19 @@ def test_rotation_ends_when_the_wallpaper_changes_elsewhere(
     assert desktop.read_state().values["picture-uri"] == other.as_uri()
 
 
+def test_undo_after_applying_by_hand_brings_the_slideshow_back(
+    library: LibraryRepository, desktop: GnomeBackground, tmp_path: Path
+) -> None:
+    manager = RotationManager(library, desktop, lambda: tmp_path / "slides")
+    state, _replaced = manager.start(RotationConfig(source="folders"))
+    other = make_image(tmp_path / "other.png", (16, 9))
+    previous = desktop.apply(other)
+    assert manager.refresh() is None  # What the window does after applying.
+    assert Path(state.file).is_file()
+    desktop.restore(previous)
+    assert manager.active_state() == state
+
+
 def test_nothing_to_rotate_is_an_error(
     library: LibraryRepository, desktop: GnomeBackground, tmp_path: Path
 ) -> None:

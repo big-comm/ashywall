@@ -227,6 +227,7 @@ class ImageViewer(Adw.Window):
     def _on_close_request(self, _window: Adw.Window) -> bool:
         if self._pending is not None:
             self._pending.cancel()
+            self._pending = None
         if self._hide_source is not None:
             GLib.source_remove(self._hide_source)
             self._hide_source = None
@@ -429,6 +430,8 @@ class ImageViewer(Adw.Window):
         self._schedule_hide()
 
     def _schedule_hide(self) -> None:
+        if self._texture is None and self._pending is None:
+            return  # Closed (or failed): nothing to hide later.
         if self._hide_source is not None:
             GLib.source_remove(self._hide_source)
         self._hide_source = GLib.timeout_add(CONTROLS_TIMEOUT_MS, self._hide_controls)
