@@ -110,7 +110,7 @@ def test_reset_with_the_same_list_updates_only_rows_read() -> None:
 
     rows.missing = {PAGE_SIZE + 2}  # Removed by the indexer meanwhile.
     model.reset(list(ids), rows, [remote("a")])
-    assert changes == [(PAGE_SIZE, PAGE_SIZE, PAGE_SIZE)]
+    assert changes == [(PAGE_SIZE + 2, 1, 1)]  # Only the row that changed.
     assert model.get_item(PAGE_SIZE + 2).entry is None
 
     model.reset(ids[:-1], rows, [remote("a")])  # A different list: full reset.
@@ -143,13 +143,13 @@ def test_cancelled_work_never_reports_back(monkeypatch) -> None:
     future.cancel()  # Already running: only its outcome can be dropped.
     release.set()
     runner.shutdown()
-    future.result(5)
+    future.wait(5)
     for callback, args in calls:
         callback(*args)
     assert calls and delivered == []
 
     kept = background_tasks.BackgroundRunner(1, "test")
-    kept.submit(lambda: 2, delivered.append).result(5)
+    kept.submit(lambda: 2, delivered.append).wait(5)
     for callback, args in calls[1:]:
         callback(*args)
     kept.shutdown()

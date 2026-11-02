@@ -61,7 +61,7 @@ class RotationDialog(Adw.Dialog):
         count_candidates: Callable[[RotationConfig], int],
         current_title: Callable[[], str | None],
         on_start: Callable[[RotationConfig], Outcome],
-        on_stop: Callable[[], str],
+        on_stop: Callable[[], tuple[bool, str]],
         on_next: Callable[[], Outcome],
         unavailable_reason: str | None,
     ) -> None:
@@ -72,6 +72,8 @@ class RotationDialog(Adw.Dialog):
         self._on_stop = on_stop
         self._on_next = on_next
         self._active = active is not None
+        # The settings the running slideshow uses (shown again if a change fails).
+        self._applied = config if active is not None else None
         self._unavailable = unavailable_reason is not None
         self._loading = True
         self._sources = source_choices(collections)
@@ -194,14 +196,29 @@ class RotationDialog(Adw.Dialog):
         )
 
     def _start(self) -> None:
-        outcome = self._on_start(self.config())
+        config = self.config()
+        outcome = self._on_start(config)
         if isinstance(outcome, str):
-            # A failed change leaves a running slideshow as it was: only a
-            # failed first start means it is off.
+            # A failed change leaves a running slideshow as it was, so show
+            # its settings again; only a failed first start means it is off.
             self._toast(outcome)
+            if self._active and self._applied is not None:
+                self._show_config(self._applied)
         else:
             self._active = True
+            self._applied = config
         self._set_switch(self._active)
+
+    def _show_config(self, config: RotationConfig) -> None:
+        keys = [key for key, _label in self._sources]
+        self._loading = True
+        if config.source in keys:
+            self._source_row.set_selected(keys.index(config.source))
+        self._tier_row.set_selected(self._tier_keys.index(config.min_tier))
+        self._portrait_row.set_active(config.skip_portrait)
+        self._interval_row.set_selected(INTERVALS.index(config.interval))
+        self._shuffle_row.set_active(config.shuffle)
+        self._loading = False
 
     def _on_switch(self, row: Adw.SwitchRow, _pspec: object) -> None:
         if self._loading:
@@ -209,8 +226,11 @@ class RotationDialog(Adw.Dialog):
         if row.get_active():
             self._start()
         else:
-            self._toast(self._on_stop())
-            self._active = False
+            stopped, message = self._on_stop()
+            self._toast(message)
+            self._active = not stopped
+            if not stopped:
+                self._set_switch(True)  # GNOME still runs the slideshow.
         self._update()
 
     def _on_changed(self, *_args: object) -> None:

@@ -36,6 +36,7 @@ class IndexController:
         self._cancel = threading.Event()
         self._rerun_requested = False
         self._last_report = 0.0
+        self._closed = False
 
     @property
     def running(self) -> bool:
@@ -43,6 +44,8 @@ class IndexController:
 
     def start(self) -> None:
         """Index now, or once more after the current run if one is active."""
+        if self._closed:
+            return
         if self._thread is not None:
             self._rerun_requested = True
             return
@@ -53,6 +56,8 @@ class IndexController:
         self._thread.start()
 
     def cancel(self) -> None:
+        """Stop for good (the window closes): late results are not delivered."""
+        self._closed = True
         self._rerun_requested = False
         self._cancel.set()
 
@@ -63,7 +68,7 @@ class IndexController:
             or progress.processed >= progress.total
         ):
             self._last_report = now
-            run_on_main(self._on_progress, progress)
+            run_on_main(self._deliver_progress, progress)
 
     def _run(self) -> None:
         conn = None
@@ -88,14 +93,22 @@ class IndexController:
             if conn is not None:
                 conn.close()
 
+    def _deliver_progress(self, progress: IndexProgress) -> None:
+        if not self._closed:
+            self._on_progress(progress)
+
     def _done(self, summary: IndexSummary | None) -> None:
         self._thread = None
+        if self._closed:
+            return
         if summary is not None:
             self._on_finished(summary)
         self._maybe_rerun()
 
     def _failed(self, error: Exception) -> None:
         self._thread = None
+        if self._closed:
+            return
         self._on_failed(error)
         self._maybe_rerun()
 

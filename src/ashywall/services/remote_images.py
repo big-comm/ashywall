@@ -65,11 +65,17 @@ class RemoteThumbnailCache:
     """Keeps re-encoded remote thumbnails inside the (pruned) thumbnail cache."""
 
     def __init__(
-        self, root: Path, http: HttpClient, allowed_hosts: frozenset[str]
+        self,
+        root: Path,
+        http: HttpClient,
+        allowed_hosts: frozenset[str],
+        note_written: Callable[[int], None] = lambda _size: None,
     ) -> None:
         self.root = root
         self._http = http
         self._allowed_hosts = allowed_hosts
+        # Lets the enclosing thumbnail cache prune during the session.
+        self._note_written = note_written
 
     def path_for(self, url: str, max_side: int) -> Path:
         key = hashlib.sha256(f"{url}\0{max_side}".encode()).hexdigest()
@@ -96,6 +102,7 @@ class RemoteThumbnailCache:
         finally:
             Path(temporary).unlink(missing_ok=True)
         _write_atomically(target, encoded)
+        self._note_written(len(encoded))
         return target
 
 

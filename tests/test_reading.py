@@ -392,3 +392,12 @@ def test_only_explicit_source_actions_fetch_and_offline_cache_survives(tmp_path)
     cancel.set()
     with pytest.raises(TransferCancelled):
         service.refresh(cancel)
+
+
+def test_a_source_alone_in_its_category_can_change_its_letter_case(conn):
+    repo = ReadingRepository(conn)
+    feed = repo.add(URL, "tecnologia", document(1))
+    repo.edit(feed, "Tecnologia")
+    assert [f.category for f in repo.feeds()] == ["Tecnologia"]
+    other = repo.add(URL + "2", "TECNOLOGIA", document(1))
+    assert {f.category for f in repo.feeds() if f.id == other} == {"Tecnologia"}

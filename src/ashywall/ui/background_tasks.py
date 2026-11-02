@@ -22,7 +22,7 @@ ResultT = TypeVar("ResultT")
 log = logging.getLogger(__name__)
 
 # Garbage collection on the main loop (see collect_garbage_on_main).
-GC_INTERVAL_MS = 1000
+GC_INTERVAL_SECONDS = 1
 FULL_GC_EVERY = 30
 
 
@@ -47,7 +47,38 @@ def collect_garbage_on_main() -> None:
         gc.collect() if next(ticks) % FULL_GC_EVERY == 0 else gc.collect(0)
         return GLib.SOURCE_CONTINUE
 
-    GLib.timeout_add(GC_INTERVAL_MS, collect)
+    # Seconds-based, so GLib can batch the wakeup with other timers.
+    GLib.timeout_add_seconds(GC_INTERVAL_SECONDS, collect)
+
+
+class Task:
+    """Handle on submitted work; ``cancel()`` (main loop) drops its outcome."""
+
+    __slots__ = ("_future", "_pending", "_runner", "_token")
+
+    def __init__(
+        self,
+        runner: "BackgroundRunner",
+        token: int,
+        pending: list[Any],
+        future: Future[None],
+    ) -> None:
+        self._runner = runner
+        self._token = token
+        self._pending = pending
+        self._future = future
+
+    def cancel(self) -> bool:
+        """Drop the outcome; True when the work had not started yet."""
+        self._runner._callbacks.pop(self._token, None)
+        cancelled = self._future.cancel()
+        if cancelled:
+            self._pending.clear()  # Released here, on the main thread.
+        return cancelled
+
+    def wait(self, timeout: float | None = None) -> None:
+        """Block until the work ran (tests only: delivery needs the main loop)."""
+        self._future.result(timeout)
 
 
 class BackgroundRunner:
@@ -64,10 +95,10 @@ class BackgroundRunner:
         work: Callable[[], ResultT],
         on_done: Callable[[ResultT], None],
         on_error: Callable[[Exception], None] | None = None,
-    ) -> Future[None]:
+    ) -> Task:
         """Run ``work`` in a worker; its outcome is delivered on the main loop.
 
-        Call from the main loop. Cancelling the returned future (also from the
+        Call from the main loop. Cancelling the returned task (also from the
         main loop) drops the outcome of work already running, so a late result
         never reaches a page or window that has moved on.
         """
@@ -85,7 +116,7 @@ class BackgroundRunner:
                 return  # Cancelled before it started.
             try:
                 box: list[Any] = [True, function()]
-            except Exception as error:
+            except BaseException as error:  # Delivered (and released) on main.
                 box = [False, error]
             del function
             # The worker keeps no reference to the work or its outcome: the
@@ -93,17 +124,7 @@ class BackgroundRunner:
             run_on_main(self._deliver, token, pending, box)
 
         future = self._executor.submit(task)
-        cancel_queued = future.cancel
-
-        def cancel() -> bool:
-            self._callbacks.pop(token, None)
-            cancelled = cancel_queued()
-            if cancelled:
-                pending.clear()
-            return cancelled
-
-        future.cancel = cancel  # type: ignore[method-assign]
-        return future
+        return Task(self, token, pending, future)
 
     def _deliver(self, token: int, pending: list[Any], box: list[Any]) -> None:
         ok, value = box
@@ -115,10 +136,12 @@ class BackgroundRunner:
         on_done, on_error = callbacks
         if ok:
             on_done(value)
-        elif on_error is not None:
+        elif on_error is not None and isinstance(value, Exception):
             on_error(value)
-        else:
+        elif isinstance(value, Exception):
             log.error("Background task failed", exc_info=value)
+        if not ok and not isinstance(value, Exception):
+            raise value  # KeyboardInterrupt and the like, now on the main loop.
 
     def shutdown(self) -> None:
         self._executor.shutdown(wait=False, cancel_futures=True)

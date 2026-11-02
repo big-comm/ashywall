@@ -189,8 +189,9 @@ class BigLinuxProvider:
         data = {
             "fetched_at": self._fetched_at,
             "files": [_as_dict(file) for file in self._files],
-            "sizes": {sha: list(size) for sha, size in self._sizes.items()},
         }
+        with self._lock:  # Probes may add sizes meanwhile.
+            data["sizes"] = {sha: list(size) for sha, size in self._sizes.items()}
         self._cache_file.parent.mkdir(parents=True, exist_ok=True)
         descriptor, temporary = tempfile.mkstemp(
             dir=self._cache_file.parent, prefix=".", suffix=".part"

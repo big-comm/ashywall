@@ -1,12 +1,12 @@
 """Grid cell: thumbnail, title, pixel size and a few state badges."""
 
 from collections.abc import Callable
-from concurrent.futures import Future
 
 from gi.repository import GObject, Gtk, Pango
 
 from ..i18n import _
 from ..providers.base import RemoteWallpaper
+from .background_tasks import Task
 from .thumbnail_loader import GalleryEntry, ThumbnailLoader
 
 THUMBNAIL_WIDTH = 232
@@ -52,7 +52,7 @@ class WallpaperCard(Gtk.Box):
         self._loader = loader
         self._on_unreadable = on_unreadable
         self._entry: GalleryEntry | None = None
-        self._pending: Future[None] | None = None
+        self._pending: Task | None = None
 
         self._picture = Gtk.Picture(content_fit=Gtk.ContentFit.COVER, can_shrink=True)
         self._picture.set_size_request(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT)

@@ -113,18 +113,23 @@ class ReadingRepository:
         )
 
     def edit(self, feed_id: int, category: str) -> None:
-        category = self._category(category)
+        # Not matched against itself, so a source alone in its category can
+        # change the letter case ("tecnologia" to "Tecnologia").
+        category = self._category(category, exclude_id=feed_id)
         self.conn.execute(
             "UPDATE reading_feeds SET category=? WHERE id=?", (category, feed_id)
         )
 
-    def _category(self, category: str) -> str:
+    def _category(self, category: str, exclude_id: int | None = None) -> str:
         category = " ".join(category.split())
         if len(category) > 60:
             raise ReadingError("category-too-long")
         # At most 50 sources: Unicode casefold keeps manually entered variants
         # such as "Tecnologia" and "tecnologia" in the same visible category.
-        for row in self.conn.execute("SELECT category FROM reading_feeds ORDER BY id"):
+        for row in self.conn.execute(
+            "SELECT category FROM reading_feeds WHERE id IS NOT ? ORDER BY id",
+            (exclude_id,),
+        ):
             if row[0].casefold() == category.casefold():
                 return row[0]
         return category

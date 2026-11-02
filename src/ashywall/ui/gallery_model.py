@@ -124,17 +124,37 @@ class GalleryModel(GObject.Object, Gio.ListModel):
 
     def _refresh(self, online: list[GalleryEntry]) -> None:
         self._overrides.clear()
+        changed: list[int] = []
+        # Update every page first: the signals make the grid read rows (and
+        # evict pages), which must not happen while the pages are walked.
         for number, page in list(self._pages.items()):
-            ids = self._ids[number * PAGE_SIZE : (number + 1) * PAGE_SIZE]
+            start = number * PAGE_SIZE
+            ids = self._ids[start : start + PAGE_SIZE]
             rows = self._load(ids) if self._load is not None else {}
-            entries = [rows.get(i) for i in ids]
-            if entries != [item.entry for item in page]:
-                self._pages[number] = [WallpaperItem(entry) for entry in entries]
-                self.items_changed(number * PAGE_SIZE, len(ids), len(ids))
+            for offset, wallpaper_id in enumerate(ids):
+                entry = rows.get(wallpaper_id)
+                if page[offset].entry != entry:
+                    page[offset] = WallpaperItem(entry)
+                    changed.append(start + offset)
         for index, entry in enumerate(online):
             if self._online[index].entry != entry:
                 self._online[index] = WallpaperItem(entry)
-                self.items_changed(len(self._ids) + index, 1, 1)
+                changed.append(len(self._ids) + index)
+        # One signal per run of consecutive changed positions.
+        changed.sort()
+        run_start = previous = None
+        for position in [*changed, None]:
+            if (
+                position is not None
+                and previous is not None
+                and position == previous + 1
+            ):
+                previous = position
+                continue
+            if run_start is not None:
+                count = previous - run_start + 1
+                self.items_changed(run_start, count, count)
+            run_start = previous = position
 
     def _add_online(self, entries: Iterable[GalleryEntry]) -> int:
         added = 0

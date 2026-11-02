@@ -2,7 +2,6 @@
 
 import threading
 import time
-from concurrent.futures import Future
 from dataclasses import replace
 from pathlib import Path
 
@@ -14,7 +13,7 @@ from ..providers.base import RemoteWallpaper
 from ..providers.registry import provider_name
 from ..services.http import TransferCancelled
 from ..services.remote_images import OriginalCache, RemoteThumbnailCache
-from .background_tasks import BackgroundRunner, run_on_main
+from .background_tasks import BackgroundRunner, Task, run_on_main
 from .detail_page import Attribution, attribution_rows, render_texture
 from .detail_widgets import (
     FavoriteButton,
@@ -82,7 +81,7 @@ class RemoteDetailPage(Adw.NavigationPage):
         # Full-resolution file shown in the preview and the full-screen view.
         self._full_path: Path | None = None
         self._original_cancel: threading.Event | None = None
-        self._pending: list[Future[None]] = []
+        self._pending: list[Task] = []
         self._install_actions(apply_unavailable_reason is None)
 
         header = Adw.HeaderBar()

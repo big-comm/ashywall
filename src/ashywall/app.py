@@ -119,6 +119,7 @@ class AshyWallApplication(Adw.Application):
             paths.thumbnails_dir() / "remote",
             cdn,
             frozenset().union(*(p.thumbnail_hosts for p in providers.values())),
+            thumbnails.note_written,
         )
         originals = OriginalCache(
             paths.originals_dir(), cdn, lambda origin: providers[origin].download_hosts

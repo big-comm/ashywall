@@ -50,12 +50,18 @@ class BackgroundState:
 
     @classmethod
     def from_json(cls, text: str) -> "BackgroundState":
-        data = json.loads(text)
+        try:
+            data = json.loads(text)
+        except ValueError as error:
+            raise DesktopError("Invalid saved background state") from error
         if not isinstance(data, dict) or not all(
             isinstance(v, str) for v in data.values()
         ):
             raise DesktopError("Invalid saved background state")
-        return cls({key: value for key, value in data.items() if key in STATE_KEYS})
+        values = {key: value for key, value in data.items() if key in STATE_KEYS}
+        if not values:  # Restoring it would change nothing.
+            raise DesktopError("Invalid saved background state")
+        return cls(values)
 
 
 def is_gnome_session() -> bool:

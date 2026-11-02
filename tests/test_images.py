@@ -171,3 +171,15 @@ def test_thumbnail_cache_stays_bounded_while_running(tmp_path: Path) -> None:
         cache.ensure(source, stat.st_size, stat.st_mtime_ns)
     # Pruned as it goes (noisy thumbnails are ~30 kB), not only at the next start.
     assert cache.total_size() <= 200_000 * 1.2
+
+
+def test_a_missing_file_is_an_access_error_not_a_bad_image(tmp_path: Path) -> None:
+    from ashywall.services.image_probe import ImageAccessError
+
+    with pytest.raises(ImageAccessError):
+        image_probe.open_image(tmp_path / "unmounted.png")
+    bad = tmp_path / "bad.png"
+    bad.write_bytes(b"not an image")
+    with pytest.raises(ImageProbeError) as refused:
+        image_probe.open_image(bad)
+    assert not isinstance(refused.value, ImageAccessError)

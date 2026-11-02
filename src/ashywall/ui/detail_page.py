@@ -1,6 +1,5 @@
 """Detail page for a wallpaper on this computer."""
 
-from concurrent.futures import Future
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,7 +13,7 @@ from ..providers.registry import provider_name
 from ..services.library_repository import DownloadRecord
 from ..services.package_owner import PackageInfo, package_info
 from ..services.thumbnails import render_preview
-from .background_tasks import BackgroundRunner
+from .background_tasks import BackgroundRunner, Task
 from .detail_widgets import (
     FavoriteButton,
     PreviewPanel,
@@ -62,7 +61,7 @@ class DetailPage(Adw.NavigationPage):
         super().__init__(title=wallpaper.title)
         self.wallpaper = wallpaper
         self._runner = runner
-        self._pending: list[Future[None]] = []
+        self._pending: list[Task] = []
         self._install_actions(apply_unavailable_reason is None)
 
         header = Adw.HeaderBar()
