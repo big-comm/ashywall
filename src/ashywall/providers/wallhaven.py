@@ -161,9 +161,13 @@ def parse_search(payload: Any, query: RemoteQuery) -> RemotePage:
         items=items,
         page=query.page,
         last_page=last_page
-        if isinstance(last_page, int) and last_page >= 0
+        if isinstance(last_page, int)
+        and not isinstance(last_page, bool)
+        and last_page >= 0
         else query.page,
-        total=None if locally_filtered or not isinstance(total, int) else total,
+        total=None
+        if locally_filtered or not isinstance(total, int) or isinstance(total, bool)
+        else total,
         seed=seed if isinstance(seed, str) and SEED_PATTERN.match(seed) else query.seed,
         skipped=skipped,
     )

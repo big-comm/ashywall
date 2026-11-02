@@ -88,6 +88,8 @@ def test_atom_supports_xhtml_summaries_and_updated_dates():
         b'<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss><channel/></rss>',
         b"x" * (MAX_FEED_BYTES + 1),
         b"<rss><channel>" + b"<a>" * 70 + b"x" + b"</a>" * 70 + b"</channel></rss>",
+        b"<?xml version='1.0' encoding='x-unknown'?><rss><channel/></rss>",
+        b"<?xml version='1.0' encoding='rot13'?><rss><channel/></rss>",
     ],
 )
 def test_invalid_or_unsafe_xml_is_refused(body):

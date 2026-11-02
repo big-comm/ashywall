@@ -14,6 +14,7 @@ import io
 import ipaddress
 import socket
 import ssl
+import string
 import threading
 import time
 import urllib.error
@@ -200,7 +201,12 @@ class ConnectionPool:
 
     def _finish(self, response: http.client.HTTPResponse, host: str, port: int) -> None:
         length = response.headers.get("Content-Length")
-        if length and length.isdigit() and int(length) <= DRAIN_LIMIT:
+        if (
+            length
+            and length.isascii()
+            and length.isdigit()
+            and int(length) <= DRAIN_LIMIT
+        ):
             try:
                 response.read()
             except (OSError, http.client.HTTPException):
@@ -219,10 +225,19 @@ class ConnectionPool:
                 raise urllib.error.URLError(str(error)) from error
             parts = urllib.parse.urlsplit(url)
             target = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+            # The request line is ASCII: quote any other character, keeping
+            # escapes already present.
+            target = urllib.parse.quote(target, safe="/?&=%:@!$'()*+,;~[]")
             response = self._send(host, port, target, headers, timeout)
             status = response.status
             if status in REDIRECT_CODES:
                 location = response.headers.get("Location")
+                if location:
+                    # Header bytes arrive decoded as Latin-1: re-encode raw
+                    # UTF-8 ("/café") as escapes, as urllib does.
+                    location = urllib.parse.quote(
+                        location, encoding="iso-8859-1", safe=string.punctuation
+                    )
                 self._finish(response, host, port)
                 if not location:
                     raise urllib.error.HTTPError(
