@@ -30,6 +30,7 @@ from ..providers.local import (
     DiscoveredFile,
     discover_system_wallpapers,
     scan_folder,
+    storable_name,
     title_from_path,
 )
 from .database import transaction
@@ -47,6 +48,10 @@ log = logging.getLogger(__name__)
 
 class IndexCancelled(Exception):
     pass
+
+
+class _SourceRemoved(Exception):
+    """The source was removed (by the window) while it was being indexed."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,7 +193,10 @@ class LibraryIndexer:
         self._total = sum(len(files) for _, files in jobs)
         self._report()
         for source_id, files in jobs:
-            self._sync_source(source_id, files, summary)
+            try:
+                self._sync_source(source_id, files, summary)
+            except _SourceRemoved:
+                continue
         self._resolve_content_hashes()
         summary.unavailable_folders = tuple(unavailable)
         return summary
@@ -218,9 +226,12 @@ class LibraryIndexer:
         for entry in files:
             self._check_cancelled()
             key = str(entry.path)
+            if not storable_name(key):
+                self._advance()
+                continue
             try:
                 file_stat = os.stat(entry.path)
-            except OSError:
+            except (OSError, ValueError):
                 self._advance()
                 continue
             if key in seen or not stat.S_ISREG(file_stat.st_mode):
@@ -257,11 +268,11 @@ class LibraryIndexer:
                 summary.added += 0 if item.known else 1
                 summary.invalid += 1 if inspection[4] == "invalid" else 0
                 if len(records) >= WRITE_BATCH_SIZE:
-                    self._flush(records)
+                    self._flush(source_id, records)
                 self._advance()
         finally:
             inspections.close()  # Stops the worker processes promptly on cancellation.
-        self._flush(records)
+        self._flush(source_id, records)
         self._report()
 
         gone = [path for path in existing if path not in seen]
@@ -333,10 +344,18 @@ class LibraryIndexer:
                 (title, dark, options, source_id, path),
             )
 
-    def _flush(self, pending: list[tuple[object, ...]]) -> None:
+    def _flush(self, source_id: int, pending: list[tuple[object, ...]]) -> None:
         if pending:
-            with transaction(self._conn):
-                self._conn.executemany(_UPSERT_SQL, pending)
+            try:
+                with transaction(self._conn):
+                    self._conn.executemany(_UPSERT_SQL, pending)
+            except sqlite3.IntegrityError:
+                exists = self._conn.execute(
+                    "SELECT 1 FROM sources WHERE id = ?", (source_id,)
+                ).fetchone()
+                if exists is None:
+                    raise _SourceRemoved() from None
+                raise
             pending.clear()
 
     def _resolve_content_hashes(self) -> None:

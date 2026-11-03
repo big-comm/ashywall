@@ -121,7 +121,12 @@ def parse_file(page: Any, day: dt.date | None) -> RemoteWallpaper:
         raise ProviderError("File is not an object")
     page_id = page.get("pageid")
     infos = page.get("imageinfo")
-    if not isinstance(page_id, int) or page_id <= 0 or not isinstance(infos, list):
+    if (
+        not isinstance(page_id, int)
+        or isinstance(page_id, bool)
+        or page_id <= 0
+        or not isinstance(infos, list)
+    ):
         raise ProviderError("Missing file information")
     info = infos[0] if infos and isinstance(infos[0], dict) else {}
     width, height, size = info.get("width"), info.get("height"), info.get("size")
@@ -132,7 +137,11 @@ def parse_file(page: Any, day: dt.date | None) -> RemoteWallpaper:
         raise ProviderError("Invalid dimensions")
     if width * height > MAX_PIXELS:
         raise ProviderError("Image too large")
-    if not isinstance(size, int) or not 0 < size <= MAX_FILE_BYTES:
+    if (
+        not isinstance(size, int)
+        or isinstance(size, bool)
+        or not 0 < size <= MAX_FILE_BYTES
+    ):
         raise ProviderError("Invalid file size")
     media_type = info.get("mime")
     if media_type not in MEDIA_TYPES:

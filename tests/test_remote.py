@@ -560,3 +560,11 @@ def test_paths_under_home_are_abbreviated(monkeypatch, tmp_path: Path) -> None:
     assert display_path(tmp_path / ".local" / "x.jpg") == "~/.local/x.jpg"
     assert display_path(tmp_path) == "~"
     assert display_path(Path("/usr/share/backgrounds")) == "/usr/share/backgrounds"
+
+
+def test_booleans_are_not_page_counts() -> None:
+    payload = search_payload(listing("good01"))
+    payload["meta"].update(last_page=True, total=False)
+    page = parse_search(payload, RemoteQuery())
+    assert page.total is None
+    assert page.last_page == 1  # The query's own page, not True.

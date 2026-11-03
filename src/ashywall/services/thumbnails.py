@@ -9,6 +9,7 @@ import hashlib
 import io
 import os
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from .image_probe import (
     apply_orientation,
     exif_orientation,
     open_image,
+    probe_error,
 )
 
 THUMBNAIL_SIZE = 480
@@ -45,7 +47,9 @@ def render_scaled_jpeg(path: Path, max_side: int, quality: int) -> bytes:
             rgb = _flatten_to_rgb(image)
     except ImageProbeError:
         raise
-    except (OSError, ValueError, SyntaxError, Image.DecompressionBombError) as error:
+    except OSError as error:
+        raise probe_error(error, "Could not decode image") from error
+    except (ValueError, SyntaxError, Image.DecompressionBombError) as error:
         raise ImageProbeError(f"Could not decode image: {error}") from error
     output = io.BytesIO()
     rgb.save(output, "JPEG", quality=quality, optimize=True)
@@ -53,6 +57,9 @@ def render_scaled_jpeg(path: Path, max_side: int, quality: int) -> bytes:
 
 
 def _flatten_to_rgb(image: Image.Image) -> Image.Image:
+    if image.mode.startswith("I"):
+        # 16-bit grayscale: a plain RGB conversion clips everything above 255.
+        image = image.convert("I").point(lambda value: value / 256).convert("L")
     if image.mode in ("RGBA", "LA") or (
         image.mode == "P" and "transparency" in image.info
     ):
@@ -91,7 +98,9 @@ def decode_for_display(path: Path, max_pixels: int = MAX_DISPLAY_PIXELS) -> Imag
             return _flatten_to_rgb(image)
     except ImageProbeError:
         raise
-    except (OSError, ValueError, SyntaxError, Image.DecompressionBombError) as error:
+    except OSError as error:
+        raise probe_error(error, "Could not decode image") from error
+    except (ValueError, SyntaxError, Image.DecompressionBombError) as error:
         raise ImageProbeError(f"Could not decode image: {error}") from error
 
 
@@ -101,6 +110,28 @@ class CacheDirectory:
     def __init__(self, root: Path, max_bytes: int) -> None:
         self.root = root
         self.max_bytes = max_bytes
+        self._written = 0
+        self._written_lock = threading.Lock()
+        self._prune_lock = threading.Lock()
+
+    def note_written(self, size: int) -> None:
+        """Prune again once a tenth of the limit was written since the last time.
+
+        Called from worker threads, so a long session (scrolling through a
+        large library) stays near the limit instead of only at the next start.
+        """
+        with self._written_lock:
+            self._written += size
+            if self._written < self.max_bytes // 10:
+                return
+            self._written = 0
+        self.prune()
+
+    def prune(self) -> int:
+        # One prune at a time: two working from their own listings would
+        # remove more than needed.
+        with self._prune_lock:
+            return self._prune()
 
     def _entries(self) -> list[tuple[float, int, Path]]:
         entries = []
@@ -122,7 +153,7 @@ class CacheDirectory:
     def total_size(self) -> int:
         return sum(size for _mtime, size, _path in self._entries())
 
-    def prune(self) -> int:
+    def _prune(self) -> int:
         """Delete least recently used files until the cache is under 80% of its limit."""
         entries = sorted(self._entries())
         total = sum(size for _mtime, size, _path in entries)
@@ -164,7 +195,10 @@ class ThumbnailCache(CacheDirectory):
             return target
         data = render_scaled_jpeg(image_path, THUMBNAIL_SIZE, quality=85)
         target.parent.mkdir(parents=True, exist_ok=True)
-        descriptor, temporary = tempfile.mkstemp(dir=target.parent, suffix=".part")
+        # Hidden, so a prune running meanwhile leaves it alone.
+        descriptor, temporary = tempfile.mkstemp(
+            dir=target.parent, prefix=".", suffix=".part"
+        )
         try:
             with os.fdopen(descriptor, "wb") as handle:
                 handle.write(data)
@@ -172,4 +206,5 @@ class ThumbnailCache(CacheDirectory):
         except BaseException:
             Path(temporary).unlink(missing_ok=True)
             raise
+        self.note_written(len(data))
         return target

@@ -20,7 +20,7 @@ import time
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 from ..services.http import HttpClient, HttpError, SlidingWindowLimiter
@@ -45,6 +45,15 @@ API_HOSTS = frozenset({"api.github.com"})
 FILE_HOSTS = frozenset({"raw.githubusercontent.com"})
 WALLPAPER_DIR = "usr/share/wallpapers/"
 EXTENSIONS = frozenset({".heic", ".heif", ".avif", ".jpg", ".jpeg", ".png", ".webp"})
+MEDIA_TYPES = {
+    ".heic": "image/heic",
+    ".heif": "image/heif",
+    ".avif": "image/avif",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+}
 PAGE_SIZE = 24
 PROBE_BYTES = 4096
 INDEX_MAX_AGE = 24 * 3600
@@ -180,8 +189,9 @@ class BigLinuxProvider:
         data = {
             "fetched_at": self._fetched_at,
             "files": [_as_dict(file) for file in self._files],
-            "sizes": {sha: list(size) for sha, size in self._sizes.items()},
         }
+        with self._lock:  # Probes may add sizes meanwhile.
+            data["sizes"] = {sha: list(size) for sha, size in self._sizes.items()}
         self._cache_file.parent.mkdir(parents=True, exist_ok=True)
         descriptor, temporary = tempfile.mkstemp(
             dir=self._cache_file.parent, prefix=".", suffix=".part"
@@ -209,11 +219,8 @@ class BigLinuxProvider:
                     ),
                     cancel=cancel,
                 )
-                commit = (
-                    branch.get("commit", {}).get("sha")
-                    if isinstance(branch, dict)
-                    else None
-                )
+                details = branch.get("commit") if isinstance(branch, dict) else None
+                commit = details.get("sha") if isinstance(details, dict) else None
                 if not isinstance(commit, str) or not SHA_PATTERN.match(commit):
                     raise ProviderError("Unexpected branch information")
                 tree = self._api.get_json(
@@ -269,7 +276,7 @@ class BigLinuxProvider:
             width=size[0],
             height=size[1],
             file_size=file.size,
-            media_type="image/avif",
+            media_type=MEDIA_TYPES.get(PurePosixPath(file.name).suffix.lower()),
             thumbnail_url=url,
             preview_url=url,
             original_url=url,

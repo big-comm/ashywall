@@ -14,7 +14,7 @@ import json
 import random
 import time
 from collections.abc import Callable, Iterable
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime
 from itertools import islice
 from pathlib import Path
@@ -219,7 +219,9 @@ def slide_index(count: int, interval: int, start: float, now: float) -> int:
     if count <= 0:
         raise RotationError("No pictures to show")
     whole_start = int(start)  # The XML keeps whole seconds.
-    elapsed = max(0.0, now - whole_start)
+    # Like GNOME, wrap a clock set back before the start to the end of the
+    # cycle (Python's modulo is never negative) instead of showing slide 0.
+    elapsed = (now - whole_start) % (count * interval)
     return int(elapsed // interval) % count
 
 
@@ -239,7 +241,7 @@ class RotationManager:
     # State -----------------------------------------------------------------
 
     def saved_config(self) -> RotationConfig:
-        state = self._saved_state()
+        state = self.active_state()
         if state is not None:
             return state.config
         text = self._repository.get_setting(f"{SETTING_KEY}.config")
@@ -317,7 +319,9 @@ class RotationManager:
         """
         state = self.active_state()
         if state is None:
-            self._forget()
+            # Kept, not forgotten: "Restore Previous Wallpaper" after applying a
+            # picture by hand brings this slideshow back, and its file must
+            # still exist then. The next start or stop removes it.
             return None
         available = self.candidates(state.config)
         if not available:
@@ -353,6 +357,21 @@ class RotationManager:
                 self._desktop.apply(current, mode=ApplyMode.BOTH)
                 kept = current
         self._forget()
+        return kept
+
+    def drop_source(self, source: str) -> Path | None:
+        """A collection was deleted: end a rotation that uses it, and forget it.
+
+        Collection ids can be reused, so a later collection would otherwise
+        silently take its place. Returns the picture kept on screen, if any.
+        """
+        kept = None
+        state = self._saved_state()
+        if state is not None and state.config.source == source:
+            kept = self.stop()
+        config = self.saved_config()
+        if config.source == source:
+            self.save_config(replace(config, source=RotationConfig().source))
         return kept
 
     def save_config(self, config: RotationConfig) -> None:

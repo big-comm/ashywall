@@ -48,6 +48,7 @@ class DownloadManager:
         on_finished: Callable[[RemoteWallpaper, Path], None],
         on_failed: Callable[[RemoteWallpaper, Exception], None],
         cached_original: Callable[[RemoteWallpaper], Path | None] = lambda _item: None,
+        on_cancelled: Callable[[RemoteWallpaper], None] = lambda _item: None,
     ) -> None:
         self._http = http
         self._target_dir = target_dir
@@ -55,6 +56,7 @@ class DownloadManager:
         self._on_finished = on_finished
         self._on_failed = on_failed
         self._cached_original = cached_original
+        self._on_cancelled = on_cancelled
         self._runner = BackgroundRunner(2, "ashywall-downloads")
         self._active: dict[DownloadKey, _ActiveDownload] = {}
         self._listeners: dict[DownloadKey, list[DownloadListener]] = {}
@@ -136,6 +138,7 @@ class DownloadManager:
     def _failed(self, key: DownloadKey, error: Exception) -> None:
         active = self._active.pop(key)
         if isinstance(error, TransferCancelled):
+            self._on_cancelled(active.item)
             for listener in self._listeners_for(key):
                 listener.on_download_cancelled()
             return

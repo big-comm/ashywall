@@ -33,6 +33,11 @@ CHUNK_SIZE = 64 * 1024
 DEFAULT_TIMEOUT = 20.0
 
 
+def _decimal(text: str) -> bool:
+    """ASCII digits only: str.isdigit() also accepts "²", which int() rejects."""
+    return text.isascii() and text.isdigit()
+
+
 class HttpError(Exception):
     def __init__(self, message: str, status: int | None = None) -> None:
         super().__init__(message)
@@ -197,7 +202,7 @@ class HttpClient:
             if error.code == 429:
                 retry = error.headers.get("Retry-After") if error.headers else None
                 raise RateLimited(
-                    float(retry) if retry and retry.isdigit() else None
+                    float(retry) if retry and _decimal(retry) else None
                 ) from error
             raise HttpError(f"HTTP {error.code}", error.code) from error
         except (urllib.error.URLError, TimeoutError, OSError) as error:
@@ -223,7 +228,7 @@ class HttpClient:
             )
             expected = (
                 int(length_header)
-                if length_header and length_header.isdigit()
+                if length_header and _decimal(length_header)
                 else None
             )
             if expected is not None and expected > max_bytes:
@@ -264,10 +269,10 @@ class HttpClient:
             if response.status == 206 and headers:
                 content_range = headers.get("Content-Range") or ""
                 size = content_range.rpartition("/")[2]
-                total = int(size) if size.isdigit() else None
+                total = int(size) if _decimal(size) else None
             elif headers:
                 size = headers.get("Content-Length") or ""
-                total = int(size) if size.isdigit() else None
+                total = int(size) if _decimal(size) else None
             parts: list[bytes] = []
             received = 0
             while received < length:

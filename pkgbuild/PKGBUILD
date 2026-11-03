@@ -6,6 +6,7 @@ depends=(
     'python>=3.12'
     'python-gobject'
     'python-pillow>=11.3'
+    'libwebp'  # Optional for python-pillow on Arch; needed for WebP wallpapers.
     'python-defusedxml>=0.7.1'
     'gsettings-desktop-schemas'
 )

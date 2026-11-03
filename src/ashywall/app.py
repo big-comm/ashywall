@@ -26,7 +26,7 @@ from .services.http import HttpClient
 from .services.library_repository import LibraryRepository
 from .services.remote_images import OriginalCache, RemoteThumbnailCache
 from .services.thumbnails import ThumbnailCache
-from .ui.background_tasks import BackgroundRunner
+from .ui.background_tasks import BackgroundRunner, collect_garbage_on_main
 from .ui.thumbnail_loader import ThumbnailLoader
 from .ui.window import MainWindow, WindowServices
 
@@ -60,6 +60,8 @@ class AshyWallApplication(Adw.Application):
         except locale.Error:
             pass  # A missing system locale must not prevent startup.
         Adw.Application.do_startup(self)
+        # Widgets must be finalized on the main thread; see background_tasks.
+        collect_garbage_on_main()
         GLib.set_application_name("AshyWall")
         Gtk.Window.set_default_icon_name(paths.APP_ID)
         display = Gdk.Display.get_default()
@@ -117,6 +119,7 @@ class AshyWallApplication(Adw.Application):
             paths.thumbnails_dir() / "remote",
             cdn,
             frozenset().union(*(p.thumbnail_hosts for p in providers.values())),
+            thumbnails.note_written,
         )
         originals = OriginalCache(
             paths.originals_dir(), cdn, lambda origin: providers[origin].download_hosts

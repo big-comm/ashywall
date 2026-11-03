@@ -142,7 +142,8 @@ def parse_feed(body: bytes, url: str) -> FeedDocument:
         root = SafeET.fromstring(
             body, forbid_dtd=True, forbid_entities=True, forbid_external=True
         )
-    except (ET.ParseError, DefusedXmlException, ValueError) as error:
+    except (ET.ParseError, DefusedXmlException, ValueError, LookupError) as error:
+        # LookupError: an unknown or non-text encoding in the XML declaration.
         raise FeedError("Invalid or unsafe XML") from error
     pending, count = [(root, 0)], 0
     while pending:

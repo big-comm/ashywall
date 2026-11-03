@@ -12,6 +12,7 @@ from ..i18n import _, ngettext
 from ..models.wallpaper import Source, SourceKind, Wallpaper
 from ..providers.base import RemotePage, RemoteProvider, RemoteSort, RemoteWallpaper
 from ..services.http import HttpClient
+from ..services.image_probe import ImageAccessError, ImageProbeError
 from ..services.library_index import IndexProgress, IndexSummary
 from ..services.library_repository import (
     CollectionError,
@@ -34,7 +35,7 @@ from .detail_page import DetailPage
 from .download_manager import DownloadManager
 from .errors import error_text
 from .explore_controller import ExploreController
-from .gallery_page import GalleryFilters, GalleryPage
+from .gallery_page import EmptyState, GalleryFilters, GalleryPage
 from .index_controller import IndexController
 from .library_reader import LibraryReader
 from .preferences_dialog import PreferencesDialog
@@ -141,6 +142,10 @@ class MainWindow(Adw.ApplicationWindow):
             self._on_download_finished,
             self._on_download_failed,
             services.originals.cached,
+            # A cancelled "Apply" must not apply when a later download finishes.
+            on_cancelled=lambda item: self._apply_after_download.pop(
+                item.favorite_key, None
+            ),
         )
 
         self._gallery = GalleryPage(services.loader, self._on_unreadable)
@@ -403,6 +408,18 @@ class MainWindow(Adw.ApplicationWindow):
         )
 
     def _on_library_failed(self, error: Exception) -> None:
+        if self._gallery.showing_loading():
+            # Nothing else would replace the spinner.
+            self._gallery.show_status(
+                EmptyState(
+                    "dialog-warning-symbolic",
+                    _("The Library Could Not Be Opened"),
+                    error_text(error),
+                    _("Try Again"),
+                    "win.retry-explore",
+                )
+            )
+            return
         self._toast(_("The library could not be read: {error}").format(error=error))
 
     def _update_counts(self) -> None:
@@ -423,6 +440,10 @@ class MainWindow(Adw.ApplicationWindow):
         )
 
     def _on_entry_activated(self, _gallery: GalleryPage, entry: GalleryEntry) -> None:
+        # A second click (or a click while the previous detail page is still
+        # sliding out) must open one page, not stack another on top.
+        if self._navigation.get_visible_page() is not self._gallery:
+            return
         if isinstance(entry, RemoteWallpaper):
             page = RemoteDetailPage(
                 entry,
@@ -552,6 +573,15 @@ class MainWindow(Adw.ApplicationWindow):
         def on_response(_dialog: Adw.AlertDialog, response: str) -> None:
             if response == "delete":
                 self._repository.delete_collection(collection_id)
+                try:
+                    self._rotation.drop_source(f"collection:{collection_id}")
+                except DesktopError as error:
+                    self._toast(
+                        _("Automatic change could not be updated: {error}").format(
+                            error=error
+                        )
+                    )
+                self._sync_rotation()
                 self._rebuild_sidebar(select_key="all")
                 self._toast(_("Collection “{name}” deleted").format(name=name))
 
@@ -559,7 +589,14 @@ class MainWindow(Adw.ApplicationWindow):
         dialog.present(self)
 
     def _on_unreadable(self, entry: GalleryEntry, error: Exception) -> None:
-        if isinstance(entry, Wallpaper):
+        # Only the image itself failing marks it invalid: an unmounted drive, a
+        # full or read-only cache, or a lack of memory must not hide
+        # wallpapers for good (the indexer does not look at unchanged files).
+        if (
+            isinstance(entry, Wallpaper)
+            and isinstance(error, ImageProbeError)
+            and not isinstance(error, ImageAccessError)
+        ):
             self._repository.mark_invalid(entry.id, str(error))
             self._update_status()
 
@@ -698,7 +735,20 @@ class MainWindow(Adw.ApplicationWindow):
             return
         entry_id, state_json = entry
         try:
-            desktop.restore(BackgroundState.from_json(state_json))
+            state = BackgroundState.from_json(state_json)
+        except DesktopError as error:
+            # A damaged entry can never be restored: drop it, or it would
+            # hide every older one.
+            self._repository.drop_desktop_history(entry_id)
+            self._update_counts()
+            self._toast(
+                _("Could not restore the previous wallpaper: {error}").format(
+                    error=error
+                )
+            )
+            return
+        try:
+            desktop.restore(state)
         except DesktopError as error:
             self._toast(
                 _("Could not restore the previous wallpaper: {error}").format(
@@ -707,7 +757,8 @@ class MainWindow(Adw.ApplicationWindow):
             )
             return
         self._repository.drop_desktop_history(entry_id)
-        self._sync_rotation()
+        # A slideshow brought back may need files indexed since it was replaced.
+        self._sync_rotation(update_list=True)
         self._update_counts()
         self._toast(_("Previous wallpaper restored"))
 
@@ -906,7 +957,9 @@ class MainWindow(Adw.ApplicationWindow):
         try:
             state, replaced = self._rotation.start(config)
         except (RotationError, DesktopError) as error:
-            self._rotation.save_config(config)
+            if self._rotation.active_state() is None:
+                # Remembered for next time; a running slideshow keeps its own.
+                self._rotation.save_config(config)
             return _("Automatic change could not start: {error}").format(error=error)
         if replaced is not None:
             # "Restore Previous Wallpaper" brings back what was on screen before.
@@ -915,19 +968,20 @@ class MainWindow(Adw.ApplicationWindow):
         self._update_counts()
         return state
 
-    def _stop_rotation(self) -> str:
+    def _stop_rotation(self) -> tuple[bool, str]:
+        """Whether the rotation stopped, and what to tell."""
         try:
             kept = self._rotation.stop()
         except DesktopError as error:
-            return _("Could not keep the current wallpaper: {error}").format(
+            return False, _("Could not keep the current wallpaper: {error}").format(
                 error=error
             )
         self._sync_rotation()
         if kept is None:
-            return _("Automatic change turned off")
-        return _("Automatic change turned off; “{name}” stays as the wallpaper").format(
-            name=kept.name
-        )
+            return True, _("Automatic change turned off")
+        return True, _(
+            "Automatic change turned off; “{name}” stays as the wallpaper"
+        ).format(name=kept.name)
 
     def _next_wallpaper(self) -> RotationState | str:
         try:
@@ -971,6 +1025,13 @@ class MainWindow(Adw.ApplicationWindow):
         if self._shut_down:
             return
         self._shut_down = True
+        # Pages stop their transfers when hidden; closing the window hides
+        # none, and a running download would keep the process alive.
+        stack = self._navigation.get_navigation_stack()
+        for position in range(stack.get_n_items()):
+            page = stack.get_item(position)
+            if isinstance(page, RemoteDetailPage | DetailPage):
+                page.emit("hidden")
         self._indexer.cancel()
         self._library.shutdown()
         self._explore.shutdown()

@@ -17,7 +17,7 @@ from ashywall.desktop.gnome import (
 )
 from ashywall.services import rotation
 from ashywall.services.library_index import LibraryIndexer
-from ashywall.services.library_repository import LibraryRepository
+from ashywall.services.library_repository import LibraryQuery, LibraryRepository
 from ashywall.services.rotation import (
     RotationConfig,
     RotationError,
@@ -69,7 +69,9 @@ def test_slide_index_follows_the_schedule() -> None:
     assert slide_index(3, 600, 1000, 1599) == 0
     assert slide_index(3, 600, 1000, 1600) == 1
     assert slide_index(3, 600, 1000, 1000 + 3 * 600 + 5) == 0
-    assert slide_index(3, 600, 1000, 10) == 0  # Clock before the start.
+    # Clock set back before the start: GNOME wraps to the end of the cycle.
+    assert slide_index(3, 600, 1000, 10) == 1
+    assert slide_index(3, 600, 1000, 999) == 2
 
 
 def test_sources_and_config_are_validated() -> None:
@@ -212,6 +214,37 @@ def test_rotation_ends_when_the_wallpaper_changes_elsewhere(
     assert manager.refresh() is None
     assert manager.stop() is None
     assert desktop.read_state().values["picture-uri"] == other.as_uri()
+
+
+def test_undo_after_applying_by_hand_brings_the_slideshow_back(
+    library: LibraryRepository, desktop: GnomeBackground, tmp_path: Path
+) -> None:
+    manager = RotationManager(library, desktop, lambda: tmp_path / "slides")
+    state, _replaced = manager.start(RotationConfig(source="folders"))
+    other = make_image(tmp_path / "other.png", (16, 9))
+    previous = desktop.apply(other)
+    assert manager.refresh() is None  # What the window does after applying.
+    assert Path(state.file).is_file()
+    desktop.restore(previous)
+    assert manager.active_state() == state
+
+
+def test_deleting_the_rotated_collection_ends_the_rotation(
+    library: LibraryRepository, desktop: GnomeBackground, tmp_path: Path
+) -> None:
+    collection_id = library.create_collection("Cats").id
+    wallpaper = library.list_wallpapers(LibraryQuery())[0]
+    library.set_in_collection(collection_id, wallpaper, True)
+    manager = RotationManager(library, desktop, lambda: tmp_path / "slides")
+    source = f"collection:{collection_id}"
+    manager.start(RotationConfig(source=source))
+    library.delete_collection(collection_id)
+
+    kept = manager.drop_source(source)
+
+    assert kept == wallpaper.path
+    assert manager.active_state() is None
+    assert manager.saved_config().source != source  # A reused id is not picked up.
 
 
 def test_nothing_to_rotate_is_an_error(

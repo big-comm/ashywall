@@ -95,3 +95,9 @@ def test_state_round_trips_through_json(background: GnomeBackground) -> None:
     assert BackgroundState.from_json(state.to_json()) == state
     with pytest.raises(DesktopError):
         BackgroundState.from_json('["not", "a", "dict"]')
+
+
+@pytest.mark.parametrize("text", ["not json", "{}", '{"unknown-key": "x"}'])
+def test_damaged_saved_states_are_refused(text):
+    with pytest.raises(DesktopError):
+        BackgroundState.from_json(text)

@@ -24,6 +24,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             "/missing": (404, b"not here", {}),
             "/to-small": (302, b"", {"Location": "/small"}),
             "/to-http": (302, b"", {"Location": "http://example.com/"}),
+            # Raw UTF-8 in the header, as many servers send it.
+            "/to-unicode": (302, b"", {"Location": "/caf\u00c3\u00a9"}),
+            "/caf%C3%A9": (200, b"accent", {}),
         }
         status, body, headers = routes[self.path]
         self.send_response(status)
@@ -129,3 +132,9 @@ def test_names_are_looked_up_one_family_at_a_time_and_cached() -> None:
     now[0] = 1000.0
     names.resolve("example.com", 443)
     assert len(calls) == 4
+
+
+def test_redirects_with_raw_utf8_are_quoted(server, pool: ConnectionPool) -> None:
+    base = f"https://localhost:{server.server_port}"
+    assert get(pool, f"{base}/to-unicode") == b"accent"
+    assert get(pool, f"{base}/caf\u00e9") == b"accent"  # A non-ASCII path, too.

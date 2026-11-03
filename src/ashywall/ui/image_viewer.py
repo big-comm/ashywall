@@ -7,7 +7,6 @@ the screen. "Actual size" maps one image pixel to one screen pixel, also on
 scaled displays.
 """
 
-from concurrent.futures import Future
 from enum import StrEnum
 from pathlib import Path
 
@@ -15,7 +14,7 @@ from gi.repository import Adw, Gdk, GLib, Gtk, Pango
 
 from ..i18n import _
 from ..services.thumbnails import decode_for_display
-from .background_tasks import BackgroundRunner
+from .background_tasks import BackgroundRunner, Task
 
 CONTROLS_TIMEOUT_MS = 2500
 
@@ -64,7 +63,7 @@ class ImageViewer(Adw.Window):
         self._mode = ViewMode.WALLPAPER
         self._size = (0, 0)
         self._hide_source: int | None = None
-        self._pending: Future[None] | None = None
+        self._pending: Task | None = None
         self._drag_origin = (0.0, 0.0)
         self._anchor: tuple[float, float, float, float] | None = None
         # Scroll position to set once the actual-size layout is allocated.
@@ -227,6 +226,7 @@ class ImageViewer(Adw.Window):
     def _on_close_request(self, _window: Adw.Window) -> bool:
         if self._pending is not None:
             self._pending.cancel()
+            self._pending = None
         if self._hide_source is not None:
             GLib.source_remove(self._hide_source)
             self._hide_source = None
@@ -429,6 +429,8 @@ class ImageViewer(Adw.Window):
         self._schedule_hide()
 
     def _schedule_hide(self) -> None:
+        if self._texture is None and self._pending is None:
+            return  # Closed (or failed): nothing to hide later.
         if self._hide_source is not None:
             GLib.source_remove(self._hide_source)
         self._hide_source = GLib.timeout_add(CONTROLS_TIMEOUT_MS, self._hide_controls)

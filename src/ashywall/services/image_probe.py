@@ -38,6 +38,21 @@ class ImageProbeError(Exception):
     """The file is not an image AshyWall can read safely."""
 
 
+class ImageAccessError(ImageProbeError):
+    """The file could not be read (missing, unmounted, no permission, I/O error).
+
+    Unlike other probe errors this says nothing about the image itself, so it
+    must not mark a wallpaper as invalid for good.
+    """
+
+
+def probe_error(error: OSError, message: str) -> ImageProbeError:
+    """An OSError with an errno comes from the file system, not the content."""
+    if error.errno is not None and not isinstance(error, UnidentifiedImageError):
+        return ImageAccessError(f"{message}: {error}")
+    return ImageProbeError(f"{message}: {error}")
+
+
 @dataclass(frozen=True, slots=True)
 class ImageInfo:
     width: int
@@ -55,12 +70,14 @@ def open_image(path: Path) -> Image.Image:
     try:
         file_size = path.stat().st_size
     except OSError as error:
-        raise ImageProbeError(str(error)) from error
+        raise probe_error(error, "Unreadable file") from error
     if file_size > MAX_FILE_SIZE:
         raise ImageProbeError(f"File too large ({file_size} bytes)")
     try:
         image = Image.open(path, formats=ALLOWED_FORMATS)
-    except (UnidentifiedImageError, OSError, ValueError, SyntaxError) as error:
+    except OSError as error:  # Includes UnidentifiedImageError.
+        raise probe_error(error, "Unreadable image") from error
+    except (ValueError, SyntaxError) as error:
         raise ImageProbeError(f"Unreadable image: {error}") from error
     width, height = image.size
     if width <= 0 or height <= 0 or width * height > MAX_PIXELS:

@@ -156,3 +156,11 @@ def test_bad_initial_url_is_refused_without_network(transport, url):
     with pytest.raises(http.HttpError):
         client.get_bytes(url, max_bytes=10)
     assert destinations == []
+
+
+@pytest.mark.parametrize(
+    ("text", "valid"),
+    [("12", True), ("", False), ("\u00b2", False), ("1\u0661", False)],
+)
+def test_only_ascii_digits_are_numbers_in_headers(text, valid):
+    assert http._decimal(text) is valid

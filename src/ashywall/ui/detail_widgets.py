@@ -1,12 +1,11 @@
 """Building blocks shared by the local and online detail pages."""
 
 from collections.abc import Callable
-from concurrent.futures import Future
 
 from gi.repository import Adw, Gdk, Gio, GLib, Gtk
 
 from ..i18n import _
-from .background_tasks import BackgroundRunner
+from .background_tasks import BackgroundRunner, Task
 
 PREVIEW_HEIGHT = 420
 # picture-options values whose result is "fill the screen and crop".
@@ -115,7 +114,7 @@ class PreviewPanel(Gtk.Box):
         self._ratio = width / height if height else 16 / 9
         self._crops = picture_options in CROPPING_OPTIONS
         self._runner = runner
-        self._pending: Future[None] | None = None
+        self._pending: Task | None = None
 
         self._picture = Gtk.Picture(content_fit=Gtk.ContentFit.COVER, can_shrink=True)
         self._picture.update_property(

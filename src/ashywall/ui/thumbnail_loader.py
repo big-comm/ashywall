@@ -6,7 +6,6 @@ recycled before their turn are cancelled before they start.
 
 from collections import OrderedDict
 from collections.abc import Callable
-from concurrent.futures import Future
 from pathlib import Path
 
 from gi.repository import Gdk
@@ -15,7 +14,7 @@ from ..models.wallpaper import Wallpaper
 from ..providers.base import RemoteWallpaper
 from ..services.remote_images import RemoteThumbnailCache
 from ..services.thumbnails import ThumbnailCache
-from .background_tasks import BackgroundRunner
+from .background_tasks import BackgroundRunner, Task
 
 GalleryEntry = Wallpaper | RemoteWallpaper
 TextureKey = tuple[str, ...]
@@ -69,7 +68,7 @@ class ThumbnailLoader:
         entry: GalleryEntry,
         on_ready: Callable[[Gdk.Texture], None],
         on_failed: Callable[[Exception], None],
-    ) -> Future[None]:
+    ) -> Task:
         key = texture_key(entry)
 
         def load() -> Gdk.Texture:

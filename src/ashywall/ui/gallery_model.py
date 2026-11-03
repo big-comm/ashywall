@@ -59,6 +59,18 @@ class GalleryModel(GObject.Object, Gio.ListModel):
         load: LoadRows | None,
         online: Iterable[GalleryEntry] = (),
     ) -> None:
+        online = list(online)
+        if (
+            self._ids
+            and ids == self._ids
+            and load == self._load
+            and [entry_identity(entry) for entry in online]
+            == [entry_identity(item.entry) for item in self._online]
+        ):
+            # Same list (indexing finished, a favorite changed): keep the
+            # scroll position and widgets, and update only rows read so far.
+            self._refresh(online)
+            return
         # Two signals, each matching the model's state when it is emitted:
         # given one that removes and adds, GridView looks for items to keep
         # across the whole range, reading every new row.
@@ -109,6 +121,40 @@ class GalleryModel(GObject.Object, Gio.ListModel):
         return item.entry if item is not None else None
 
     # Internals -------------------------------------------------------------
+
+    def _refresh(self, online: list[GalleryEntry]) -> None:
+        self._overrides.clear()
+        changed: list[int] = []
+        # Update every page first: the signals make the grid read rows (and
+        # evict pages), which must not happen while the pages are walked.
+        for number, page in list(self._pages.items()):
+            start = number * PAGE_SIZE
+            ids = self._ids[start : start + PAGE_SIZE]
+            rows = self._load(ids) if self._load is not None else {}
+            for offset, wallpaper_id in enumerate(ids):
+                entry = rows.get(wallpaper_id)
+                if page[offset].entry != entry:
+                    page[offset] = WallpaperItem(entry)
+                    changed.append(start + offset)
+        for index, entry in enumerate(online):
+            if self._online[index].entry != entry:
+                self._online[index] = WallpaperItem(entry)
+                changed.append(len(self._ids) + index)
+        # One signal per run of consecutive changed positions.
+        changed.sort()
+        run_start = previous = None
+        for position in [*changed, None]:
+            if (
+                position is not None
+                and previous is not None
+                and position == previous + 1
+            ):
+                previous = position
+                continue
+            if run_start is not None:
+                count = previous - run_start + 1
+                self.items_changed(run_start, count, count)
+            run_start = previous = position
 
     def _add_online(self, entries: Iterable[GalleryEntry]) -> int:
         added = 0

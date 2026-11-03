@@ -88,6 +88,8 @@ def test_atom_supports_xhtml_summaries_and_updated_dates():
         b'<!DOCTYPE rss SYSTEM "file:///etc/passwd"><rss><channel/></rss>',
         b"x" * (MAX_FEED_BYTES + 1),
         b"<rss><channel>" + b"<a>" * 70 + b"x" + b"</a>" * 70 + b"</channel></rss>",
+        b"<?xml version='1.0' encoding='x-unknown'?><rss><channel/></rss>",
+        b"<?xml version='1.0' encoding='rot13'?><rss><channel/></rss>",
     ],
 )
 def test_invalid_or_unsafe_xml_is_refused(body):
@@ -390,3 +392,12 @@ def test_only_explicit_source_actions_fetch_and_offline_cache_survives(tmp_path)
     cancel.set()
     with pytest.raises(TransferCancelled):
         service.refresh(cancel)
+
+
+def test_a_source_alone_in_its_category_can_change_its_letter_case(conn):
+    repo = ReadingRepository(conn)
+    feed = repo.add(URL, "tecnologia", document(1))
+    repo.edit(feed, "Tecnologia")
+    assert [f.category for f in repo.feeds()] == ["Tecnologia"]
+    other = repo.add(URL + "2", "TECNOLOGIA", document(1))
+    assert {f.category for f in repo.feeds() if f.id == other} == {"Tecnologia"}
